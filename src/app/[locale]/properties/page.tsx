@@ -1,0 +1,182 @@
+'use client';
+
+import { useState, useEffect, useRef, useCallback } from 'react';
+import PropertyCard from '@/components/PropertyCard';
+import SearchFilters, { SearchFilters as SearchFiltersType } from '@/components/SearchFilters';
+import ViewToggle from '@/components/ViewToggle';
+import MapView from '@/components/MapView';
+
+export default function PropertiesPage() {
+  const [view, setView] = useState<'grid' | 'map'>('grid');
+  const [displayCount, setDisplayCount] = useState(20); // 4 cards × 5 rows
+  const [isLoading, setIsLoading] = useState(false);
+  const [allProperties, setAllProperties] = useState<any[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const observerTarget = useRef(null);
+  const [filters, setFilters] = useState<SearchFiltersType>({
+    query: '',
+    category: '',
+    subtype: '',
+    listingType: '',
+    minPrice: '',
+    maxPrice: '',
+    bedrooms: '',
+    city: '',
+    area: '',
+    petFriendly: false,
+    furnished: false,
+    pool: false,
+    garden: false,
+    seaView: false,
+    conferenceRoom: false,
+    openForYearsRange: '',
+    staffRange: '',
+    equipmentIncluded: '',
+  });
+  
+  // Fetch properties from API
+  useEffect(() => {
+    async function fetchProperties() {
+      try {
+        setLoadingData(true);
+        const params = new URLSearchParams();
+        
+        // Append all active filters to query params
+        Object.entries(filters).forEach(([key, value]) => {
+          if (value === '' || value === false || value === null || value === undefined) return;
+          
+          if (value === true) {
+            params.append(key, 'true');
+          } else {
+            // Strip commas from price fields
+            if (key === 'minPrice' || key === 'maxPrice') {
+              params.append(key, String(value).replace(/,/g, ''));
+            } else {
+              params.append(key, String(value));
+            }
+          }
+        });
+        
+        const response = await fetch(`/api/properties?${params.toString()}`);
+        const result = await response.json();
+        
+        if (result.success) {
+          setAllProperties(result.data);
+        }
+      } catch (error) {
+        console.error('Error fetching properties:', error);
+      } finally {
+        setLoadingData(false);
+      }
+    }
+    
+    fetchProperties();
+  }, [filters]);
+
+  const handleSearch = (newFilters: SearchFiltersType) => {
+    setFilters(newFilters);
+    setDisplayCount(20); // Reset to initial 5 rows when filters change
+  };
+
+  // Filter properties based on search query (API already filters most criteria)
+  const filteredProperties = allProperties.filter((property) => {
+    if (filters.query && !(
+      property.title?.toLowerCase().includes(filters.query.toLowerCase()) ||
+      property.city?.toLowerCase().includes(filters.query.toLowerCase()) ||
+      property.address?.toLowerCase().includes(filters.query.toLowerCase())
+    )) return false;
+    return true;
+  });
+
+  const loadMore = useCallback(() => {
+    if (isLoading) return;
+    setIsLoading(true);
+    setTimeout(() => {
+      setDisplayCount(prev => prev + 20); // Load 5 more rows (4 × 5)
+      setIsLoading(false);
+    }, 500);
+  }, [isLoading]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && filteredProperties.length > displayCount) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => observer.disconnect();
+  }, [displayCount, loadMore, filteredProperties.length]);
+
+  return (
+    <div className="bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-4xl font-bold mb-6 text-gray-900">Browse Properties</h1>
+        
+        <div className="mb-6">
+          <SearchFilters onSearch={handleSearch} />
+        </div>
+
+        <div className="flex justify-between items-center mb-6">
+          <p className="text-lg text-gray-700">
+            <span className="font-semibold">{filteredProperties.length}</span> properties found
+          </p>
+          <ViewToggle view={view} onViewChange={setView} />
+        </div>
+
+        {view === 'grid' ? (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {filteredProperties.slice(0, displayCount).map((property) => (
+                <PropertyCard key={property.id} property={property} />
+              ))}
+            </div>
+            {filteredProperties.length > displayCount && (
+              <div ref={observerTarget} className="flex justify-center py-8">
+                {isLoading && (
+                    <div className="flex items-center space-x-2">
+                      <div className="w-4 h-4 bg-[#496f5d] rounded-full animate-bounce"></div>
+                      <div className="w-4 h-4 bg-[#49516f] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-4 h-4 bg-[#8ea4d2] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                )}
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="flex flex-col lg:flex-row h-[calc(100vh-200px)] min-h-[600px] gap-6">
+            <div className="lg:w-2/3 h-full rounded-lg overflow-hidden shadow-md border border-gray-200">
+              <MapView properties={filteredProperties} />
+            </div>
+            <div className="lg:w-1/3 h-full overflow-y-auto pr-2 space-y-4">
+              <h3 className="font-semibold text-gray-700 sticky top-0 bg-gray-50 py-2 z-10">
+                Results in view ({filteredProperties.length})
+              </h3>
+              <div className="grid grid-cols-1 gap-4">
+                {filteredProperties.map((property) => (
+                  <PropertyCard key={property.id} property={property} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {filteredProperties.length === 0 && (
+          <div className="text-center py-16">
+            <svg className="w-20 h-20 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h2 className="text-2xl font-bold text-gray-700 mb-2">No properties found</h2>
+            <p className="text-gray-500">Try adjusting your search filters to see more results</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

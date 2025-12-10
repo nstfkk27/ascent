@@ -1,0 +1,96 @@
+[
+  {
+    "id": "1ea6a195-3955-48f4-b881-af3927da672d",
+    "name": "Ascent Heights",
+    "type": "CONDO",
+    "address": "123 Sukhumvit Road",
+    "city": "Bangkok",
+    "lat": "13.7563",
+    "lng": "100.5018",
+    "developer": "Ascent Development",
+    "completionYear": 2024,
+    "totalUnits": null,
+    "totalFloors": null,
+    "totalBuildings": null,
+    "description": "Luxury high-rise condominium in the heart of the city.",
+    "imageUrl": null,
+    "createdAt": "2025-11-27T02:08:27.032Z",
+    "updatedAt": "2025-11-27T02:08:27.032Z",
+    "modelAsset": {
+      "id": "15003142-f3a3-4e30-b938-43ded1b226b9",
+      "glbUrl": "https://modelviewer.dev/shared-assets/models/Astronaut.glb",
+      "placement": {
+        "scale": [
+          10,
+          10,
+          10
+        ],
+        "rotation": [
+          0,
+          0,
+          0
+        ]
+      },
+      "projectId": "1ea6a195-3955-48f4-b881-af3927da672d"
+    }
+  },
+  {
+    "id": "83888ca1-ca91-4203-bf75-a832574ce74d",
+    "name": "Green Valley Estate",
+    "type": "HOUSE",
+    "address": "456 Green Way",
+    "city": "Bangkok",
+    "lat": "13.8",
+    "lng": "100.55",
+    "developer": "Green Living",
+    "completionYear": 2023,
+    "totalUnits": null,
+    "totalFloors": null,
+    "totalBuildings": null,
+    "description": "Spacious family homes surrounded by nature.",
+    "imageUrl": null,
+    "createdAt": "2025-11-27T02:08:27.610Z",
+    "updatedAt": "2025-11-27T02:08:27.610Z",
+    "modelAsset": {
+      "id": "5d1f02d8-405a-43bd-83ea-c38896f5e3c9",
+      "glbUrl": "https://modelviewer.dev/shared-assets/models/RobotExpressive.glb",
+      "placement": {
+        "scale": [
+          5,
+          5,
+          5
+        ],
+        "rotation": [
+          0,
+          90,
+          0
+        ]
+      },
+      "projectId": "83888ca1-ca91-4203-bf75-a832574ce74d"
+    }
+  },
+  {
+    "id": "a380da91-ac65-4d3d-8ee9-d9bc80a9b945",
+    "name": "Riviera Oceandrive",
+    "type": "CONDO",
+    "address": "ซอยจอมเทียนสาย 2 ซอย 7, 20150, Pattaya, Chon Buri, Thailand",
+    "city": "Pattaya",
+    "lat": "12.89439321",
+    "lng": "100.87701539",
+    "developer": "The Riviera Group",
+    "completionYear": 2022,
+    "totalUnits": 381,
+    "totalFloors": 43,
+    "totalBuildings": 1,
+    "description": "Very good",
+    "imageUrl": "https://xzthjuqnqtggqnuctzpf.supabase.co/storage/v1/object/public/facilities/xwkvvtosvzf.png",
+    "createdAt": "2025-11-27T05:07:38.748Z",
+    "updatedAt": "2025-11-28T05:07:22.871Z",
+    "modelAsset": {
+      "id": "263dea5e-f2be-4520-ada3-8db07b57a67f",
+      "glbUrl": "https://xzthjuqnqtggqnuctzpf.supabase.co/storage/v1/object/public/models/xbi8d6ppvp7.glb",
+      "placement": {},
+      "projectId": "a380da91-ac65-4d3d-8ee9-d9bc80a9b945"
+    }
+  }
+]

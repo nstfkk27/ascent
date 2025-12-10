@@ -1,0 +1,35 @@
+{
+  "HomePage": {
+    "heroTitle": "Discover Pattaya's",
+    "heroHighlight": "Properties",
+    "heroDescription": "We specialize in Pattaya's Residential and investment market. Combining local expertise with smart technology to guide your journey home.",
+    "ctaExplore": "Explore Properties",
+    "ctaExpert": "Talk to an Expert",
+    "featureTitle": "Better Search Experience",
+    "featureSubtitle": "Find exactly what you need with",
+    "featureSubtitleHighlight": "Smart Map",
+    "featureDescription": "Why scroll through endless lists? Our interactive map search empowers you to visualize properties in their actual neighborhoods. Check proximity to the beach, analyze price heatmaps, and filter by investment ROI instantly.",
+    "feature1": "Real-time location based availability",
+    "feature2": "Investment yield & ROI analytics overlay",
+    "feature3": "Filter by distance to beach and amenities",
+    "ctaMap": "Try Map Search Now",
+    "motto": "Ascending Beyond Expectations.",
+    "mottoSub": "We don't just find properties; we curate lifestyles and secure futures in Pattaya's most prestigious locations.",
+    "marketInsights": "Market Insights",
+    "marketInsightsSub": "Latest news, trends, and investment advice.",
+    "viewArticles": "View all articles",
+    "meetExperts": "Meet Our Local Experts",
+    "meetExpertsSub": "Our team of dedicated professionals is here to guide you through every step of your real estate journey in Pattaya."
+  },
+  "Navbar": {
+    "home": "Home",
+    "buy": "Buy",
+    "rent": "Rent",
+    "sell": "Sell",
+    "projects": "New Projects",
+    "invest": "Invest",
+    "agents": "Agents",
+    "login": "Login",
+    "addListing": "Add Listing"
+  }
+}

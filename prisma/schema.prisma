@@ -1,0 +1,304 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum PropertyCategory {
+  HOUSE
+  CONDO
+  INVESTMENT
+}
+
+enum HouseType {
+  SINGLE_HOUSE
+  POOL_VILLA
+  TOWNHOUSE
+  SHOPHOUSE
+}
+
+enum InvestmentType {
+  HOTEL
+  CLUB_BAR
+  MASSAGE
+  RESTAURANT
+  WELLNESS
+}
+
+enum EquipmentLevel {
+  FULLY
+  PARTIAL
+  JUST_STRUCTURE
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  PENDING
+  SOLD
+  RENTED
+  EXPIRED
+}
+
+enum ListingType {
+  SALE
+  RENT
+  BOTH
+}
+
+enum VerificationSource {
+  MANUAL
+  OWNER
+  SYSTEM
+}
+
+enum ContactMethod {
+  LINE
+  EMAIL
+  PHONE
+}
+
+enum DealStage {
+  NEW_LEAD
+  VIEWING
+  OFFER
+  CONTRACT
+  CLOSED
+}
+
+model Deal {
+  id          String    @id @default(uuid())
+  clientName  String
+  clientPhone String?
+  stage       DealStage @default(NEW_LEAD)
+  amount      Decimal?  @db.Decimal(12, 2)
+  
+  propertyId  String
+  property    Property  @relation(fields: [propertyId], references: [id])
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// --- 3D Map & Project Models ---
+
+model Project {
+  id          String           @id @default(uuid())
+  name        String
+  type        PropertyCategory // CONDO, HOUSE, INVESTMENT (Land?)
+  
+  // Location
+  address     String
+  city        String
+  lat         Decimal          @db.Decimal(10, 8)
+  lng         Decimal          @db.Decimal(11, 8)
+  
+  // Details
+  developer   String?
+  completionYear Int?
+  totalUnits  Int?             // Total number of units in the project
+  totalFloors Int?             // Number of floors
+  totalBuildings Int?          // Number of buildings
+  description String?          @db.Text
+  imageUrl    String?          // Cover image for the project
+  
+  // 3D Assets
+  modelAsset  ModelAsset?
+  
+  // Relations
+  units       Property[]       // The actual listings inside this project
+  facilities  Facility[]
+  
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model ModelAsset {
+  id          String   @id @default(uuid())
+  glbUrl      String   // URL to the .glb file
+  
+  // Placement Configuration (JSON for flexibility: { rotation: [0, 90, 0], scale: [1, 1, 1], altitude: 0 })
+  placement   Json     @default("{}")
+  
+  projectId   String   @unique
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Facility {
+  id          String   @id @default(uuid())
+  name        String   // e.g. "Infinity Pool"
+  imageUrl    String?
+  
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Property {
+  id          String           @id @default(uuid())
+  title       String
+  description String           @db.Text
+  price       Decimal?         @db.Decimal(12, 2) // Sale Price
+  rentPrice   Decimal?         @db.Decimal(12, 2) // Rent Price
+  
+  // Link to Parent Project (Optional for legacy/standalone listings)
+  projectId   String?
+  project     Project?         @relation(fields: [projectId], references: [id])
+
+  address     String
+  city        String
+  area        String?          // Added for specific neighborhoods (e.g. Jomtien, Wongamat)
+  state       String
+  zipCode     String
+  
+  // Category and Type
+  category    PropertyCategory
+  
+  // House-specific
+  houseType   HouseType?
+  
+  // Condo-specific
+  projectName String?
+  floor       Int?             // Floor level for condos
+  
+  // Investment-specific
+  investmentType    InvestmentType?
+  openForYears      Int?         // How long the business has been operating
+  equipmentIncluded EquipmentLevel?
+  numberOfStaff     Int?
+  monthlyRevenue    Decimal?     @db.Decimal(12, 2)
+  license           Boolean?
+  conferenceRoom    Boolean?     // Added for Hotel investment type
+  
+  // Common features (House & Condo)
+  bedrooms    Int?
+  bathrooms   Int?
+  size        Int              // in square meters
+  petFriendly Boolean?
+  parking     Int?
+  furnished   Boolean?
+  
+  // House-specific features
+  garden      Boolean?
+  pool        Boolean?
+  floors      Int?             // Number of floors
+  
+  // Condo Amenities (stored as JSON)
+  amenities   Json?            // {swimmingPool, gym, security24h, parking, garden, playground, coWorkingSpace, sauna, library}
+  
+  status      PropertyStatus   @default(AVAILABLE)
+  listingType ListingType      @default(SALE)
+  images      String[]         // Array of image URLs
+  featured    Boolean          @default(false)
+
+  // Verification & Freshness
+  lastVerifiedAt      DateTime         @default(now())
+  verificationSource  VerificationSource?
+  ownerContactMethod  ContactMethod?
+  ownerContactDetails String?
+  
+  // Location coordinates for map
+  latitude    Decimal?         @db.Decimal(10, 8)
+  longitude   Decimal?         @db.Decimal(11, 8)
+  
+  deals       Deal[]
+
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  
+  @@index([city])
+  @@index([status])
+  @@index([featured])
+  @@index([category])
+  @@index([houseType])
+  @@index([investmentType])
+  @@index([listingType])
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  phone     String?
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+  
+  @@index([createdAt])
+}
+
+model PropertySubmission {
+  id          String           @id @default(uuid())
+  
+  // Contact Info
+  contactName String
+  contactLine String?
+  contactPhone String?
+  
+  // Property Details
+  title       String
+  description String           @db.Text
+  price       Decimal          @db.Decimal(12, 2)
+  listingType ListingType
+  category    PropertyCategory
+  
+  // Location
+  address     String?
+  city        String?
+  state       String?
+  
+  // Commission
+  commission  String?
+  
+  // Images
+  images      String[]
+  
+  // Status
+  status      String           @default("PENDING") // PENDING, REVIEWED, ARCHIVED
+  
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+enum PostCategory {
+  MARKET_TREND
+  INVESTMENT
+  LEGAL
+  NEWS
+}
+
+model Post {
+  id          String       @id @default(uuid())
+  title       String
+  excerpt     String?      @db.Text
+  content     String       @db.Text
+  category    PostCategory
+  coverImage  String?
+  published   Boolean      @default(false)
+  authorName  String?
+  
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([category])
+  @@index([published])
+}
+
+model AgentProfile {
+  id          String   @id @default(uuid())
+  name        String
+  role        String
+  email       String?
+  phone       String?
+  lineId      String?
+  imageUrl    String?
+  languages   String[]
+  isActive    Boolean  @default(true)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
