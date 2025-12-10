@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import FileUpload from '@/components/ui/FileUpload';
-import { addFacility } from '@/app/agent/project-manager/actions';
+import { addFacility } from '@/app/[locale]/agent/project-manager/actions';
 
 export default function AddFacilityForm({ projectId }: { projectId: string }) {
   const [imageUrl, setImageUrl] = useState('');
