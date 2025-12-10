@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
 import { MapPin, ArrowRight, User, Calendar, Newspaper } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
 
 interface Agent {
@@ -14,21 +14,11 @@ interface Agent {
 }
 
 export default function LandingPage() {
-  const t = useTranslations('HomePage');
-
-  // We need to fetch data inside the component or pass it as props.
-  // Since this is a server component, we can await data.
-  // However, prisma call inside render is fine in RSC.
-  
-  // Note: We cannot use async/await directly in the component body if we want to use hooks like useTranslations?
-  // No, useTranslations works in Server Components.
-  // But we need to make the component async.
-  
   return <LandingPageContent />;
 }
 
 async function LandingPageContent() {
-  const t = useTranslations('HomePage');
+  const t = await getTranslations('HomePage');
 
   let displayAgents: Agent[] = [
     { name: "Sarah Johnson", role: "Senior Consultant", color: "bg-emerald-100" },
