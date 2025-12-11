@@ -40,7 +40,8 @@ export default function AgentDashboard() {
         setLoading(false);
       }
     };
-    fetchData();
+    // fetchData();
+    setLoading(false);
   }, []);
 
   const getFreshnessStatus = (lastVerifiedAt: string) => {
