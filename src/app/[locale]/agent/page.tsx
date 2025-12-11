@@ -27,10 +27,10 @@ export default function AgentDashboard() {
         const propsData = await propsRes.json();
         const subsData = await subsRes.json();
 
-        if (propsData.success) {
+          if (propsData.success && Array.isArray(propsData.data)) {
           setProperties(propsData.data);
         }
-        if (subsData.success) {
+        if (subsData.success && Array.isArray(subsData.data)) {
           const pending = subsData.data.filter((s: any) => s.status === 'PENDING').length;
           setPendingSubmissions(pending);
         }
@@ -44,7 +44,11 @@ export default function AgentDashboard() {
   }, []);
 
   const getFreshnessStatus = (lastVerifiedAt: string) => {
-    const days = Math.floor((new Date().getTime() - new Date(lastVerifiedAt).getTime()) / (1000 * 3600 * 24));
+    if (!lastVerifiedAt) return { color: 'bg-gray-100 text-gray-800', label: 'Unknown', dot: '⚪' };
+    const date = new Date(lastVerifiedAt);
+    if (isNaN(date.getTime())) return { color: 'bg-gray-100 text-gray-800', label: 'Invalid', dot: '⚪' };
+    
+    const days = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
     if (days < 14) return { color: 'bg-green-100 text-green-800', label: 'Fresh', dot: '🟢' };
     if (days < 30) return { color: 'bg-yellow-100 text-yellow-800', label: 'Stale', dot: '🟡' };
     return { color: 'bg-red-100 text-red-800', label: 'Expired', dot: '🔴' };
@@ -114,24 +118,30 @@ export default function AgentDashboard() {
         {/* Quick Stats */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Active Listings</h3>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{properties.filter(p => p.status === 'AVAILABLE').length}</p>
+          <p className="text-3xl font-bold text-gray-900 mt-2">{Array.isArray(properties) ? properties.filter(p => p.status === 'AVAILABLE').length : 0}</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Fresh Listings</h3>
           <p className="text-3xl font-bold text-green-600 mt-2">
-            {properties.filter(p => {
-              const days = Math.floor((new Date().getTime() - new Date(p.lastVerifiedAt).getTime()) / (1000 * 3600 * 24));
+            {Array.isArray(properties) ? properties.filter(p => {
+              if (!p.lastVerifiedAt) return false;
+              const date = new Date(p.lastVerifiedAt);
+              if (isNaN(date.getTime())) return false;
+              const days = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
               return p.status === 'AVAILABLE' && days < 14;
-            }).length}
+            }).length : 0}
           </p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Needs Check</h3>
           <p className="text-3xl font-bold text-yellow-600 mt-2">
-            {properties.filter(p => {
-              const days = Math.floor((new Date().getTime() - new Date(p.lastVerifiedAt).getTime()) / (1000 * 3600 * 24));
+            {Array.isArray(properties) ? properties.filter(p => {
+              if (!p.lastVerifiedAt) return false;
+              const date = new Date(p.lastVerifiedAt);
+              if (isNaN(date.getTime())) return false;
+              const days = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
               return p.status === 'AVAILABLE' && days >= 14;
-            }).length}
+            }).length : 0}
           </p>
         </div>
       </div>
@@ -155,7 +165,7 @@ export default function AgentDashboard() {
             <tbody>
               {loading ? (
                 <tr><td colSpan={5} className="text-center py-4">Loading...</td></tr>
-              ) : properties.map((property) => {
+              ) : (Array.isArray(properties) ? properties : []).map((property) => {
                 const freshness = getFreshnessStatus(property.lastVerifiedAt);
                 return (
                   <tr key={property.id} className="bg-white border-b hover:bg-gray-50">
