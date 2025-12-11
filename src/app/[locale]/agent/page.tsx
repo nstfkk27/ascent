@@ -31,7 +31,7 @@ export default function AgentDashboard() {
           setProperties(propsData.data);
         }
         if (subsData.success && Array.isArray(subsData.data)) {
-          const pending = subsData.data.filter((s: any) => s.status === 'PENDING').length;
+          const pending = subsData.data.filter((s: any) => s && s.status === 'PENDING').length;
           setPendingSubmissions(pending);
         }
       } catch (error) {
@@ -40,8 +40,8 @@ export default function AgentDashboard() {
         setLoading(false);
       }
     };
-    // fetchData();
-    setLoading(false);
+    fetchData();
+    // setLoading(false);
   }, []);
 
   const getFreshnessStatus = (lastVerifiedAt: string) => {
@@ -170,8 +170,8 @@ export default function AgentDashboard() {
                 const freshness = getFreshnessStatus(property.lastVerifiedAt);
                 return (
                   <tr key={property.id} className="bg-white border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{property.title}</td>
-                    <td className="px-6 py-4">฿{property.price.toLocaleString()}</td>
+                    <td className="px-6 py-4 font-medium text-gray-900">{property.title || 'Untitled'}</td>
+                    <td className="px-6 py-4">฿{property.price?.toLocaleString() ?? 'N/A'}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         property.status === 'AVAILABLE' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
