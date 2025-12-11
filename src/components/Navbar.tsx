@@ -15,6 +15,8 @@ export default function Navbar() {
   const supabase = createClient();
 
   useEffect(() => {
+    if (!supabase) return;
+
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
@@ -22,7 +24,7 @@ export default function Navbar() {
 
     checkUser();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: any, session: any) => {
       setUser(session?.user ?? null);
     });
 
