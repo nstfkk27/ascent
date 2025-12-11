@@ -11,11 +11,20 @@ export default async function DebugPage() {
   };
 
   let dbStatus = 'Unknown';
+  let submissionStatus = 'Unknown';
   let dbError = '';
 
   try {
     const count = await prisma.property.count();
     dbStatus = `Connected! Properties count: ${count}`;
+    
+    try {
+      const subCount = await prisma.propertySubmission.count();
+      submissionStatus = `Connected! Submissions count: ${subCount}`;
+    } catch (subErr: any) {
+      submissionStatus = `Failed: ${subErr.message}`;
+    }
+
   } catch (e: any) {
     dbStatus = 'Failed';
     dbError = e.message;
@@ -35,6 +44,9 @@ export default async function DebugPage() {
           <h2 className="font-bold mb-2">Database Connection</h2>
           <p className={dbStatus === 'Failed' ? 'text-red-600' : 'text-green-600'}>
             Status: {dbStatus}
+          </p>
+          <p className={submissionStatus.startsWith('Failed') ? 'text-red-600' : 'text-green-600'}>
+            Submissions: {submissionStatus}
           </p>
           {dbError && (
             <p className="text-red-600 mt-2 whitespace-pre-wrap">
