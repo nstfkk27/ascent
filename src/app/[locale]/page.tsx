@@ -51,7 +51,7 @@ async function LandingPageContent() {
       {/* 1. Hero Section */}
       <section className="relative pt-24 pb-20 lg:pt-36 lg:pb-32 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-white">
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-[#49516f] mb-8 leading-tight">
               {t('heroTitle')} <br />
@@ -88,7 +88,7 @@ async function LandingPageContent() {
 
       {/* 2. Search Feature Section */}
       <section className="py-24 bg-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <div className="flex flex-col lg:flex-row items-center gap-16">
             <div className="lg:w-1/2">
               <h2 className="text-3xl font-bold text-[#496f5d] mb-2 uppercase tracking-wide text-sm">{t('featureTitle')}</h2>
@@ -167,7 +167,7 @@ async function LandingPageContent() {
 
       {/* 4. News and Articles */}
       <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl font-bold text-[#49516f]">{t('marketInsights')}</h2>
@@ -234,7 +234,7 @@ async function LandingPageContent() {
 
       {/* 5. Our Agents */}
       <section className="py-24 bg-white border-t border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
           <h2 className="text-3xl font-bold text-[#49516f] mb-4">{t('meetExperts')}</h2>
           <p className="text-gray-600 max-w-2xl mx-auto mb-16">
             {t('meetExpertsSub')}

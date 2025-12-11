@@ -33,7 +33,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50 transition-all duration-300">
-      <div className="max-w-[1600px] mx-auto px-6">
+      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
         <div className="flex justify-between items-center h-20">
           <div className="flex items-center gap-8">
             <Link href="/" className="flex text-2xl font-bold text-[#49516f] hover:text-[#8ea4d2] transition-colors tracking-tight leading-none pb-1">
@@ -236,12 +236,49 @@ export default function Navbar() {
               <LanguageSwitcher />
             </div>
 
-            <div className="space-y-4">
-              <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">Properties</div>
-              <Link href="/properties?subtype=HOUSE" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Houses for Sale</Link>
-              <Link href="/properties?subtype=CONDO" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Condos for Sale</Link>
-              <Link href="/properties?category=LAND" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Land</Link>
-              <Link href="/properties?investment=true" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Investment Opportunities</Link>
+            <div className="space-y-6">
+              {/* House Section */}
+              <div className="space-y-2">
+                <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">House</div>
+                <div className="pl-4 space-y-1">
+                  <Link href="/properties?subtype=HOUSE" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Rent and Sale</Link>
+                  <Link href="/properties?subtype=POOL_VILLA" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Pool Villa</Link>
+                  <Link href="/properties?subtype=HOUSE&tag=new" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">New Project</Link>
+                  <Link href="/properties?subtype=HOUSE&tag=renovation" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">For Renovation</Link>
+                </div>
+              </div>
+
+              {/* Condo Section */}
+              <div className="space-y-2">
+                <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">Condo</div>
+                <div className="pl-4 space-y-1">
+                  <Link href="/properties?subtype=CONDO" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Rent and Sale</Link>
+                  <Link href="/properties?subtype=CONDO&tag=new" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">New Project</Link>
+                  <Link href="/properties?subtype=CONDO&city=Pattaya" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Condo In Pattaya</Link>
+                </div>
+              </div>
+
+              {/* Land Section */}
+              <div className="space-y-2">
+                <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">Land</div>
+                <div className="pl-4 space-y-1">
+                  <Link href="/properties?category=LAND" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">All Land</Link>
+                  <Link href="/properties?category=LAND&listingType=SALE" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Land for Sale</Link>
+                  <Link href="/properties?category=LAND&listingType=RENT" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Land for Rent</Link>
+                </div>
+              </div>
+
+              {/* Investment Section */}
+              <div className="space-y-2">
+                <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">Investment</div>
+                <div className="pl-4 space-y-1">
+                  <Link href="/properties?subtype=HOTEL" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Hotel</Link>
+                  <Link href="/properties?category=BUSINESS&businessType=club" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Club and Bar</Link>
+                  <Link href="/properties?category=BUSINESS&businessType=massage" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Massage</Link>
+                  <Link href="/properties?category=BUSINESS&businessType=restaurant" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Restaurant</Link>
+                  <Link href="/properties?category=BUSINESS&businessType=wellness" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Wellness</Link>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-4">

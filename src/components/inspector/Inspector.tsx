@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -58,6 +58,103 @@ declare global {
 
 export default function Inspector({ project, isOpen, onClose }: InspectorProps) {
   const modelViewerRef = useRef<any>(null);
+  
+  // Mobile Drawer State
+  const [isMobile, setIsMobile] = useState(false);
+  const [snapState, setSnapState] = useState<'peek' | 'mini' | 'full'>('mini');
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const drawerRef = useRef<HTMLDivElement>(null);
+  const startY = useRef(0);
+  const currentY = useRef(0);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Reset to mini when opening new project on mobile
+  useEffect(() => {
+    if (isOpen && isMobile) {
+      setSnapState('mini');
+      setDragOffset(0);
+    }
+  }, [isOpen, project?.id, isMobile]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!isMobile) return;
+    setIsDragging(true);
+    startY.current = e.touches[0].clientY;
+    
+    // Calculate current translation based on state
+    let baseTranslate = 0;
+    const height = drawerRef.current?.offsetHeight || window.innerHeight * 0.85;
+    
+    if (snapState === 'mini') baseTranslate = height * 0.55;
+    if (snapState === 'peek') baseTranslate = height - 100; // 100px peek
+    
+    currentY.current = baseTranslate;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isMobile || !isDragging) return;
+    const deltaY = e.touches[0].clientY - startY.current;
+    const newOffset = deltaY;
+    
+    // Limit dragging up past full
+    if (currentY.current + newOffset < -50) return; 
+
+    setDragOffset(newOffset);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (!isMobile || !isDragging) return;
+    setIsDragging(false);
+    
+    const height = drawerRef.current?.offsetHeight || window.innerHeight * 0.85;
+    const totalMove = currentY.current + dragOffset;
+    
+    // Thresholds
+    const miniThreshold = height * 0.35;
+    const peekThreshold = height * 0.75;
+
+    // Determine nearest snap point
+    // Logic: If moved significantly, snap to next state. Else revert.
+    // Simple nearest neighbor approach based on position:
+    
+    if (totalMove < miniThreshold) {
+      setSnapState('full');
+    } else if (totalMove < peekThreshold) {
+      setSnapState('mini');
+    } else {
+      setSnapState('peek');
+    }
+    
+    setDragOffset(0);
+  };
+
+  // Calculate transform for mobile
+  const getMobileTransform = () => {
+    if (!isMobile) return undefined;
+    
+    // Base positions
+    // Full: 0
+    // Mini: 55%
+    // Peek: Calc based on height
+    
+    let base = 0; // full
+    const height = typeof window !== 'undefined' ? window.innerHeight * 0.85 : 800;
+    
+    if (snapState === 'mini') base = 55; // percent
+    if (snapState === 'peek') base = ((height - 100) / height) * 100; // percent to show 100px
+
+    if (isDragging) {
+        return `translateY(calc(${base}% + ${dragOffset}px))`;
+    }
+    return `translateY(${base}%)`;
+  };
 
   useEffect(() => {
     // Dynamically import model-viewer to avoid SSR issues
@@ -67,9 +164,43 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
   if (!isOpen || !project) return null;
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full md:w-[500px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 overflow-y-auto border-l border-gray-100">
-      {/* Header */}
-      <div className="absolute top-4 right-4 z-10">
+    <>
+      {/* Backdrop for mobile (optional, maybe transparent) */}
+      {isMobile && isOpen && snapState !== 'peek' && (
+        <div 
+            className="fixed inset-0 bg-black/20 z-40 transition-opacity" 
+            onClick={() => setSnapState('peek')}
+        />
+      )}
+
+      <div 
+        ref={drawerRef}
+        className={`fixed z-50 bg-white shadow-2xl transition-transform ease-out
+            ${isMobile 
+                ? 'bottom-0 left-0 right-0 w-full h-[85vh] rounded-t-2xl border-t border-gray-100' 
+                : 'inset-y-0 right-0 w-[500px] border-l border-gray-100 duration-300'
+            }
+        `}
+        style={{ 
+            transform: isMobile ? getMobileTransform() : undefined,
+            transitionDuration: isDragging ? '0ms' : '300ms',
+            touchAction: 'none' // Prevent browser scrolling while dragging
+        }}
+      >
+      {/* Mobile Handle */}
+      {isMobile && (
+        <div 
+            className="w-full h-8 flex items-center justify-center cursor-grab active:cursor-grabbing border-b border-gray-50 bg-white rounded-t-2xl"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
+            <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+        </div>
+      )}
+
+      {/* Close Button (Desktop Only or Full State Mobile) */}
+      <div className={`absolute top-4 right-4 z-10 ${isMobile && snapState !== 'full' ? 'hidden' : ''}`}>
         <button 
           onClick={onClose}
           className="bg-white/80 backdrop-blur p-2 rounded-full hover:bg-gray-100 transition-colors"
@@ -80,6 +211,9 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
         </button>
       </div>
 
+      {/* Scrollable Content Container */}
+      <div className={`h-full overflow-y-auto ${isMobile ? 'pb-20' : ''}`}>
+      
       {/* Preview Section (Image or 3D) */}
       <div className="h-[300px] bg-gray-900 relative border-b border-gray-100 group">
         {project.imageUrl ? (
@@ -249,6 +383,8 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
           </div>
         </div>
       </div>
-    </div>
+      </div>
+      </div>
+    </>
   );
 }

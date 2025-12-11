@@ -25,6 +25,7 @@ interface MapSearchProps {
 
 export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: MapSearchProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true); // Default to collapsed on mobile initially
 
   const handleChange = (name: keyof MapFilters, value: string) => {
     // Handle price formatting (remove non-digits)
@@ -43,10 +44,36 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
   };
 
   return (
-    <div className="absolute top-4 left-4 z-20 w-full max-w-xl px-4 md:px-0">
-      <div className="bg-white/95 backdrop-blur-md shadow-xl rounded-2xl p-4 border border-gray-100 transition-all duration-300">
-        {/* Top Row: Search & Main Toggles */}
-        <div className="flex flex-col gap-3">
+    <>
+      {/* Mobile Collapse Button (Only visible when collapsed on mobile) */}
+      <button
+        onClick={() => setIsCollapsed(false)}
+        className={`md:hidden absolute top-4 left-4 z-20 bg-white shadow-lg p-3 rounded-full text-gray-700 hover:text-[#496f5d] transition-all duration-300 ${!isCollapsed ? 'opacity-0 pointer-events-none scale-75' : 'opacity-100 scale-100'}`}
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+
+      {/* Search Container */}
+      <div 
+        className={`absolute top-4 z-20 w-full max-w-xl px-4 md:px-0 left-1/2 -translate-x-1/2 md:left-4 md:translate-x-0 transition-all duration-300 origin-top-left ${
+          isCollapsed ? 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto scale-95 md:scale-100' : 'opacity-100 scale-100'
+        }`}
+      >
+        <div className="bg-white/95 backdrop-blur-md shadow-xl rounded-2xl p-4 border border-gray-100 relative">
+          {/* Mobile Close Button */}
+          <button 
+            onClick={() => setIsCollapsed(true)}
+            className="md:hidden absolute -top-2 -right-2 bg-white rounded-full p-1.5 shadow-md border border-gray-100 text-gray-500 z-30"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Top Row: Search & Main Toggles */}
+          <div className="flex flex-col gap-3">
           {/* Search Bar */}
           <div className="relative">
             <input
@@ -177,5 +204,6 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
         )}
       </div>
     </div>
+    </>
   );
 }
