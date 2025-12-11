@@ -13,23 +13,34 @@ interface Property {
 
 export default function AgentDashboard() {
   const [properties, setProperties] = useState<Property[]>([]);
+  const [pendingSubmissions, setPendingSubmissions] = useState(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProperties = async () => {
+    const fetchData = async () => {
       try {
-        const res = await fetch('/api/properties');
-        const data = await res.json();
-        if (data.success) {
-          setProperties(data.data);
+        const [propsRes, subsRes] = await Promise.all([
+          fetch('/api/properties'),
+          fetch('/api/submissions')
+        ]);
+        
+        const propsData = await propsRes.json();
+        const subsData = await subsRes.json();
+
+        if (propsData.success) {
+          setProperties(propsData.data);
+        }
+        if (subsData.success) {
+          const pending = subsData.data.filter((s: any) => s.status === 'PENDING').length;
+          setPendingSubmissions(pending);
         }
       } catch (error) {
-        console.error('Failed to fetch properties', error);
+        console.error('Failed to fetch dashboard data', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchProperties();
+    fetchData();
   }, []);
 
   const getFreshnessStatus = (lastVerifiedAt: string) => {
@@ -84,7 +95,22 @@ export default function AgentDashboard() {
         </div>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {/* Pending Submissions */}
+        <Link href="/agent/submissions" className="block">
+          <div className={`p-6 rounded-lg shadow-sm border border-gray-200 transition-colors ${
+            pendingSubmissions > 0 ? 'bg-orange-50 border-orange-200' : 'bg-white'
+          }`}>
+            <h3 className="text-gray-500 text-sm font-medium uppercase">Pending Reviews</h3>
+            <p className={`text-3xl font-bold mt-2 ${pendingSubmissions > 0 ? 'text-orange-600' : 'text-gray-900'}`}>
+              {pendingSubmissions}
+            </p>
+            {pendingSubmissions > 0 && (
+              <p className="text-xs text-orange-600 mt-1 font-medium">Action Required</p>
+            )}
+          </div>
+        </Link>
+
         {/* Quick Stats */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Active Listings</h3>

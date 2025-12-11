@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -40,10 +38,10 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true, data: submission });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating submission:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create submission' },
+      { success: false, error: error.message || 'Failed to create submission' },
       { status: 500 }
     );
   }

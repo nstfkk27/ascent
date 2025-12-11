@@ -124,6 +124,23 @@ export default function ListingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Client-side validation
+    if (!formData.title.trim()) {
+      alert('Please enter a property title');
+      return;
+    }
+    if (!formData.contactName.trim()) {
+      alert('Please enter a contact name');
+      return;
+    }
+    
+    const rawPrice = parseFloat(formData.price.replace(/,/g, ''));
+    if (isNaN(rawPrice) || rawPrice <= 0) {
+      alert('Please enter a valid price');
+      return;
+    }
+
     setLoading(true);
 
     try {

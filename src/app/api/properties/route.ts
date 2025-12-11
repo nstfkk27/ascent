@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // GET /api/properties - Get all properties with optional filters
 export async function GET(request: NextRequest) {
@@ -250,10 +248,10 @@ export async function POST(request: NextRequest) {
       { success: true, data: property },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating property:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to create property' },
+      { success: false, error: error.message || 'Failed to create property' },
       { status: 500 }
     );
   }

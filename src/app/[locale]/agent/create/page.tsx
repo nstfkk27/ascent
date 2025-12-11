@@ -75,6 +75,13 @@ export default function QuickDropPage() {
     selectedAmenities: [] as string[],
   });
 
+  // Map View State (Separate from Pin Location to allow panning)
+  const [viewState, setViewState] = useState({
+    longitude: 100.8825,
+    latitude: 12.9236,
+    zoom: 12
+  });
+
   // Reset subtype when category changes
   useEffect(() => {
     setFormData(prev => ({ ...prev, subtype: '' }));
@@ -190,6 +197,7 @@ export default function QuickDropPage() {
       if (data.features && data.features.length > 0) {
         const [lng, lat] = data.features[0].center;
         setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+        setViewState(prev => ({ ...prev, latitude: lat, longitude: lng, zoom: 14 }));
       }
     } catch (err) {
       console.error("Geocoding error:", err);
@@ -236,14 +244,19 @@ export default function QuickDropPage() {
   };
 
   const selectProject = (project: any) => {
+    const lat = project.lat ? Number(project.lat) : formData.latitude;
+    const lng = project.lng ? Number(project.lng) : formData.longitude;
+    
     setFormData(prev => ({ 
       ...prev, 
       projectName: project.name,
       address: project.address || prev.address,
       city: project.city || prev.city,
-      latitude: project.lat ? Number(project.lat) : prev.latitude,
-      longitude: project.lng ? Number(project.lng) : prev.longitude
+      latitude: lat,
+      longitude: lng
     }));
+    
+    setViewState(prev => ({ ...prev, latitude: lat, longitude: lng, zoom: 14 }));
     setShowProjectSuggestions(false);
   };
 
@@ -358,7 +371,7 @@ export default function QuickDropPage() {
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <label className="block text-sm font-medium text-gray-700 mb-2">Raw Property Text</label>
             <textarea
-              className="w-full h-48 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full h-48 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
               placeholder="Paste details here... e.g. 2 Bed 2 Bath Condo at Noble Ploenchit..."
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
@@ -370,6 +383,18 @@ export default function QuickDropPage() {
             >
               {isProcessing ? 'Processing...' : '⬇️ Fill Form from Text'}
             </button>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <textarea 
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={6}
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base" 
+              placeholder="Property description..."
+            ></textarea>
           </div>
 
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -406,7 +431,7 @@ export default function QuickDropPage() {
           <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">Listing Details</h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
                 <input 
@@ -414,7 +439,7 @@ export default function QuickDropPage() {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                   placeholder="e.g. Luxury Condo in Thong Lo"
                 />
               </div>
@@ -429,7 +454,7 @@ export default function QuickDropPage() {
                     onChange={(e) => handleProjectSearch(e.target.value)}
                     onFocus={() => formData.projectName.length >= 2 && setShowProjectSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowProjectSuggestions(false), 200)}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                     placeholder="Start typing to search existing projects..."
                     autoComplete="off"
                   />
@@ -458,7 +483,7 @@ export default function QuickDropPage() {
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                 >
                   {Object.entries(PROPERTY_CATEGORIES).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
@@ -474,7 +499,7 @@ export default function QuickDropPage() {
                     name="subtype"
                     value={formData.subtype}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                   >
                     <option value="">Select Type...</option>
                     {CATEGORY_SUBTYPES[formData.category as keyof typeof CATEGORY_SUBTYPES].map((key) => (
@@ -492,7 +517,7 @@ export default function QuickDropPage() {
                   name="listingType"
                   value={formData.listingType}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                 >
                   <option value="SALE">For Sale</option>
                   <option value="RENT">For Rent</option>
@@ -509,55 +534,54 @@ export default function QuickDropPage() {
                     name="price"
                     value={formatNumber(formData.price)}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base text-gray-900" 
                   />
                 </div>
               )}
 
               {(formData.listingType === 'RENT' || formData.listingType === 'BOTH') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Rental Price (THB/Month) *</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Rental Price / Month </label>
                   <input 
                     type="text" 
                     name="rentPrice"
                     value={formatNumber(formData.rentPrice)}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base text-gray-900" 
                   />
                 </div>
               )}
 
               {/* Dynamic Fields */}
               {shouldShowField('bedrooms') && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {formData.subtype === 'HOTEL' ? 'Number of Rooms' : 'Bedrooms'}
-                  </label>
-                  <input 
-                    type="number" 
-                    name="bedrooms"
-                    value={formData.bedrooms}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                  />
-                </div>
-              )}
-
-              {shouldShowField('bathrooms') && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
-                  <input 
-                    type="number" 
-                    name="bathrooms"
-                    value={formData.bathrooms}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                  />
-                </div>
+                <>
+                  <div className="col-span-1 md:col-span-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {formData.subtype === 'HOTEL' ? 'Number of Rooms' : 'Bedrooms'}
+                    </label>
+                    <input 
+                      type="number" 
+                      name="bedrooms"
+                      value={formData.bedrooms}
+                      onChange={handleChange}
+                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
+                    />
+                  </div>
+                  <div className="col-span-1 md:col-span-1">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Bathrooms</label>
+                    <input 
+                      type="number" 
+                      name="bathrooms"
+                      value={formData.bathrooms}
+                      onChange={handleChange}
+                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
+                    />
+                  </div>
+                </>
               )}
 
               {shouldShowField('size') && (
-                <div>
+                <div className="col-span-1 md:col-span-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {formData.subtype === 'LAND' ? 'Land Size (sqm)' : 'Size (sqm)'} *
                   </label>
@@ -566,20 +590,20 @@ export default function QuickDropPage() {
                     name="size"
                     value={formData.size}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                   />
                 </div>
               )}
 
               {shouldShowField('floors') && (
-                <div>
+                <div className="col-span-1 md:col-span-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Floors</label>
                   <input 
                     type="number" 
                     name="floors"
                     value={formData.floors}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -592,7 +616,7 @@ export default function QuickDropPage() {
                     name="parking"
                     value={formData.parking}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -612,7 +636,7 @@ export default function QuickDropPage() {
                     name="openForYears"
                     value={formData.openForYears}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -625,7 +649,7 @@ export default function QuickDropPage() {
                     name="numberOfStaff"
                     value={formData.numberOfStaff}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -637,7 +661,7 @@ export default function QuickDropPage() {
                     name="equipmentIncluded"
                     value={formData.equipmentIncluded}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                   >
                     {Object.entries(EQUIPMENT_LEVELS).map(([key, label]) => (
                       <option key={key} value={key}>{label}</option>
@@ -654,7 +678,7 @@ export default function QuickDropPage() {
                     name="zoning"
                     value={formData.zoning}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                     placeholder="e.g. Red, Yellow, Commercial"
                   />
                 </div>
@@ -824,7 +848,7 @@ export default function QuickDropPage() {
                         handleGeocode();
                       }
                     }}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base" 
                     placeholder="Street address or Building name"
                   />
                   <button
@@ -846,7 +870,7 @@ export default function QuickDropPage() {
                   name="area"
                   value={formData.area}
                   onChange={handleChange}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base"
                 >
                   <option value="">Select Area</option>
                   {PATTAYA_AREAS.map((area) => (
@@ -861,14 +885,8 @@ export default function QuickDropPage() {
                   {process.env.NEXT_PUBLIC_MAPBOX_TOKEN ? (
                     <Map
                       mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-                      initialViewState={{
-                        longitude: formData.longitude,
-                        latitude: formData.latitude,
-                        zoom: 12
-                      }}
-                      // Sync map view with form data when it changes programmatically
-                      longitude={formData.longitude}
-                      latitude={formData.latitude}
+                      {...viewState}
+                      onMove={evt => setViewState(evt.viewState)}
                       style={{width: '100%', height: '100%'}}
                       mapStyle="mapbox://styles/mapbox/streets-v11"
                       onClick={(e: MapMouseEvent) => {
@@ -898,32 +916,21 @@ export default function QuickDropPage() {
                 </div>
               </div>
 
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                <textarea 
-                  name="description"
-                  value={formData.description}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                ></textarea>
+              <div className="mt-8 pt-6 border-t flex gap-4 justify-end">
+                <button 
+                  onClick={() => router.push('/agent')}
+                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSave}
+                  disabled={isSaving}
+                  className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm"
+                >
+                  {isSaving ? 'Saving...' : '💾 Save Property'}
+                </button>
               </div>
-            </div>
-
-            <div className="mt-8 pt-6 border-t flex gap-4 justify-end">
-              <button 
-                onClick={() => router.push('/agent')}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button 
-                onClick={handleSave}
-                disabled={isSaving}
-                className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm"
-              >
-                {isSaving ? 'Saving...' : '💾 Save Property'}
-              </button>
             </div>
           </div>
         </div>
