@@ -43,6 +43,7 @@ export interface SearchFilters {
   openForYearsRange: string;
   staffRange: string;
   equipmentIncluded: string;
+  landZoneColor: string;
   [key: string]: any;
 }
 
@@ -67,6 +68,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     openForYearsRange: '',
     staffRange: '',
     equipmentIncluded: '',
+    landZoneColor: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -104,7 +106,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     // Hide residential-specific common filters for Investment
     if (filters.category === 'INVESTMENT') {
        // Allow specific investment fields
-       if (['pool', 'conferenceRoom', 'elevator', 'zoning'].includes(fieldId)) {
+       if (['pool', 'conferenceRoom', 'elevator', 'landZoneColor'].includes(fieldId)) {
           // Check if subtype allows it
           if (!filters.subtype) return true;
           const allowedFeatures = SUBTYPE_FEATURES[filters.subtype as keyof typeof SUBTYPE_FEATURES] as readonly string[];
@@ -533,6 +535,25 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
                         {Object.entries(EQUIPMENT_LEVELS).map(([key, label]) => (
                           <option key={key} value={key}>{label}</option>
                         ))}
+                      </select>
+                    </div>
+                  )}
+
+                  {shouldShowField('landZoneColor') && (
+                    <div className="col-span-2 md:col-span-1">
+                      <select
+                        name="landZoneColor"
+                        value={filters.landZoneColor}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#8ea4d2] focus:border-transparent"
+                      >
+                        <option value="">Any Zone Color</option>
+                        <option value="RED">Red (Commercial)</option>
+                        <option value="ORANGE">Orange (High Density)</option>
+                        <option value="YELLOW">Yellow (Low Density)</option>
+                        <option value="BROWN">Brown (Special)</option>
+                        <option value="PURPLE">Purple (Industrial)</option>
+                        <option value="GREEN">Green (Rural/Agri)</option>
                       </select>
                     </div>
                   )}

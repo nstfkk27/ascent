@@ -15,6 +15,7 @@ enum PropertyCategory {
   HOUSE
   CONDO
   INVESTMENT
+  LAND
 }
 
 enum HouseType {
@@ -30,6 +31,15 @@ enum InvestmentType {
   MASSAGE
   RESTAURANT
   WELLNESS
+}
+
+enum LandZoneColor {
+  RED
+  ORANGE
+  YELLOW
+  BROWN
+  PURPLE
+  GREEN
 }
 
 enum EquipmentLevel {
@@ -162,8 +172,10 @@ model Property {
   // House-specific
   houseType   HouseType?
   
-  // Condo-specific
+  // Project/Village Name (Condo Project or House Village)
   projectName String?
+  
+  // Condo-specific
   floor       Int?             // Floor level for condos
   
   // Investment-specific
@@ -175,6 +187,9 @@ model Property {
   license           Boolean?
   conferenceRoom    Boolean?     // Added for Hotel investment type
   
+  // Land-specific
+  landZoneColor LandZoneColor?
+
   // Common features (House & Condo)
   bedrooms    Int?
   bathrooms   Int?
@@ -217,6 +232,7 @@ model Property {
   @@index([category])
   @@index([houseType])
   @@index([investmentType])
+  @@index([landZoneColor])
   @@index([listingType])
 }
 

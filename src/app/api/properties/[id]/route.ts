@@ -43,11 +43,16 @@ export async function PUT(
   try {
     const body = await request.json();
     
+    let updateData = body;
+    if (body.category) {
+      updateData = sanitizePropertyData(body);
+    }
+
     const property = await prisma.property.update({
       where: {
         id: params.id,
       },
-      data: body,
+      data: updateData,
     });
     
     return NextResponse.json({

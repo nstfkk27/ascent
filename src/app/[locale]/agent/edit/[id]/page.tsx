@@ -612,16 +612,23 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                 </div>
               )}
 
-              {shouldShowField('zoning') && (
+              {shouldShowField('landZoneColor') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Zoning</label>
-                  <input 
-                    type="text" 
-                    name="zoning"
-                    value={formData.zoning}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Land Zone Color</label>
+                  <select 
+                    name="landZoneColor"
+                    value={formData.landZoneColor}
                     onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                  />
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Select Zone Color</option>
+                    <option value="RED">Red (Commercial)</option>
+                    <option value="ORANGE">Orange (High Density)</option>
+                    <option value="YELLOW">Yellow (Low Density)</option>
+                    <option value="BROWN">Brown (Special)</option>
+                    <option value="PURPLE">Purple (Industrial)</option>
+                    <option value="GREEN">Green (Rural/Agri)</option>
+                  </select>
                 </div>
               )}
 

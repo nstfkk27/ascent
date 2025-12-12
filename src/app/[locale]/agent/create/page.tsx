@@ -68,7 +68,7 @@ export default function QuickDropPage() {
     openForYears: 0,
     numberOfStaff: 0,
     equipmentIncluded: 'FULLY',
-    zoning: '',
+    landZoneColor: '',
     conferenceRoom: false,
     
     // Amenities
@@ -299,8 +299,10 @@ export default function QuickDropPage() {
         payload.conferenceRoom = formData.conferenceRoom;
         payload.pool = formData.pool;
         
-        // Pack extra fields into amenities if they don't exist in schema
-        if (formData.zoning) payload.amenities.zoning = formData.zoning;
+        // Handle Land specific fields
+        if (formData.subtype === 'LAND') {
+          payload.landZoneColor = formData.landZoneColor;
+        }
       }
 
       const res = await fetch('/api/properties', {
@@ -446,7 +448,9 @@ export default function QuickDropPage() {
 
               {shouldShowField('projectName') && (
                 <div className="col-span-2 relative">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {formData.category === 'HOUSE' ? 'Village Name (Optional)' : 'Project Name'}
+                  </label>
                   <input 
                     type="text" 
                     name="projectName"
@@ -455,7 +459,7 @@ export default function QuickDropPage() {
                     onFocus={() => formData.projectName.length >= 2 && setShowProjectSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowProjectSuggestions(false), 200)}
                     className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
-                    placeholder="Start typing to search existing projects..."
+                    placeholder={formData.category === 'HOUSE' ? "Leave empty if detached..." : "Start typing to search existing projects..."}
                     autoComplete="off"
                   />
                   {showProjectSuggestions && projectSuggestions.length > 0 && (
@@ -670,17 +674,23 @@ export default function QuickDropPage() {
                 </div>
               )}
 
-              {shouldShowField('zoning') && (
+              {shouldShowField('landZoneColor') && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Zoning</label>
-                  <input 
-                    type="text" 
-                    name="zoning"
-                    value={formData.zoning}
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Land Zone Color</label>
+                  <select 
+                    name="landZoneColor"
+                    value={formData.landZoneColor}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
-                    placeholder="e.g. Red, Yellow, Commercial"
-                  />
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600"
+                  >
+                    <option value="">Select Zone Color</option>
+                    <option value="RED">Red (Commercial)</option>
+                    <option value="ORANGE">Orange (High Density)</option>
+                    <option value="YELLOW">Yellow (Low Density)</option>
+                    <option value="BROWN">Brown (Special)</option>
+                    <option value="PURPLE">Purple (Industrial)</option>
+                    <option value="GREEN">Green (Rural/Agri)</option>
+                  </select>
                 </div>
               )}
 

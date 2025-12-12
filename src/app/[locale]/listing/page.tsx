@@ -174,6 +174,7 @@ export default function ListingPage() {
       
       let extraDetails = `\n\n--- Property Details ---\n`;
       if (category === 'HOUSE') {
+        extraDetails += `Village: ${formData.projectName || 'Detached/Standalone'}\n`;
         extraDetails += `Type: ${formData.houseType}\nBedrooms: ${formData.bedrooms}\nBathrooms: ${formData.bathrooms}\nSize: ${formData.size} sqm\nFloors: ${formData.floors}\nParking: ${formData.parking}\n`;
         extraDetails += `Features: ${formData.petFriendly ? 'Pet Friendly, ' : ''}${formData.furnished ? 'Furnished, ' : ''}${formData.pool ? 'Pool, ' : ''}${formData.garden ? 'Garden' : ''}`;
       } else if (category === 'CONDO') {
@@ -393,6 +394,18 @@ export default function ListingPage() {
             <div className="space-y-4">
               <h2 className="text-2xl font-bold text-[#49516f] border-b pb-2">House Details</h2>
               
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Village Name (Optional)</label>
+                <input
+                  type="text"
+                  name="projectName"
+                  value={formData.projectName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#496f5d] focus:border-transparent placeholder-gray-600 text-gray-900"
+                  placeholder="e.g., Baan Dusit, Siam Royal View (Leave empty if standalone)"
+                />
+              </div>
+
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">House Type *</label>
                 <select

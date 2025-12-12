@@ -80,7 +80,7 @@ export const SUBTYPE_FEATURES = {
   // INVESTMENT
   HOTEL: ['bedrooms', 'bathrooms', 'size', 'floors', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'conferenceRoom', 'pool', 'elevator', 'wifi', 'cctv'],
   COMMERCIAL_BUILDING: ['bedrooms', 'bathrooms', 'size', 'floors', 'elevator', 'cctv'],
-  LAND: ['size', 'zoning'],
+  LAND: ['size', 'landZoneColor'],
   CLUB_BAR: ['size', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
   RESTAURANT: ['size', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
   WELLNESS: ['size', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
@@ -131,7 +131,6 @@ export const CONDO_FACILITIES = [
 // These are mostly columns, but some are amenities (JSON)
 export const INVESTMENT_AMENITIES = [
   { id: 'elevator', label: 'Elevator' }, // Hotel, Commercial
-  { id: 'zoning', label: 'Zoning' }, // Land
 ] as const;
 
 // Helper to get all amenities for search

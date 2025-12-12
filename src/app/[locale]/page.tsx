@@ -69,12 +69,6 @@ async function LandingPageContent() {
               >
                 {t('ctaExplore')} <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
-              <Link
-                href="/agent"
-                className="inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-full text-[#49516f] bg-white border-2 border-[#49516f]/10 hover:border-[#49516f]/30 hover:bg-gray-50 transition-all"
-              >
-                {t('ctaExpert')}
-              </Link>
             </div>
           </div>
         </div>

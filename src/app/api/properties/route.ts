@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { sanitizePropertyData } from '@/lib/property-utils';
 
 // GET /api/properties - Get all properties with optional filters
 export const dynamic = 'force-dynamic';
@@ -72,13 +73,20 @@ export async function GET(request: NextRequest) {
     const knownParams = [
       'category', 'houseType', 'investmentType', 'listingType', 
       'city', 'area', 'minPrice', 'maxPrice', 'bedrooms', 'featured', 'status',
-      'page', 'limit', 'query', 'openForYearsRange', 'staffRange', 'equipmentIncluded'
+      'page', 'limit', 'query', 'openForYearsRange', 'staffRange', 'equipmentIncluded',
+      'landZoneColor'
     ];
     
     const booleanColumns = ['petFriendly', 'furnished', 'pool', 'garden', 'conferenceRoom'];
     
     // Initialize AND array if not exists
     if (!where.AND) where.AND = [];
+
+    // Handle Land Zone Color
+    const landZoneColor = searchParams.get('landZoneColor');
+    if (landZoneColor) {
+      where.landZoneColor = landZoneColor;
+    }
 
     // Handle Investment Ranges
     const openForYearsRange = searchParams.get('openForYearsRange');
@@ -197,8 +205,7 @@ export async function POST(request: NextRequest) {
     }
     
     // Create property
-    const property = await prisma.property.create({
-      data: {
+    const rawData = {
         title: body.title,
         description: body.description,
         price: body.price || null,
@@ -222,8 +229,10 @@ export async function POST(request: NextRequest) {
         pool: body.pool || null,
         floors: body.floors || null,
         
-        // Condo-specific
+        // Project/Village Name
         projectName: body.projectName || null,
+        
+        // Condo-specific
         floor: body.floor || null,
         amenities: body.amenities || null,
         
@@ -236,6 +245,9 @@ export async function POST(request: NextRequest) {
         license: body.license || null,
         conferenceRoom: body.conferenceRoom || null,
         
+        // Land-specific
+        landZoneColor: body.landZoneColor || null,
+        
         status: body.status || 'AVAILABLE',
         listingType: body.listingType || 'SALE',
         images: body.images || [],
@@ -243,7 +255,12 @@ export async function POST(request: NextRequest) {
         
         latitude: body.latitude || null,
         longitude: body.longitude || null,
-      },
+    };
+
+    const cleanData = sanitizePropertyData(rawData);
+
+    const property = await prisma.property.create({
+      data: cleanData,
     });
     
     return NextResponse.json(
