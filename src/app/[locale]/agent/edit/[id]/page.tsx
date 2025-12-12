@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -66,7 +66,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     openForYears: 0,
     numberOfStaff: 0,
     equipmentIncluded: 'FULLY',
-    zoning: '',
+    landZoneColor: '',
     conferenceRoom: false,
     
     // Amenities
@@ -123,7 +123,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
             openForYears: p.openForYears || 0,
             numberOfStaff: p.numberOfStaff || 0,
             equipmentIncluded: p.equipmentIncluded || 'FULLY',
-            zoning: p.amenities?.zoning || '', // Extract zoning from JSON if stored there
+            landZoneColor: p.amenities?.landZoneColor || '', // Extract landZoneColor from JSON if stored there
             conferenceRoom: p.conferenceRoom || false,
             
             selectedAmenities: amenitiesList,
@@ -308,7 +308,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
         payload.investmentType = formData.subtype;
         payload.conferenceRoom = formData.conferenceRoom;
         payload.pool = formData.pool;
-        if (formData.zoning) payload.amenities.zoning = formData.zoning;
+        if (formData.landZoneColor) payload.landZoneColor = formData.landZoneColor;
       }
 
       const res = await fetch(`/api/properties/${params.id}`, {
@@ -372,7 +372,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                       onClick={() => setUploadedImages(prev => prev.filter((_, i) => i !== idx))}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      ×
+                      Ã—
                     </button>
                   </div>
                 ))}
@@ -801,7 +801,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                     onClick={handleGeocode}
                     className="px-4 py-2 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 border border-gray-300"
                   >
-                    🔍
+                    ðŸ”
                   </button>
                 </div>
               </div>
@@ -849,7 +849,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                           handleReverseGeocode(e.lngLat.lat, e.lngLat.lng);
                         }}
                       >
-                        <div className="text-2xl cursor-pointer animate-bounce">📍</div>
+                        <div className="text-2xl cursor-pointer animate-bounce">ðŸ“</div>
                       </Marker>
                     </Map>
                   ) : (
@@ -884,7 +884,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                 disabled={isSaving}
                 className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm"
               >
-                {isSaving ? 'Saving...' : '💾 Update Property'}
+                {isSaving ? 'Saving...' : 'ðŸ’¾ Update Property'}
               </button>
             </div>
           </div>
@@ -893,3 +893,4 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
+

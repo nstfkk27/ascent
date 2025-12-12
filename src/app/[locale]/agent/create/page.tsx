@@ -441,7 +441,7 @@ export default function QuickDropPage() {
                   name="title"
                   value={formData.title}
                   onChange={handleChange}
-                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   placeholder="e.g. Luxury Condo in Thong Lo"
                 />
               </div>
@@ -458,7 +458,7 @@ export default function QuickDropPage() {
                     onChange={(e) => handleProjectSearch(e.target.value)}
                     onFocus={() => formData.projectName.length >= 2 && setShowProjectSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowProjectSuggestions(false), 200)}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                     placeholder={formData.category === 'HOUSE' ? "Leave empty if detached..." : "Start typing to search existing projects..."}
                     autoComplete="off"
                   />
@@ -487,7 +487,7 @@ export default function QuickDropPage() {
                   name="category"
                   value={formData.category}
                   onChange={handleChange}
-                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600"
+                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
                 >
                   {Object.entries(PROPERTY_CATEGORIES).map(([key, label]) => (
                     <option key={key} value={key}>{label}</option>
@@ -503,7 +503,7 @@ export default function QuickDropPage() {
                     name="subtype"
                     value={formData.subtype}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600"
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
                   >
                     <option value="">Select Type...</option>
                     {CATEGORY_SUBTYPES[formData.category as keyof typeof CATEGORY_SUBTYPES].map((key) => (
@@ -521,7 +521,7 @@ export default function QuickDropPage() {
                   name="listingType"
                   value={formData.listingType}
                   onChange={handleChange}
-                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600"
+                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
                 >
                   <option value="SALE">For Sale</option>
                   <option value="RENT">For Rent</option>
@@ -538,7 +538,7 @@ export default function QuickDropPage() {
                     name="price"
                     value={formatNumber(formData.price)}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base text-gray-900" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -551,7 +551,7 @@ export default function QuickDropPage() {
                     name="rentPrice"
                     value={formatNumber(formData.rentPrice)}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base text-gray-900" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -568,7 +568,7 @@ export default function QuickDropPage() {
                       name="bedrooms"
                       value={formData.bedrooms}
                       onChange={handleChange}
-                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                     />
                   </div>
                   <div className="col-span-1 md:col-span-1">
@@ -578,7 +578,7 @@ export default function QuickDropPage() {
                       name="bathrooms"
                       value={formData.bathrooms}
                       onChange={handleChange}
-                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                     />
                   </div>
                 </>
@@ -594,7 +594,7 @@ export default function QuickDropPage() {
                     name="size"
                     value={formData.size}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -607,7 +607,7 @@ export default function QuickDropPage() {
                     name="floors"
                     value={formData.floors}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -620,7 +620,7 @@ export default function QuickDropPage() {
                     name="parking"
                     value={formData.parking}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -640,7 +640,7 @@ export default function QuickDropPage() {
                     name="openForYears"
                     value={formData.openForYears}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -653,7 +653,7 @@ export default function QuickDropPage() {
                     name="numberOfStaff"
                     value={formData.numberOfStaff}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
                 </div>
               )}
@@ -665,7 +665,7 @@ export default function QuickDropPage() {
                     name="equipmentIncluded"
                     value={formData.equipmentIncluded}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600"
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
                   >
                     {Object.entries(EQUIPMENT_LEVELS).map(([key, label]) => (
                       <option key={key} value={key}>{label}</option>
@@ -681,7 +681,7 @@ export default function QuickDropPage() {
                     name="landZoneColor"
                     value={formData.landZoneColor}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600"
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
                   >
                     <option value="">Select Zone Color</option>
                     <option value="RED">Red (Commercial)</option>
