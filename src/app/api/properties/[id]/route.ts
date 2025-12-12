@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { sanitizePropertyData } from '@/lib/property-utils';
 
 const prisma = new PrismaClient();
 
