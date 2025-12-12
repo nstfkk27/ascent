@@ -69,12 +69,52 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') || 'AVAILABLE';
     where.status = status;
 
+    const tag = searchParams.get('tag');
+    if (tag) {
+      const currentYear = new Date().getFullYear();
+      const isNewProject = {
+        project: {
+          is: {
+            completionYear: {
+              gte: currentYear - 1,
+            },
+          },
+        },
+      };
+
+      if (tag === 'new') {
+        // Only listings that belong to a project completed within the last 1 year
+        where.AND = where.AND || [];
+        where.AND.push(isNewProject);
+      }
+
+      if (tag === 'renovation') {
+        // Exclude new projects: treat standalone listings as "old" by default
+        where.AND = where.AND || [];
+        where.AND.push({
+          OR: [
+            { projectId: null },
+            {
+              project: {
+                is: {
+                  OR: [
+                    { completionYear: null },
+                    { completionYear: { lt: currentYear - 1 } },
+                  ],
+                },
+              },
+            },
+          ],
+        });
+      }
+    }
+
     // Dynamic Feature filters
     const knownParams = [
       'category', 'houseType', 'investmentType', 'listingType', 
       'city', 'area', 'minPrice', 'maxPrice', 'bedrooms', 'featured', 'status',
       'page', 'limit', 'query', 'openForYearsRange', 'staffRange', 'equipmentIncluded',
-      'landZoneColor'
+      'landZoneColor', 'tag'
     ];
     
     const booleanColumns = ['petFriendly', 'furnished', 'pool', 'garden', 'conferenceRoom'];
@@ -161,11 +201,23 @@ export async function GET(request: NextRequest) {
         createdAt: 'desc',
       },
     });
+
+    const serializedProperties = properties.map((p) => ({
+      ...p,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+      lastVerifiedAt: p.lastVerifiedAt.toISOString(),
+      price: p.price ? p.price.toNumber() : null,
+      rentPrice: p.rentPrice ? p.rentPrice.toNumber() : null,
+      monthlyRevenue: p.monthlyRevenue ? p.monthlyRevenue.toNumber() : null,
+      latitude: p.latitude ? p.latitude.toNumber() : null,
+      longitude: p.longitude ? p.longitude.toNumber() : null,
+    }));
     
     return NextResponse.json({
       success: true,
       count: properties.length,
-      data: properties,
+      data: serializedProperties,
     });
   } catch (error) {
     console.error('Error fetching properties:', error);

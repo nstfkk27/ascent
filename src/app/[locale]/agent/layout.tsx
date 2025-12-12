@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 export default function AgentLayout({
   children,
@@ -11,6 +12,7 @@ export default function AgentLayout({
 }) {
   const router = useRouter();
   const supabase = createClient();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -76,6 +78,59 @@ export default function AgentLayout({
 
       {/* Main Content */}
       <main className="flex-1 overflow-y-auto p-8">
+        <div className="md:hidden mb-6">
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen((v) => !v)}
+            className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm"
+          >
+            <span className="font-semibold text-gray-800">Agent Menu</span>
+            <svg className={`w-5 h-5 text-gray-500 transition-transform ${mobileNavOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+
+          {mobileNavOpen && (
+            <div className="mt-3 bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+              <nav className="divide-y divide-gray-100">
+                <Link onClick={() => setMobileNavOpen(false)} href="/agent" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                  Dashboard
+                </Link>
+                <Link onClick={() => setMobileNavOpen(false)} href="/agent/tools" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                  Smart Tools
+                </Link>
+                <Link onClick={() => setMobileNavOpen(false)} href="/agent/create" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                  Create Listing
+                </Link>
+                <Link onClick={() => setMobileNavOpen(false)} href="/agent/marketing" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                  Marketing Center
+                </Link>
+                <Link onClick={() => setMobileNavOpen(false)} href="/agent/crm" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                  Smart CRM
+                </Link>
+                <Link onClick={() => setMobileNavOpen(false)} href="/agent/submissions" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                  Submissions
+                </Link>
+                <Link onClick={() => setMobileNavOpen(false)} href="/agent/team" className="block px-4 py-3 text-gray-700 hover:bg-gray-50">
+                  Team Management
+                </Link>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setMobileNavOpen(false);
+                    await handleLogout();
+                  }}
+                  className="w-full text-left px-4 py-3 text-red-600 hover:bg-red-50"
+                >
+                  Sign Out
+                </button>
+                <Link onClick={() => setMobileNavOpen(false)} href="/" className="block px-4 py-3 text-gray-600 hover:bg-gray-50">
+                  &larr; Back to Website
+                </Link>
+              </nav>
+            </div>
+          )}
+        </div>
         {children}
       </main>
     </div>

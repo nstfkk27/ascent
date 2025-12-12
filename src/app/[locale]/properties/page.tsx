@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import PropertyCard from '@/components/PropertyCard';
 import SearchFilters, { SearchFilters as SearchFiltersType } from '@/components/SearchFilters';
 import ViewToggle from '@/components/ViewToggle';
 import MapView from '@/components/MapView';
 
 export default function PropertiesPage() {
+  const searchParams = useSearchParams();
   const [view, setView] = useState<'grid' | 'map'>('grid');
   const [displayCount, setDisplayCount] = useState(20); // 4 cards × 5 rows
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +25,7 @@ export default function PropertiesPage() {
     bedrooms: '',
     city: '',
     area: '',
+    tag: '',
     petFriendly: false,
     furnished: false,
     pool: false,
@@ -32,7 +35,40 @@ export default function PropertiesPage() {
     openForYearsRange: '',
     staffRange: '',
     equipmentIncluded: '',
+    landZoneColor: '',
   });
+
+  useEffect(() => {
+    const nextFilters: any = { ...filters };
+
+    const urlCategory = searchParams.get('category');
+    const urlSubtype = searchParams.get('subtype');
+    const urlListingType = searchParams.get('listingType');
+    const urlCity = searchParams.get('city');
+    const urlArea = searchParams.get('area');
+    const urlQuery = searchParams.get('query');
+    const urlTag = searchParams.get('tag');
+
+    if (urlCategory) nextFilters.category = urlCategory;
+    if (urlSubtype) {
+      // Navbar uses `subtype=HOUSE` for houses; the API expects `category=HOUSE`.
+      if (urlSubtype === 'HOUSE') nextFilters.category = 'HOUSE';
+      else nextFilters.subtype = urlSubtype;
+    }
+    if (urlListingType) nextFilters.listingType = urlListingType;
+    if (urlCity) nextFilters.city = urlCity;
+    if (urlArea) nextFilters.area = urlArea;
+    if (urlQuery) nextFilters.query = urlQuery;
+    if (urlTag) nextFilters.tag = urlTag;
+
+    // Only update if something actually changed
+    const changed = Object.keys(nextFilters).some((k) => nextFilters[k] !== (filters as any)[k]);
+    if (changed) {
+      setFilters(nextFilters);
+      setDisplayCount(20);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
   
   // Fetch properties from API
   useEffect(() => {

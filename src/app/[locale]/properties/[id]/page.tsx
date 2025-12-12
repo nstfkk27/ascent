@@ -10,6 +10,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [agent, setAgent] = useState<any>(null);
   
   useEffect(() => {
     async function fetchProperty() {
@@ -31,6 +32,22 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
     
     fetchProperty();
   }, [params.id]);
+
+  useEffect(() => {
+    async function fetchAgent() {
+      try {
+        const response = await fetch('/api/agents');
+        const result = await response.json();
+        if (result?.success && Array.isArray(result.data) && result.data.length > 0) {
+          setAgent(result.data[0]);
+        }
+      } catch (err) {
+        setAgent(null);
+      }
+    }
+
+    fetchAgent();
+  }, []);
   
   if (loading) {
     return (
@@ -488,18 +505,87 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <p className="text-sm text-gray-600 mb-4">Or contact us directly:</p>
                 <div className="space-y-3">
-                  <a href="tel:+66123456789" className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    +66 123 456 789
-                  </a>
-                  <a href="mailto:info@ascentpattaya.com" className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    info@ascentpattaya.com
-                  </a>
+                  {agent?.phone && (
+                    <a href={`tel:${agent.phone}`} className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                      </svg>
+                      {agent.phone}
+                    </a>
+                  )}
+
+                  {agent?.email && (
+                    <a href={`mailto:${agent.email}`} className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      {agent.email}
+                    </a>
+                  )}
+
+                  {agent?.lineId && (
+                    <a
+                      href={`https://line.me/ti/p/~${encodeURIComponent(agent.lineId)}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4v8z" />
+                      </svg>
+                      Line: {agent.lineId}
+                    </a>
+                  )}
+
+                  {agent?.phone && (
+                    <a
+                      href={`https://wa.me/${String(agent.phone).replace(/\D/g, '')}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9h.01M12 9h.01M16 9h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.8L3 20l1.2-3.6A7.63 7.63 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      </svg>
+                      WhatsApp
+                    </a>
+                  )}
+
+                  {(agent?.facebookUrl || agent?.facebook) && (
+                    <a
+                      href={agent.facebookUrl || agent.facebook}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3V2z" />
+                      </svg>
+                      Facebook
+                    </a>
+                  )}
+
+                  {(agent?.instagramUrl || agent?.instagram) && (
+                    <a
+                      href={agent.instagramUrl || agent.instagram}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.5 6.5h.01" />
+                      </svg>
+                      Instagram
+                    </a>
+                  )}
+
+                  {!agent?.phone && !agent?.email && !agent?.lineId && (
+                    <div className="text-sm text-gray-500">
+                      Please use the contact form above.
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

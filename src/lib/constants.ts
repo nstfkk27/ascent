@@ -161,8 +161,19 @@ export const PATTAYA_AREAS = [
   'Jomtien',
   'Central Pattaya',
   'Wongamat',
+  'Pratumnak',
+  'Naklua',
+  'Thepprasit',
+  'Khao Talo',
+  'Khao Noi',
+  'Bang Saray',
+  'Sattahip',
   'Najomtien',
   'Siam Country',
   'Huay Yai',
+  'Nongprue',
+  'Tungklom-Talman',
+  'Mabprachan',
+  'etc.'
 ] as const;
 

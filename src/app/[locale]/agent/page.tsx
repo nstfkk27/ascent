@@ -107,7 +107,7 @@ export default function AgentDashboard() {
             pendingSubmissions > 0 ? 'bg-orange-50 border-orange-200' : 'bg-white'
           }`}>
             <h3 className="text-gray-500 text-sm font-medium uppercase">Pending Reviews</h3>
-            <p className={`text-3xl font-bold mt-2 ${pendingSubmissions > 0 ? 'text-orange-600' : 'text-gray-900'}`}>
+            <p className={`text-2xl md:text-3xl font-bold mt-2 ${pendingSubmissions > 0 ? 'text-orange-600' : 'text-gray-900'}`}>
               {pendingSubmissions}
             </p>
             {pendingSubmissions > 0 && (
@@ -119,11 +119,11 @@ export default function AgentDashboard() {
         {/* Quick Stats */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Active Listings</h3>
-          <p className="text-3xl font-bold text-gray-900 mt-2">{Array.isArray(properties) ? properties.filter(p => p.status === 'AVAILABLE').length : 0}</p>
+          <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{Array.isArray(properties) ? properties.filter(p => p.status === 'AVAILABLE').length : 0}</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Fresh Listings</h3>
-          <p className="text-3xl font-bold text-green-600 mt-2">
+          <p className="text-2xl md:text-3xl font-bold text-green-600 mt-2">
             {Array.isArray(properties) ? properties.filter(p => {
               if (!p.lastVerifiedAt) return false;
               const date = new Date(p.lastVerifiedAt);
@@ -135,7 +135,7 @@ export default function AgentDashboard() {
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Needs Check</h3>
-          <p className="text-3xl font-bold text-yellow-600 mt-2">
+          <p className="text-2xl md:text-3xl font-bold text-yellow-600 mt-2">
             {Array.isArray(properties) ? properties.filter(p => {
               if (!p.lastVerifiedAt) return false;
               const date = new Date(p.lastVerifiedAt);

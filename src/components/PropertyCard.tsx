@@ -20,10 +20,24 @@ interface PropertyCardProps {
     investmentType?: string | null;
     listingType: string;
     projectName?: string | null;
+    updatedAt?: string;
+    lastVerifiedAt?: string;
   };
 }
 
 export default function PropertyCard({ property }: PropertyCardProps) {
+  const getUpdatedLabel = () => {
+    const ts = property.updatedAt || property.lastVerifiedAt;
+    if (!ts) return null;
+    const d = new Date(ts);
+    if (isNaN(d.getTime())) return null;
+
+    const days = Math.floor((Date.now() - d.getTime()) / (1000 * 60 * 60 * 24));
+    if (days <= 0) return 'Updated today';
+    if (days === 1) return 'Updated 1 day ago';
+    return `Updated ${days} days ago`;
+  };
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'CONDO':
@@ -66,6 +80,14 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </div>
         </div>
         <div className="p-5">
+          {getUpdatedLabel() && (
+            <div
+              className="text-xs text-gray-500 mb-2"
+              title={property.updatedAt || property.lastVerifiedAt}
+            >
+              {getUpdatedLabel()}
+            </div>
+          )}
           <div className="flex justify-between items-start mb-2">
             <div>
               {property.projectName && (
