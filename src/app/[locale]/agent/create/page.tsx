@@ -373,7 +373,7 @@ export default function QuickDropPage() {
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <label className="block text-sm font-medium text-gray-700 mb-2">Raw Property Text</label>
             <textarea
-              className="w-full h-48 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base"
+              className="w-full h-48 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base text-gray-900 placeholder-gray-500"
               placeholder="Paste details here... e.g. 2 Bed 2 Bath Condo at Noble Ploenchit..."
               value={rawText}
               onChange={(e) => setRawText(e.target.value)}
@@ -394,7 +394,7 @@ export default function QuickDropPage() {
               value={formData.description}
               onChange={handleChange}
               rows={6}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base" 
+              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base text-gray-900 placeholder-gray-500" 
               placeholder="Property description..."
             ></textarea>
           </div>
@@ -503,7 +503,7 @@ export default function QuickDropPage() {
                     name="subtype"
                     value={formData.subtype}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
+                    className={`w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${formData.subtype ? 'text-gray-900' : 'text-gray-500'}`}
                   >
                     <option value="">Select Type...</option>
                     {CATEGORY_SUBTYPES[formData.category as keyof typeof CATEGORY_SUBTYPES].map((key) => (
@@ -681,7 +681,7 @@ export default function QuickDropPage() {
                     name="landZoneColor"
                     value={formData.landZoneColor}
                     onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
+                    className={`w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${formData.landZoneColor ? 'text-gray-900' : 'text-gray-500'}`}
                   >
                     <option value="">Select Zone Color</option>
                     <option value="RED">Red (Commercial)</option>
@@ -858,7 +858,7 @@ export default function QuickDropPage() {
                         handleGeocode();
                       }
                     }}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600" 
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base text-gray-900 placeholder-gray-500" 
                     placeholder="Street address or Building name"
                   />
                   <button
@@ -880,7 +880,7 @@ export default function QuickDropPage() {
                   name="area"
                   value={formData.area}
                   onChange={handleChange}
-                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base placeholder-gray-600"
+                  className={`w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-sm md:text-base ${formData.area ? 'text-gray-900' : 'text-gray-500'}`}
                 >
                   <option value="">Select Area</option>
                   {PATTAYA_AREAS.map((area) => (
