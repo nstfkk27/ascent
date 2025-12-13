@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
@@ -125,6 +125,10 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
             equipmentIncluded: p.equipmentIncluded || 'FULLY',
             landZoneColor: p.amenities?.landZoneColor || '', // Extract landZoneColor from JSON if stored there
             conferenceRoom: p.conferenceRoom || false,
+
+            commissionRate: Number(p.commissionRate || 0),
+            commissionAmount: Number(p.commissionAmount || 0),
+            coAgentCommissionRate: Number(p.coAgentCommissionRate || 0),
             
             selectedAmenities: amenitiesList,
           });

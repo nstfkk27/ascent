@@ -154,6 +154,36 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                 </span>
               </div>
 
+              {/* Commission Section (Visible only to authorized agents) */}
+              {(property.commissionRate || property.commissionAmount || property.coAgentCommissionRate) && (
+                <div className="mb-8 bg-blue-50 border border-blue-100 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="text-xl">🛡️</span>
+                    <h3 className="text-lg font-bold text-blue-900">Agent Commission</h3>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {property.commissionRate && (
+                      <div className="bg-white p-3 rounded-lg shadow-sm border border-blue-100">
+                        <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider mb-1">Full Rate</p>
+                        <p className="text-2xl font-bold text-blue-900">{property.commissionRate}%</p>
+                      </div>
+                    )}
+                    {property.commissionAmount && (
+                      <div className="bg-white p-3 rounded-lg shadow-sm border border-blue-100">
+                        <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider mb-1">Fixed Amount</p>
+                        <p className="text-2xl font-bold text-blue-900">฿{Number(property.commissionAmount).toLocaleString()}</p>
+                      </div>
+                    )}
+                    {property.coAgentCommissionRate && (
+                      <div className="bg-white p-3 rounded-lg shadow-sm border border-blue-100">
+                        <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider mb-1">Co-Agent Share</p>
+                        <p className="text-2xl font-bold text-blue-900">{property.coAgentCommissionRate}%</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* House Features */}
               {property.category === 'HOUSE' && (
                 <div>

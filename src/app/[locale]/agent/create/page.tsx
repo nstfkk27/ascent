@@ -35,6 +35,22 @@ export default function QuickDropPage() {
   // Project Autocomplete State
   const [projectSuggestions, setProjectSuggestions] = useState<any[]>([]);
   const [showProjectSuggestions, setShowProjectSuggestions] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const res = await fetch('/api/agent/me');
+        if (res.ok) {
+          const data = await res.json();
+          setRole(data.role);
+        }
+      } catch (error) {
+        console.error('Failed to fetch role', error);
+      }
+    };
+    fetchRole();
+  }, []);
   
   // Form State
   const [formData, setFormData] = useState({
@@ -63,6 +79,7 @@ export default function QuickDropPage() {
     pool: false,
     garden: false,
     projectName: '',
+    projectId: '',
     
     // Investment Specific
     openForYears: 0,
@@ -70,6 +87,11 @@ export default function QuickDropPage() {
     equipmentIncluded: 'FULLY',
     landZoneColor: '',
     conferenceRoom: false,
+    
+    // Commission (SuperAdmin/Platform Agent)
+    commissionRate: 0,
+    commissionAmount: 0,
+    coAgentCommissionRate: 0,
     
     // Amenities
     selectedAmenities: [] as string[],
@@ -223,7 +245,7 @@ export default function QuickDropPage() {
   };
 
   const handleProjectSearch = async (query: string) => {
-    setFormData(prev => ({ ...prev, projectName: query }));
+    setFormData(prev => ({ ...prev, projectName: query, projectId: '' })); // Clear ID on name change
     
     if (query.length < 2) {
       setProjectSuggestions([]);
@@ -250,6 +272,7 @@ export default function QuickDropPage() {
     setFormData(prev => ({ 
       ...prev, 
       projectName: project.name,
+      projectId: project.id,
       address: project.address || prev.address,
       city: project.city || prev.city,
       latitude: lat,
@@ -275,8 +298,12 @@ export default function QuickDropPage() {
     setIsSaving(true);
     try {
       // Prepare payload based on category
+      // Create a clean payload object, explicitly excluding UI-only fields
+      const { selectedAmenities, ...cleanFormData } = formData;
+
       const payload: any = {
-        ...formData,
+        ...cleanFormData,
+        projectId: formData.projectId || null,
         images: uploadedImages,
         amenities: {}, // Initialize amenities
       };
@@ -553,6 +580,49 @@ export default function QuickDropPage() {
                     onChange={handleChange}
                     className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
+                </div>
+              )}
+
+              {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') && (
+                <div className="col-span-2 pt-4 border-t">
+                  <h3 className="text-md font-semibold text-gray-800 mb-3">Commission Details</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Full Commission Rate (%)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        name="commissionRate"
+                        value={formData.commissionRate}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="e.g. 3.0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Fixed Amount (THB)</label>
+                      <input 
+                        type="number" 
+                        name="commissionAmount"
+                        value={formData.commissionAmount}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="Optional fixed amount"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Share (%)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        name="coAgentCommissionRate"
+                        value={formData.coAgentCommissionRate}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="e.g. 1.5"
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
 

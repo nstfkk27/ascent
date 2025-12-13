@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function AgentLayout({
   children,
@@ -13,6 +13,25 @@ export default function AgentLayout({
   const router = useRouter();
   const supabase = createClient();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const res = await fetch('/api/agent/me');
+        if (res.ok) {
+          const data = await res.json();
+          setRole(data.role);
+        }
+      } catch (error) {
+        console.error('Failed to fetch role', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRole();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -20,13 +39,21 @@ export default function AgentLayout({
     router.refresh();
   };
 
+  if (loading) return null; // Or a skeleton
+
+  const isSuperAdmin = role === 'SUPER_ADMIN';
+  const isPlatformAgent = role === 'PLATFORM_AGENT';
+  const isExternalAgent = role === 'AGENT';
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <aside className="w-64 bg-white shadow-md hidden md:block flex flex-col">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-blue-600">AgentHub</h1>
-          <p className="text-sm text-gray-500">AscentWeb Agent Portal</p>
+          <p className="text-sm text-gray-500">
+            {isSuperAdmin ? 'Super Admin' : isPlatformAgent ? 'Platform Agent' : 'Partner Agent'}
+          </p>
         </div>
         <nav className="mt-6 flex-1">
           <Link href="/agent" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
@@ -35,32 +62,39 @@ export default function AgentLayout({
           <Link href="/agent/create" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
             Create Listing
           </Link>
-          <Link href="/agent/project-manager" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-            Project Manager (3D)
-          </Link>
-          <Link href="/agent/marketing" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-            Marketing Center
-          </Link>
+          
+          {isSuperAdmin && (
+            <>
+              <Link href="/agent/project-manager" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                Project Manager (3D)
+              </Link>
+              <Link href="/agent/marketing" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                Marketing Center
+              </Link>
+              <Link href="/agent/import" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                Bulk Import
+              </Link>
+              <Link href="/agent/leads" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                Leads Inbox
+              </Link>
+              <Link href="/agent/submissions" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                Submissions
+              </Link>
+              <Link href="/agent/posts/create" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                Create Post
+              </Link>
+              <Link href="/agent/team" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                Team Management
+              </Link>
+            </>
+          )}
+
           <Link href="/agent/crm" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
             Smart CRM
           </Link>
-          <Link href="/agent/import" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-            Bulk Import
-          </Link>
-          <Link href="/agent/leads" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-            Leads Inbox
-          </Link>
-          <Link href="/agent/submissions" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-            Submissions
-          </Link>
-          <Link href="/agent/posts/create" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-            Create Post
-          </Link>
+          
           <Link href="/agent/tools" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
             Smart Tools
-          </Link>
-          <Link href="/agent/team" className="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">
-            Team Management
           </Link>
         </nav>
         <div className="p-6 border-t space-y-4">

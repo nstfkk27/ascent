@@ -15,6 +15,9 @@ interface Unit {
   size: number;
   images: string[];
   listingType: string;
+  commissionRate?: number | null;
+  commissionAmount?: number | null;
+  coAgentCommissionRate?: number | null;
 }
 
 interface Facility {
@@ -40,6 +43,7 @@ interface Project {
   } | null;
   units: Unit[];
   facilities: Facility[];
+  isStandalone?: boolean;
 }
 
 interface InspectorProps {
@@ -261,7 +265,7 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
           </div>
           
           <Link 
-            href={`/project/${encodeURIComponent(project.name.replace(/ /g, '-'))}`}
+            href={project.isStandalone ? `/properties/${project.id}` : `/project/${encodeURIComponent(project.name.replace(/ /g, '-'))}`}
             className="bg-[#496f5d] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg hover:bg-[#3d5c4d] transition-colors pointer-events-auto flex items-center gap-1"
           >
             Full Page
@@ -274,29 +278,95 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
 
       {/* Content Section */}
       <div className="p-6 space-y-8">
-        {/* Project Details */}
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="text-gray-500">Developer</p>
-            <p className="font-medium text-gray-900">{project.developer || 'Unknown'}</p>
+        {/* Project/Property Details */}
+        {project.isStandalone ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-500">Price</p>
+              <div className="font-medium text-gray-900">
+                {project.units[0]?.price && (
+                  <span className="text-[#496f5d] block">฿{Number(project.units[0].price).toLocaleString()}</span>
+                )}
+                {project.units[0]?.rentPrice && (
+                  <span className="text-orange-600 block">฿{Number(project.units[0].rentPrice).toLocaleString()}/mo</span>
+                )}
+                {!project.units[0]?.price && !project.units[0]?.rentPrice && (
+                  <span>Contact for Price</span>
+                )}
+              </div>
+            </div>
+            <div>
+              <p className="text-gray-500">Size</p>
+              <p className="font-medium text-gray-900">{project.units[0]?.size || '-'} m²</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Bedrooms</p>
+              <p className="font-medium text-gray-900">{project.units[0]?.bedrooms || 'Studio'}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Bathrooms</p>
+              <p className="font-medium text-gray-900">{project.units[0]?.bathrooms || '-'}</p>
+            </div>
+            <div>
+               <p className="text-gray-500">Type</p>
+               <p className="font-medium text-gray-900 capitalize">{project.type.toLowerCase().replace('_', ' ')}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-gray-500">Completion</p>
-            <p className="font-medium text-gray-900">{project.completionYear || 'Ready to Move'}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Total Units</p>
-            <p className="font-medium text-gray-900">{project.totalUnits || '-'}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Floors</p>
-            <p className="font-medium text-gray-900">{project.totalFloors || '-'}</p>
-          </div>
-          <div>
-            <p className="text-gray-500">Buildings</p>
-            <p className="font-medium text-gray-900">{project.totalBuildings || '-'}</p>
-          </div>
+
+          {/* Agent Commission (Standalone) */}
+          {(project.units[0]?.commissionRate || project.units[0]?.commissionAmount || project.units[0]?.coAgentCommissionRate) && (
+            <div className="bg-blue-50 p-3 rounded-lg border border-blue-100 text-sm mt-2">
+              <h4 className="font-semibold text-blue-800 mb-2 flex items-center gap-2 text-xs uppercase tracking-wide">
+                <span>🛡️</span> Agent Commission
+              </h4>
+              <div className="grid grid-cols-3 gap-2">
+                {project.units[0]?.commissionRate && (
+                  <div>
+                    <span className="text-blue-600 block text-xs">Full Rate</span>
+                    <span className="font-bold text-blue-900">{project.units[0].commissionRate}%</span>
+                  </div>
+                )}
+                {project.units[0]?.commissionAmount && (
+                  <div>
+                    <span className="text-blue-600 block text-xs">Fixed Amt</span>
+                    <span className="font-bold text-blue-900">฿{project.units[0].commissionAmount.toLocaleString()}</span>
+                  </div>
+                )}
+                {project.units[0]?.coAgentCommissionRate && (
+                  <div>
+                    <span className="text-blue-600 block text-xs">Co-Agent</span>
+                    <span className="font-bold text-blue-900">{project.units[0].coAgentCommissionRate}%</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-gray-500">Developer</p>
+              <p className="font-medium text-gray-900">{project.developer || 'Unknown'}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Completion</p>
+              <p className="font-medium text-gray-900">{project.completionYear || 'Ready to Move'}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Total Units</p>
+              <p className="font-medium text-gray-900">{project.totalUnits || '-'}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Floors</p>
+              <p className="font-medium text-gray-900">{project.totalFloors || '-'}</p>
+            </div>
+            <div>
+              <p className="text-gray-500">Buildings</p>
+              <p className="font-medium text-gray-900">{project.totalBuildings || '-'}</p>
+            </div>
+          </div>
+        )}
 
         {/* Description */}
         <div>
@@ -329,59 +399,61 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
         )}
 
         {/* Available Units */}
-        <div>
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
-            Available Units ({project.units.length})
-          </h3>
-          <div className="space-y-3">
-            {project.units.map((unit) => (
-              <div key={unit.id} className="group flex gap-4 p-3 rounded-xl border border-gray-100 hover:border-[#496f5d] hover:shadow-md transition-all cursor-pointer bg-white">
-                <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                  {unit.images[0] ? (
-                    <Image 
-                      src={unit.images[0]} 
-                      alt={unit.title}
-                      fill
-                      className="object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gray-200" />
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-start">
-                    <h4 className="font-medium text-gray-900 truncate pr-2">{unit.title}</h4>
-                    <div className="flex flex-col items-end">
-                      {unit.price ? (
-                        <span className="text-[#496f5d] font-bold text-sm">
-                          ฿{Number(unit.price).toLocaleString()}
-                        </span>
-                      ) : null}
-                      {unit.rentPrice ? (
-                        <span className="text-orange-600 font-bold text-xs">
-                          ฿{Number(unit.rentPrice).toLocaleString()}/mo
-                        </span>
-                      ) : null}
+        {!project.isStandalone && (
+          <div>
+            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">
+              Available Units ({project.units.length})
+            </h3>
+            <div className="space-y-3">
+              {project.units.map((unit) => (
+                <div key={unit.id} className="group flex gap-4 p-3 rounded-xl border border-gray-100 hover:border-[#496f5d] hover:shadow-md transition-all cursor-pointer bg-white">
+                  <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                    {unit.images[0] ? (
+                      <Image 
+                        src={unit.images[0]} 
+                        alt={unit.title}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start">
+                      <h4 className="font-medium text-gray-900 truncate pr-2">{unit.title}</h4>
+                      <div className="flex flex-col items-end">
+                        {unit.price ? (
+                          <span className="text-[#496f5d] font-bold text-sm">
+                            ฿{Number(unit.price).toLocaleString()}
+                          </span>
+                        ) : null}
+                        {unit.rentPrice ? (
+                          <span className="text-orange-600 font-bold text-xs">
+                            ฿{Number(unit.rentPrice).toLocaleString()}/mo
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {unit.bedrooms ? `${unit.bedrooms} Bed` : 'Studio'} • {unit.bathrooms ? `${unit.bathrooms} Bath` : '-'} • {unit.size}m²
+                    </p>
+                    <div className="mt-2 flex items-center gap-2">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                        unit.listingType === 'SALE' ? 'bg-blue-50 text-blue-700' : 'bg-orange-50 text-orange-700'
+                      }`}>
+                        {unit.listingType}
+                      </span>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">
-                    {unit.bedrooms ? `${unit.bedrooms} Bed` : 'Studio'} • {unit.bathrooms ? `${unit.bathrooms} Bath` : '-'} • {unit.size}m²
-                  </p>
-                  <div className="mt-2 flex items-center gap-2">
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                      unit.listingType === 'SALE' ? 'bg-blue-50 text-blue-700' : 'bg-orange-50 text-orange-700'
-                    }`}>
-                      {unit.listingType}
-                    </span>
-                  </div>
                 </div>
-              </div>
-            ))}
-            {project.units.length === 0 && (
-              <p className="text-sm text-gray-500 italic">No units currently listed.</p>
-            )}
+              ))}
+              {project.units.length === 0 && (
+                <p className="text-sm text-gray-500 italic">No units currently listed.</p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
       </div>
       </div>

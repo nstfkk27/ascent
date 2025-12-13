@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
+import { createClient } from '@/utils/supabase/server';
 
 // GET /api/properties - Get all properties with optional filters
 export const dynamic = 'force-dynamic';
@@ -233,6 +234,22 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
+    // Check User Role for Permissions
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let userRole = 'AGENT';
+    if (user && user.email) {
+      const agent = await prisma.agentProfile.findFirst({
+        where: { email: user.email }
+      });
+      if (agent) {
+        userRole = agent.role;
+      }
+    }
+    
+    const isInternal = userRole === 'SUPER_ADMIN' || userRole === 'PLATFORM_AGENT';
+    
     // Validate required fields
     const requiredFields = ['title', 'description', 'address', 'city', 'state', 'zipCode', 'category', 'size'];
     for (const field of requiredFields) {
@@ -283,6 +300,12 @@ export async function POST(request: NextRequest) {
         
         // Project/Village Name
         projectName: body.projectName || null,
+        projectId: body.projectId || null,
+        
+        // Commission (Restricted)
+        commissionRate: isInternal ? (body.commissionRate || null) : null,
+        commissionAmount: isInternal ? (body.commissionAmount || null) : null,
+        coAgentCommissionRate: isInternal ? (body.coAgentCommissionRate || null) : null,
         
         // Condo-specific
         floor: body.floor || null,

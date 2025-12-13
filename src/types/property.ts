@@ -37,6 +37,12 @@ export interface Property {
   numberOfStaff?: number | null;
   monthlyRevenue?: number | null;
   license?: boolean | null;
+  conferenceRoom?: boolean | null;
+  
+  // Commission Info
+  commissionRate?: number | null;
+  commissionAmount?: number | null;
+  coAgentCommissionRate?: number | null;
   
   // Common features (House & Condo)
   bedrooms?: number | null;

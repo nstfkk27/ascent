@@ -244,6 +244,7 @@ export default async function Home({ searchParams }: HomeProps) {
     // --- 4. Serialize Standalone ---
     const serializedStandalone = standaloneProperties.map(prop => ({
       id: prop.id,
+      isStandalone: true,
       name: prop.projectName || prop.title, 
       type: prop.category,
       lat: prop.latitude ? prop.latitude.toNumber() : 0,
