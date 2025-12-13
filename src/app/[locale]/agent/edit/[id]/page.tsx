@@ -18,6 +18,41 @@ import {
   PATTAYA_AREAS
 } from '@/lib/constants';
 
+interface ListingFormData {
+  title: string;
+  price: number;
+  rentPrice: number;
+  size: number;
+  bedrooms: number;
+  bathrooms: number;
+  description: string;
+  address: string;
+  city: string;
+  area: string;
+  state: string;
+  zipCode: string;
+  latitude: number;
+  longitude: number;
+  category: string;
+  listingType: string;
+  subtype: string;
+  floors: number;
+  parking: number;
+  furnished: boolean;
+  pool: boolean;
+  garden: boolean;
+  projectName: string;
+  openForYears: number;
+  numberOfStaff: number;
+  equipmentIncluded: string;
+  landZoneColor: string;
+  conferenceRoom: boolean;
+  commissionRate: number;
+  commissionAmount: number;
+  coAgentCommissionRate: number;
+  selectedAmenities: string[];
+}
+
 const formatNumber = (num: number) => {
   if (!num) return '';
   return num.toLocaleString();
@@ -35,7 +70,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
   const [showProjectSuggestions, setShowProjectSuggestions] = useState(false);
   
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<ListingFormData>({
     title: '',
     price: 0,
     rentPrice: 0,
@@ -68,6 +103,11 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     equipmentIncluded: 'FULLY',
     landZoneColor: '',
     conferenceRoom: false,
+
+    // Commission
+    commissionRate: 0,
+    commissionAmount: 0,
+    coAgentCommissionRate: 0,
     
     // Amenities
     selectedAmenities: [] as string[],
@@ -204,7 +244,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
       finalValue = (e.target as HTMLInputElement).checked;
     }
 
-    if (name === 'price' || name === 'rentPrice') {
+    if (name === 'price' || name === 'rentPrice' || name === 'commissionAmount') {
       finalValue = parseFloat(value.replace(/,/g, '')) || 0;
     }
 
@@ -376,7 +416,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                       onClick={() => setUploadedImages(prev => prev.filter((_, i) => i !== idx))}
                       className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      Ã—
+                      ×
                     </button>
                   </div>
                 ))}
@@ -504,6 +544,45 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                   />
                 </div>
               )}
+
+              {/* Commission Section */}
+              <div className="col-span-2 border-t pt-4 mt-2">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Commission Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Commission Rate (%)</label>
+                    <input 
+                      type="number" 
+                      name="commissionRate"
+                      value={formData.commissionRate}
+                      onChange={handleChange}
+                      step="0.1"
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Commission Amount (THB)</label>
+                    <input 
+                      type="text" 
+                      name="commissionAmount"
+                      value={formatNumber(formData.commissionAmount)}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Rate (%)</label>
+                    <input 
+                      type="number" 
+                      name="coAgentCommissionRate"
+                      value={formData.coAgentCommissionRate}
+                      onChange={handleChange}
+                      step="0.1"
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    />
+                  </div>
+                </div>
+              </div>
 
               {shouldShowField('bedrooms') && (
                 <div>
@@ -805,7 +884,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                     onClick={handleGeocode}
                     className="px-4 py-2 bg-gray-100 text-gray-600 rounded hover:bg-gray-200 border border-gray-300"
                   >
-                    ðŸ”
+                    🔍
                   </button>
                 </div>
               </div>
@@ -853,7 +932,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                           handleReverseGeocode(e.lngLat.lat, e.lngLat.lng);
                         }}
                       >
-                        <div className="text-2xl cursor-pointer animate-bounce">ðŸ“</div>
+                        <div className="text-2xl cursor-pointer animate-bounce">📍</div>
                       </Marker>
                     </Map>
                   ) : (
@@ -888,7 +967,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                 disabled={isSaving}
                 className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm"
               >
-                {isSaving ? 'Saving...' : 'ðŸ’¾ Update Property'}
+                {isSaving ? 'Saving...' : '💾 Update Property'}
               </button>
             </div>
           </div>
@@ -897,4 +976,3 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     </div>
   );
 }
-
