@@ -107,6 +107,17 @@ export default function AgentLayout({
           <Link href="/" className="block text-sm text-gray-500 hover:text-gray-900">
             &larr; Back to Website
           </Link>
+          
+          {/* Debug Info */}
+          <div className="pt-4 border-t text-xs text-gray-400">
+             <p>Role: {role}</p>
+             <p>Status: {debugInfo?.debug?.message}</p>
+             {debugInfo?.debug?.searchedEmail && (
+               <p className="truncate" title={debugInfo.debug.searchedEmail}>
+                 Auth: {debugInfo.debug.searchedEmail}
+               </p>
+             )}
+          </div>
         </div>
       </aside>
 

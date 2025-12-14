@@ -13,22 +13,28 @@ export async function GET() {
       return NextResponse.json({ authenticated: false }, { status: 401 });
     }
 
-    // Find agent profile by email
+    // Find agent profile by email (case-insensitive)
     const agent = await prisma.agentProfile.findFirst({
-      where: { email: user.email }
+      where: { 
+        email: {
+          equals: user.email,
+          mode: 'insensitive'
+        }
+      }
     });
 
-    // If no profile exists yet, return default role (e.g., AGENT) or create one?
-    // For now, we'll return a basic structure. In a real app, we might auto-create or require admin approval.
-    // Let's assume manual creation for now, or default to AGENT if not found but authenticated.
-    
     if (!agent) {
        // Fallback for new users who haven't been assigned a profile yet
        return NextResponse.json({ 
          authenticated: true, 
          role: 'AGENT', 
          name: user.user_metadata?.full_name || user.email.split('@')[0],
-         email: user.email 
+         email: user.email,
+         debug: {
+           message: 'Profile not found in DB',
+           searchedEmail: user.email,
+           dbConnection: 'Active'
+         }
        });
     }
 
@@ -38,7 +44,11 @@ export async function GET() {
       role: agent.role, // SUPER_ADMIN, PLATFORM_AGENT, AGENT
       name: agent.name,
       email: agent.email,
-      imageUrl: agent.imageUrl
+      imageUrl: agent.imageUrl,
+      debug: {
+        message: 'Profile found',
+        roleInDb: agent.role
+      }
     });
 
   } catch (error) {

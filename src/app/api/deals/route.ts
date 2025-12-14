@@ -1,11 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
+import { createClient } from '@/utils/supabase/server';
 
 const prisma = new PrismaClient();
 
 // GET /api/deals - Get all deals
 export async function GET() {
   try {
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
     const deals = await prisma.deal.findMany({
       include: {
         property: {

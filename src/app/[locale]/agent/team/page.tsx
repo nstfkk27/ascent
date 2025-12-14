@@ -7,6 +7,7 @@ import { User, Plus, Trash2 } from 'lucide-react';
 export default function TeamManagementPage() {
   const [agents, setAgents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     role: '',
@@ -36,14 +37,43 @@ export default function TeamManagementPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await fetch('/api/agents', {
-        method: 'POST',
+      const url = editingId ? `/api/agents/${editingId}` : '/api/agents';
+      const method = editingId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
       const data = await res.json();
       if (data.success) {
         setFormData({ name: '', role: '', email: '', imageUrl: '', phone: '' });
+        setEditingId(null);
+        fetchAgents();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleEdit = (agent: any) => {
+    setEditingId(agent.id);
+    setFormData({
+      name: agent.name || '',
+      role: agent.role || '',
+      email: agent.email || '',
+      imageUrl: agent.imageUrl || '',
+      phone: agent.phone || '',
+    });
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to remove this agent?')) return;
+    
+    try {
+      const res = await fetch(`/api/agents/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.success) {
         fetchAgents();
       }
     } catch (err) {
@@ -56,10 +86,10 @@ export default function TeamManagementPage() {
       <h1 className="text-3xl font-bold text-gray-800 mb-8">Team Management</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Create Form */}
+        {/* Create/Edit Form */}
         <div className="bg-white p-6 rounded-xl shadow-md lg:col-span-1 h-fit">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Plus className="w-5 h-5" /> Add New Agent
+            <Plus className="w-5 h-5" /> {editingId ? 'Edit Agent' : 'Add New Agent'}
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -136,8 +166,26 @@ export default function TeamManagementPage() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-bold text-gray-800">{agent.name}</h3>
-                    <p className="text-sm text-[#496f5d] font-medium">{agent.role}</p>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-bold text-gray-800">{agent.name}</h3>
+                        <p className="text-sm text-[#496f5d] font-medium">{agent.role}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => handleEdit(agent)}
+                          className="text-blue-600 hover:text-blue-800 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(agent.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
                     {agent.email && <p className="text-xs text-gray-500 mt-1">{agent.email}</p>}
                     {agent.phone && <p className="text-xs text-gray-500">{agent.phone}</p>}
                   </div>
