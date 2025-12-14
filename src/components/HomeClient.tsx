@@ -71,8 +71,16 @@ export default function HomeClient({ projects }: HomeClientProps) {
     project.units = project.units.filter((unit: any) => {
        // Apply same unit filters as above
        if (filters.listingType) {
-         if (filters.listingType === 'SALE' && unit.listingType !== 'SALE' && unit.listingType !== 'BOTH') return false;
-         if (filters.listingType === 'RENT' && unit.listingType !== 'RENT' && unit.listingType !== 'BOTH') return false;
+         const type = filters.listingType;
+         const unitType = unit.listingType;
+
+         if (type === 'SALE') {
+            if (unitType !== 'SALE' && unitType !== 'BOTH') return false;
+         } else if (type === 'RENT') {
+            if (unitType !== 'RENT' && unitType !== 'BOTH') return false;
+         } else if (type === 'BOTH') {
+            if (unitType !== 'BOTH') return false;
+         }
        }
 
        const min = filters.minPrice ? Number(filters.minPrice.replace(/,/g, '')) : 0;

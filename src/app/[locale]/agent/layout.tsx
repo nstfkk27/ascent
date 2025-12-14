@@ -14,6 +14,7 @@ export default function AgentLayout({
   const supabase = createClient();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [role, setRole] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function AgentLayout({
         if (res.ok) {
           const data = await res.json();
           setRole(data.role);
+          setDebugInfo(data);
         }
       } catch (error) {
         console.error('Failed to fetch role', error);

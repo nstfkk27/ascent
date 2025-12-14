@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -95,6 +96,14 @@ export default function LoginPage() {
               required
               minLength={6}
             />
+          </div>
+          <div className="flex justify-end">
+            <Link 
+              href="/login/forgot" 
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Forgot Password?
+            </Link>
           </div>
           <button
             type="submit"
