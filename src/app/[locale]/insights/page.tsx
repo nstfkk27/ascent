@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, User, ArrowRight } from 'lucide-react';
 
 // Force dynamic to ensure we get fresh data if not using revalidate
@@ -28,10 +29,11 @@ export default async function InsightsPage() {
               <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 h-full flex flex-col">
                 <div className="h-48 bg-gray-200 relative overflow-hidden">
                   {post.coverImage ? (
-                    <img 
+                    <Image 
                       src={post.coverImage} 
                       alt={post.title} 
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className="absolute inset-0 flex items-center justify-center bg-gray-100 text-gray-400">

@@ -39,7 +39,7 @@ export default function MarketIntelligence({ opportunities }: MarketIntelligence
       <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 mb-10">
         <h3 className="text-blue-900 font-bold flex items-center gap-2 mb-3">
           <Info className="w-5 h-5" />
-          How we calculate "True Value"
+          How we calculate &quot;True Value&quot;
         </h3>
         <div className="grid md:grid-cols-3 gap-8 text-sm text-blue-800/80">
           <div>
@@ -48,11 +48,11 @@ export default function MarketIntelligence({ opportunities }: MarketIntelligence
           </div>
           <div>
             <strong className="block text-blue-900 mb-1">2. Floor Premium Adjustment</strong>
-            We adjust the baseline for every unit. Higher floors get a <span className="font-mono bg-blue-100 px-1 rounded">0.5%</span> premium per floor. Lower floors are discounted. This creates a specific "Fair Price" for <i>that exact unit</i>.
+            We adjust the baseline for every unit. Higher floors get a <span className="font-mono bg-blue-100 px-1 rounded">0.5%</span> premium per floor. Lower floors are discounted. This creates a specific &quot;Fair Price&quot; for <i>that exact unit</i>.
           </div>
           <div>
             <strong className="block text-blue-900 mb-1">3. The Discrepancy</strong>
-            We compare the <span className="font-bold text-emerald-700">Fair Price</span> vs. <span className="font-bold text-red-700">Asking Price</span>. Large negative gaps indicate undervalued "Steal" deals.
+            We compare the <span className="font-bold text-emerald-700">Fair Price</span> vs. <span className="font-bold text-red-700">Asking Price</span>. Large negative gaps indicate undervalued &quot;Steal&quot; deals.
           </div>
         </div>
       </div>

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 
 type PropertyCategory = 'HOUSE' | 'CONDO' | 'INVESTMENT';
 type HouseType = 'SINGLE_HOUSE' | 'POOL_VILLA' | 'TOWNHOUSE' | 'SHOPHOUSE';
@@ -748,7 +749,13 @@ export default function ListingPage() {
                 <div className="grid grid-cols-4 gap-4 mt-4">
                   {uploadedImages.map((url, idx) => (
                     <div key={idx} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
-                      <img src={url} alt={`Uploaded ${idx}`} className="w-full h-full object-cover" />
+                      <Image 
+                        src={url} 
+                        alt={`Uploaded ${idx}`} 
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
                     </div>
                   ))}
                 </div>

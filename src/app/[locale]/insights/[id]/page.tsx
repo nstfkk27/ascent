@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Calendar, User, ArrowLeft, Clock } from 'lucide-react';
 import { notFound } from 'next/navigation';
 
@@ -56,10 +57,11 @@ export default async function InsightDetailPage({ params }: { params: { id: stri
 
         {post.coverImage && (
           <div className="mb-12 rounded-2xl overflow-hidden shadow-lg h-[400px] w-full relative">
-            <img 
+            <Image 
               src={post.coverImage} 
               alt={post.title} 
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
             />
           </div>
         )}

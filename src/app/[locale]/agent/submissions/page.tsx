@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 interface Submission {
   id: string;
@@ -156,8 +157,14 @@ export default function SubmissionsPage() {
                   <h3 className="font-semibold text-gray-700 mb-2">Images</h3>
                   <div className="grid grid-cols-4 gap-4">
                     {selectedSubmission.images.map((img, idx) => (
-                      <a key={idx} href={img} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-lg overflow-hidden bg-gray-100 hover:opacity-90">
-                        <img src={img} alt={`Submission ${idx}`} className="w-full h-full object-cover" />
+                      <a key={idx} href={img} target="_blank" rel="noopener noreferrer" className="block aspect-square rounded-lg overflow-hidden bg-gray-100 hover:opacity-90 relative">
+                        <Image 
+                          src={img} 
+                          alt={`Submission ${idx}`} 
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
                       </a>
                     ))}
                   </div>

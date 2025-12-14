@@ -2,6 +2,7 @@
 
 import { Link } from '@/navigation';
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
 import { Search, Menu, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
@@ -179,12 +180,14 @@ export default function Navbar() {
                 href="/agent"
                 className="flex items-center gap-3 pl-2 pr-4 py-1.5 border border-gray-200 rounded-full hover:border-[#496f5d] transition-all duration-300 group bg-white"
               >
-                <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200 group-hover:border-[#496f5d] transition-colors">
+                <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200 group-hover:border-[#496f5d] transition-colors relative">
                   {user.user_metadata?.avatar_url ? (
-                    <img 
+                    <Image 
                       src={user.user_metadata.avatar_url} 
                       alt="Profile" 
-                      className="w-full h-full object-cover" 
+                      fill
+                      className="object-cover" 
+                      unoptimized
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-[#496f5d] text-white text-sm font-bold">
@@ -301,9 +304,9 @@ export default function Navbar() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center gap-3 py-2"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200">
+                  <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200 relative">
                     {user.user_metadata?.avatar_url ? (
-                      <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                      <Image src={user.user_metadata.avatar_url} alt="Profile" fill className="object-cover" unoptimized />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-[#496f5d] text-white text-sm font-bold">
                         {user.email?.[0]?.toUpperCase() || 'U'}
