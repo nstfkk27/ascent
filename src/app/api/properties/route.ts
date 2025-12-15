@@ -165,21 +165,23 @@ export async function GET(request: NextRequest) {
       
       if (booleanColumns.includes(key)) {
         if (value === 'true') {
-          // For pool and garden, check both boolean column AND amenities JSON
+          // For pool and garden, check both boolean column AND unitFeatures JSON
           // This handles cases where Investment properties store these in JSON
           if (key === 'pool') {
             where.AND.push({
               OR: [
                 { pool: true },
-                { amenities: { path: ['pool'], equals: true } },
-                { amenities: { path: ['swimmingPool'], equals: true } }
+                { unitFeatures: { path: ['pool'], equals: true } },
+                { unitFeatures: { path: ['swimmingPool'], equals: true } },
+                { unitFeatures: { path: ['privatePool'], equals: true } }
               ]
             });
           } else if (key === 'garden') {
             where.AND.push({
               OR: [
                 { garden: true },
-                { amenities: { path: ['garden'], equals: true } }
+                { unitFeatures: { path: ['garden'], equals: true } },
+                { unitFeatures: { path: ['privateGarden'], equals: true } }
               ]
             });
           } else {
@@ -189,10 +191,10 @@ export async function GET(request: NextRequest) {
         return;
       }
       
-      // Assume it's an amenity in the JSON
+      // Assume it's a unit feature in the JSON
       if (value === 'true') {
         where.AND.push({
-          amenities: {
+          unitFeatures: {
             path: [key],
             equals: true
           }
@@ -306,8 +308,8 @@ export async function POST(request: NextRequest) {
         zipCode: body.zipCode,
         category: body.category,
         
-        // House-specific
-        houseType: body.houseType || null,
+        // Common features (House & Condo)
+        condition: body.condition || null,
         bedrooms: body.bedrooms || null,
         bathrooms: body.bathrooms || null,
         size: body.size,
@@ -329,7 +331,7 @@ export async function POST(request: NextRequest) {
         
         // Condo-specific
         floor: body.floor || null,
-        amenities: body.amenities || null,
+        unitFeatures: body.unitFeatures || body.amenities || null,
         
         // Investment-specific
         investmentType: body.investmentType || null,

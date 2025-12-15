@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
 import { createClient } from '@/utils/supabase/server';
 
-const prisma = new PrismaClient();
 
 // GET /api/properties/[id] - Get single property by ID
 export async function GET(
@@ -87,6 +86,11 @@ export async function PUT(
     }
 
     let updateData = { ...body };
+    
+    // Handle empty condition string
+    if (updateData.condition === '') {
+      updateData.condition = null;
+    }
     
     // Remove restricted fields if not internal
     if (!isInternal) {

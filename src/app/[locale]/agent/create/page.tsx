@@ -10,11 +10,10 @@ import {
   PROPERTY_SUBTYPES, 
   SUBTYPE_FEATURES, 
   EQUIPMENT_LEVELS, 
-  CONDO_FACILITIES,
-  CONDO_VIEWS,
-  HOUSE_FACILITIES,
-  HOUSE_AMENITIES,
-  INVESTMENT_AMENITIES,
+  CONDO_UNIT_FEATURES,
+  HOUSE_UNIT_FEATURES,
+  PROJECT_FACILITIES,
+  PROPERTY_CONDITIONS,
   PATTAYA_AREAS
 } from '@/lib/constants';
 
@@ -25,8 +24,6 @@ const formatNumber = (num: number) => {
 
 export default function QuickDropPage() {
   const router = useRouter();
-  const [rawText, setRawText] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   
   const [isUploading, setIsUploading] = useState(false);
@@ -73,6 +70,7 @@ export default function QuickDropPage() {
     
     // Dynamic Fields
     subtype: '', // houseType or investmentType
+    condition: '', // Added condition
     floors: 0,
     parking: 0,
     furnished: false,
@@ -169,24 +167,6 @@ export default function QuickDropPage() {
     } finally {
       setIsUploading(false);
     }
-  };
-
-  const handleProcess = async () => {
-    setIsProcessing(true);
-    // Simulate parsing (In future, this will call OpenAI)
-    setTimeout(() => {
-      setFormData({
-        ...formData,
-        title: "New Listing from Text",
-        description: rawText,
-        price: 0,
-        size: 0,
-        bedrooms: 0,
-        bathrooms: 0,
-        address: "Extracted Address",
-      });
-      setIsProcessing(false);
-    }, 500);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -398,23 +378,6 @@ export default function QuickDropPage() {
         {/* Input Section (Left) */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Raw Property Text</label>
-            <textarea
-              className="w-full h-48 p-4 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base text-gray-900 placeholder-gray-500"
-              placeholder="Paste details here... e.g. 2 Bed 2 Bath Condo at Noble Ploenchit..."
-              value={rawText}
-              onChange={(e) => setRawText(e.target.value)}
-            ></textarea>
-            <button
-              onClick={handleProcess}
-              disabled={!rawText || isProcessing}
-              className="w-full mt-4 py-2 px-4 bg-gray-800 text-white rounded hover:bg-gray-900 transition-colors text-sm"
-            >
-              {isProcessing ? 'Processing...' : '⬇️ Fill Form from Text'}
-            </button>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
             <textarea 
               name="description"
@@ -555,6 +518,23 @@ export default function QuickDropPage() {
                   <option value="BOTH">Sale & Rent</option>
                 </select>
               </div>
+
+              {(formData.category === 'HOUSE' || formData.category === 'CONDO') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Condition</label>
+                  <select 
+                    name="condition"
+                    value={formData.condition}
+                    onChange={handleChange}
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base"
+                  >
+                    <option value="">Select Condition</option>
+                    {Object.entries(PROPERTY_CONDITIONS).map(([key, label]) => (
+                      <option key={key} value={key}>{label}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {/* Price Inputs */}
               {(formData.listingType === 'SALE' || formData.listingType === 'BOTH') && (
@@ -764,86 +744,33 @@ export default function QuickDropPage() {
                 </div>
               )}
 
-              {/* Amenities / Facilities Section */}
+              {/* Unit Features Section - These are specific to this unit */}
               {formData.category === 'HOUSE' && (
-                <>
-                  <div className="col-span-2 mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      {HOUSE_AMENITIES.map((item) => (
-                        <label key={item.id} className="flex items-center space-x-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={formData.selectedAmenities.includes(item.id)}
-                            onChange={() => toggleAmenity(item.id)}
-                            className="rounded text-blue-600 focus:ring-blue-500" 
-                          />
-                          <span className="text-sm text-gray-700">{item.label}</span>
-                        </label>
-                      ))}
-                    </div>
+                <div className="col-span-2 mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Unit Features</label>
+                  <p className="text-xs text-gray-500 mb-2">Features specific to this unit (not shared project facilities)</p>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    {HOUSE_UNIT_FEATURES.map((item: { id: string; label: string }) => (
+                      <label key={item.id} className="flex items-center space-x-2 cursor-pointer">
+                        <input 
+                          type="checkbox" 
+                          checked={formData.selectedAmenities.includes(item.id)}
+                          onChange={() => toggleAmenity(item.id)}
+                          className="rounded text-blue-600 focus:ring-blue-500" 
+                        />
+                        <span className="text-sm text-gray-700">{item.label}</span>
+                      </label>
+                    ))}
                   </div>
-                  <div className="col-span-2 mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Facilities</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      {HOUSE_FACILITIES.map((item) => (
-                        <label key={item.id} className="flex items-center space-x-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={formData.selectedAmenities.includes(item.id)}
-                            onChange={() => toggleAmenity(item.id)}
-                            className="rounded text-blue-600 focus:ring-blue-500" 
-                          />
-                          <span className="text-sm text-gray-700">{item.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </>
+                </div>
               )}
 
               {formData.category === 'CONDO' && (
-                <>
-                  <div className="col-span-2 mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Views</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      {CONDO_VIEWS.map((item) => (
-                        <label key={item.id} className="flex items-center space-x-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={formData.selectedAmenities.includes(item.id)}
-                            onChange={() => toggleAmenity(item.id)}
-                            className="rounded text-blue-600 focus:ring-blue-500" 
-                          />
-                          <span className="text-sm text-gray-700">{item.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="col-span-2 mt-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Facilities</label>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                      {CONDO_FACILITIES.map((item) => (
-                        <label key={item.id} className="flex items-center space-x-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={formData.selectedAmenities.includes(item.id)}
-                            onChange={() => toggleAmenity(item.id)}
-                            className="rounded text-blue-600 focus:ring-blue-500" 
-                          />
-                          <span className="text-sm text-gray-700">{item.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {formData.category === 'INVESTMENT' && (
                 <div className="col-span-2 mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Unit Features</label>
+                  <p className="text-xs text-gray-500 mb-2">Features specific to this unit (project facilities are inherited automatically)</p>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    {INVESTMENT_AMENITIES.map((item) => (
+                    {CONDO_UNIT_FEATURES.map((item: { id: string; label: string }) => (
                       <label key={item.id} className="flex items-center space-x-2 cursor-pointer">
                         <input 
                           type="checkbox" 

@@ -40,6 +40,13 @@ export const LISTING_TYPES = {
   BOTH: 'Sale & Rent',
 } as const;
 
+export const PROPERTY_CONDITIONS = {
+  NEW: 'New',
+  GOOD: 'Good',
+  FAIR: 'Fair',
+  NEED_RENOVATION: 'Need Renovation',
+} as const;
+
 export const PROPERTY_STATUS = {
   AVAILABLE: 'Available',
   PENDING: 'Pending',
@@ -87,8 +94,13 @@ export const SUBTYPE_FEATURES = {
   MASSAGE: ['size', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
 } as const;
 
-// --- HOUSE CONSTANTS ---
-export const HOUSE_AMENITIES = [
+// ============================================
+// UNIT FEATURES (stored on Property.unitFeatures)
+// These are specific to the individual unit/listing
+// ============================================
+
+// --- HOUSE UNIT FEATURES ---
+export const HOUSE_UNIT_FEATURES = [
   { id: 'westernKitchen', label: 'Western Kitchen' },
   { id: 'thaiKitchen', label: 'Thai Kitchen' },
   { id: 'maidsRoom', label: "Maid's Room" },
@@ -96,50 +108,67 @@ export const HOUSE_AMENITIES = [
   { id: 'laundryRoom', label: 'Laundry Room' },
   { id: 'walkInCloset', label: 'Walk-in Closet' },
   { id: 'bathtub', label: 'Bathtub' },
+  { id: 'privatePool', label: 'Private Pool' },
+  { id: 'privateGarden', label: 'Private Garden' },
 ] as const;
 
-export const HOUSE_FACILITIES = [
-  { id: 'wifi', label: 'Wifi' },
-  { id: 'gym', label: 'Gym / Fitness' },
-  { id: 'sauna', label: 'Sauna' },
-  { id: 'communalPool', label: 'Pool (Communal)' },
-  { id: 'security', label: '24/7 Security' },
-  { id: 'library', label: 'Library' },
-  { id: 'coworking', label: 'Co-working Space' },
-  { id: 'playground', label: 'Kids Playground' },
-] as const;
-
-// --- CONDO CONSTANTS ---
-export const CONDO_VIEWS = [
+// --- CONDO UNIT FEATURES ---
+export const CONDO_UNIT_FEATURES = [
   { id: 'seaView', label: 'Sea View' },
   { id: 'cityView', label: 'City View' },
   { id: 'poolView', label: 'Pool View' },
   { id: 'gardenView', label: 'Garden View' },
+  { id: 'bathtub', label: 'Bathtub' },
+  { id: 'walkInCloset', label: 'Walk-in Closet' },
+  { id: 'balcony', label: 'Balcony' },
+  { id: 'washer', label: 'Washing Machine' },
 ] as const;
 
-export const CONDO_FACILITIES = [
-  { id: 'wifi', label: 'Wifi' },
+// ============================================
+// PROJECT FACILITIES (stored on Project.facilities)
+// These are shared amenities for the entire building/village
+// Inherited by all units in the project - DO NOT re-enter per listing
+// ============================================
+
+export const PROJECT_FACILITIES = [
+  { id: 'swimmingPool', label: 'Swimming Pool' },
   { id: 'gym', label: 'Gym / Fitness' },
   { id: 'sauna', label: 'Sauna' },
-  { id: 'communalPool', label: 'Pool (Communal)' },
   { id: 'security', label: '24/7 Security' },
+  { id: 'parking', label: 'Parking' },
   { id: 'library', label: 'Library' },
   { id: 'coworking', label: 'Co-working Space' },
+  { id: 'playground', label: 'Kids Playground' },
+  { id: 'garden', label: 'Garden' },
+  { id: 'clubhouse', label: 'Clubhouse' },
+  { id: 'wifi', label: 'Common Area Wifi' },
+  { id: 'elevator', label: 'Elevator' },
+  { id: 'cctv', label: 'CCTV' },
+  { id: 'keycard', label: 'Keycard Access' },
 ] as const;
 
-// --- INVESTMENT CONSTANTS ---
-// These are mostly columns, but some are amenities (JSON)
+// ============================================
+// LEGACY EXPORTS (for backward compatibility)
+// ============================================
+export const HOUSE_AMENITIES = HOUSE_UNIT_FEATURES;
+export const HOUSE_FACILITIES = PROJECT_FACILITIES;
+export const CONDO_VIEWS = CONDO_UNIT_FEATURES.filter(f => f.id.includes('View'));
+export const CONDO_FACILITIES = PROJECT_FACILITIES;
 export const INVESTMENT_AMENITIES = [
-  { id: 'elevator', label: 'Elevator' }, // Hotel, Commercial
+  { id: 'elevator', label: 'Elevator' },
 ] as const;
 
-// Helper to get all amenities for search
+// Helper to get all unit features for search
+export const ALL_UNIT_FEATURES = [
+  ...HOUSE_UNIT_FEATURES,
+  ...CONDO_UNIT_FEATURES,
+] as const;
+
+// Helper to get all amenities for search (legacy)
 export const ALL_AMENITIES = [
-  ...HOUSE_AMENITIES,
-  ...HOUSE_FACILITIES,
-  ...CONDO_VIEWS,
-  ...CONDO_FACILITIES,
-  ...INVESTMENT_AMENITIES
+  ...HOUSE_UNIT_FEATURES,
+  ...CONDO_UNIT_FEATURES,
+  ...PROJECT_FACILITIES,
 ];
 
 export const YEARS_OPERATIONAL_RANGES = [

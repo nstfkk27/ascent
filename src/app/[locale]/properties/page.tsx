@@ -4,12 +4,10 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import PropertyCard from '@/components/PropertyCard';
 import SearchFilters, { SearchFilters as SearchFiltersType } from '@/components/SearchFilters';
-import ViewToggle from '@/components/ViewToggle';
-import MapView from '@/components/MapView';
+import Link from 'next/link';
 
 export default function PropertiesPage() {
   const searchParams = useSearchParams();
-  const [view, setView] = useState<'grid' | 'map'>('grid');
   const [displayCount, setDisplayCount] = useState(20); // 4 cards × 5 rows
   const [isLoading, setIsLoading] = useState(false);
   const [allProperties, setAllProperties] = useState<any[]>([]);
@@ -163,43 +161,31 @@ export default function PropertiesPage() {
           <p className="text-lg text-gray-700">
             <span className="font-semibold">{filteredProperties.length}</span> properties found
           </p>
-          <ViewToggle view={view} onViewChange={setView} />
+          <Link 
+            href="/search" 
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+            </svg>
+            Map
+          </Link>
         </div>
 
-        {view === 'grid' ? (
-          <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {filteredProperties.slice(0, displayCount).map((property) => (
-                <PropertyCard key={property.id} property={property} />
-              ))}
-            </div>
-            {filteredProperties.length > displayCount && (
-              <div ref={observerTarget} className="flex justify-center py-8">
-                {isLoading && (
-                    <div className="flex items-center space-x-2">
-                      <div className="w-4 h-4 bg-[#496f5d] rounded-full animate-bounce"></div>
-                      <div className="w-4 h-4 bg-[#49516f] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-4 h-4 bg-[#8ea4d2] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    </div>
-                )}
-              </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {filteredProperties.slice(0, displayCount).map((property) => (
+            <PropertyCard key={property.id} property={property} />
+          ))}
+        </div>
+        {filteredProperties.length > displayCount && (
+          <div ref={observerTarget} className="flex justify-center py-8">
+            {isLoading && (
+                <div className="flex items-center space-x-2">
+                  <div className="w-4 h-4 bg-[#496f5d] rounded-full animate-bounce"></div>
+                  <div className="w-4 h-4 bg-[#49516f] rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                  <div className="w-4 h-4 bg-[#8ea4d2] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                </div>
             )}
-          </>
-        ) : (
-          <div className="flex flex-col lg:flex-row h-[calc(100vh-200px)] min-h-[600px] gap-6">
-            <div className="lg:w-2/3 h-full rounded-lg overflow-hidden shadow-md border border-gray-200">
-              <MapView properties={filteredProperties} />
-            </div>
-            <div className="lg:w-1/3 h-full overflow-y-auto pr-2 space-y-4">
-              <h3 className="font-semibold text-gray-700 sticky top-0 bg-gray-50 py-2 z-10">
-                Results in view ({filteredProperties.length})
-              </h3>
-              <div className="grid grid-cols-1 gap-4">
-                {filteredProperties.map((property) => (
-                  <PropertyCard key={property.id} property={property} />
-                ))}
-              </div>
-            </div>
           </div>
         )}
 

@@ -192,7 +192,7 @@ export default function AgentDashboard() {
                 return (
                   <tr key={property.id} className="bg-white border-b hover:bg-gray-50">
                     <td className="px-6 py-4 font-medium text-gray-900">{property.title || 'Untitled'}</td>
-                    <td className="px-6 py-4">฿{property.price?.toLocaleString() ?? 'N/A'}</td>
+                    <td className="px-6 py-4 text-gray-900">฿{property.price?.toLocaleString() ?? 'N/A'}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         property.status === 'AVAILABLE' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'

@@ -10,7 +10,7 @@ export function sanitizePropertyData(data: any) {
     // Clear Condo specific fields
     // We allow projectName for Houses to store the "Village Name" or "Mooban"
     cleanData.floor = null;
-    cleanData.amenities = null;
+    cleanData.unitFeatures = cleanData.unitFeatures || null; // Keep unit features for houses
 
     // Clear Investment specific fields
     cleanData.investmentType = null;
@@ -43,11 +43,14 @@ export function sanitizePropertyData(data: any) {
     cleanData.garden = null;
     cleanData.pool = null;
     cleanData.floors = null;
+    
+    // Clear Condition (applies to House/Condo units)
+    cleanData.condition = null;
 
     // Clear Condo specific fields
     cleanData.projectName = null;
     cleanData.floor = null;
-    cleanData.amenities = null;
+    cleanData.unitFeatures = null;
     
     cleanData.landZoneColor = null;
   } else if (category === 'LAND') {
@@ -61,10 +64,13 @@ export function sanitizePropertyData(data: any) {
     cleanData.petFriendly = null;
     cleanData.pool = null;
     cleanData.garden = null;
+    
+    // Clear Condition
+    cleanData.condition = null;
 
     // Clear Condo specific fields
     cleanData.floor = null;
-    cleanData.amenities = null;
+    cleanData.unitFeatures = null;
     // We might keep projectName for Land if it's land in a village/project
 
     // Clear Investment (Business) specific fields
