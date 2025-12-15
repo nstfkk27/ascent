@@ -147,17 +147,6 @@ async function main() {
       floor: 25,
       petFriendly: false,
       furnished: true,
-      amenities: {
-        swimmingPool: true,
-        gym: true,
-        security24h: true,
-        parking: true,
-        garden: true,
-        playground: true,
-        coWorkingSpace: true,
-        sauna: true,
-        library: false,
-      },
       status: 'AVAILABLE',
       listingType: 'SALE',
       images: [
