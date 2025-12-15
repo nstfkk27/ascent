@@ -42,6 +42,7 @@ interface ListingFormData {
   pool: boolean;
   garden: boolean;
   projectName: string;
+  projectId: string | null;
   openForYears: number;
   numberOfStaff: number;
   equipmentIncluded: string;
@@ -287,7 +288,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
   };
 
   const handleProjectSearch = async (query: string) => {
-    setFormData(prev => ({ ...prev, projectName: query }));
+    setFormData(prev => ({ ...prev, projectName: query, projectId: null }));
     if (query.length < 2) {
       setProjectSuggestions([]);
       setShowProjectSuggestions(false);
@@ -309,6 +310,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     setFormData(prev => ({ 
       ...prev, 
       projectName: project.name,
+      projectId: project.id,
       address: project.address || prev.address,
       city: project.city || prev.city,
       latitude: project.lat ? Number(project.lat) : prev.latitude,
@@ -333,6 +335,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     try {
       const payload: any = {
         ...formData,
+        projectId: formData.projectId, // Explicitly ensure projectId is sent
         images: uploadedImages,
         amenities: {},
       };
