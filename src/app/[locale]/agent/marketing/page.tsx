@@ -30,21 +30,44 @@ export default function MarketingPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string>('');
   const [postText, setPostText] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    fetch('/api/properties')
-      .then(res => res.json())
-      .then(data => {
-        if (data.success) {
-          setProperties(data.data);
-          if (data.data.length > 0) {
-            setSelectedPropertyId(data.data[0].id);
-          }
-        }
-        setLoading(false);
-      });
+    // Load initial recent properties
+    searchProperties('');
   }, []);
+
+  const searchProperties = async (query: string) => {
+    setLoading(true);
+    try {
+      const url = query 
+        ? `/api/properties?query=${encodeURIComponent(query)}&limit=20`
+        : `/api/properties?limit=10`; // Recent 10
+        
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (data.success) {
+        setProperties(data.data);
+        // If we have no selection yet and results exist, select the first one
+        if (!selectedPropertyId && data.data.length > 0 && !query) {
+          setSelectedPropertyId(data.data[0].id);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to search properties', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        searchProperties(searchQuery);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   useEffect(() => {
     if (!selectedPropertyId) return;
@@ -103,7 +126,16 @@ Line: @ascentweb
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
         {/* Left: Property Selector */}
         <div className="lg:col-span-3 bg-white rounded-lg shadow border border-gray-200 flex flex-col overflow-hidden">
-          <div className="p-4 border-b bg-gray-50 font-semibold">1. Select Property</div>
+          <div className="p-4 border-b bg-gray-50 font-semibold">
+            <div>1. Select Property</div>
+            <input 
+              type="text"
+              placeholder="Search properties..."
+              className="mt-2 w-full p-2 border rounded text-sm font-normal"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
           <div className="overflow-y-auto flex-1 p-2 space-y-2">
             {loading ? <p className="p-4 text-center text-gray-500">Loading...</p> : properties.map(p => (
               <div 

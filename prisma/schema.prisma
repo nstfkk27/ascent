@@ -127,6 +127,11 @@ model Project {
   
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
+
+  @@index([name])
+  @@index([type])
+  @@index([city])
+  @@index([address])
 }
 
 model ModelAsset {

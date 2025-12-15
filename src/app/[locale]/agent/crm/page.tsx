@@ -22,10 +22,16 @@ interface Property {
 
 export default function CRMPage() {
   const [deals, setDeals] = useState<Deal[]>([]);
-  const [properties, setProperties] = useState<Property[]>([]);
+  // Removed bulk properties state
   const [isLoading, setIsLoading] = useState(true);
   const [showNewDealModal, setShowNewDealModal] = useState(false);
   
+  // Property Search State
+  const [propertySearchQuery, setPropertySearchQuery] = useState('');
+  const [propertySuggestions, setPropertySuggestions] = useState<Property[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedPropertyTitle, setSelectedPropertyTitle] = useState('');
+
   // New Deal Form State
   const [newDeal, setNewDeal] = useState({
     clientName: '',
@@ -44,8 +50,36 @@ export default function CRMPage() {
 
   useEffect(() => {
     fetchDeals();
-    fetchProperties();
   }, []);
+
+  // Debounced Property Search
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (propertySearchQuery.length >= 2) {
+        searchProperties(propertySearchQuery);
+      } else {
+        setPropertySuggestions([]);
+      }
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [propertySearchQuery]);
+
+  const searchProperties = async (query: string) => {
+    try {
+      const res = await fetch(`/api/properties?query=${encodeURIComponent(query)}&limit=5`);
+      const data = await res.json();
+      if (data.success) setPropertySuggestions(data.data);
+    } catch (error) {
+      console.error('Failed to search properties', error);
+    }
+  };
+
+  const selectProperty = (property: Property) => {
+    setNewDeal({ ...newDeal, propertyId: property.id });
+    setSelectedPropertyTitle(property.title);
+    setShowSuggestions(false);
+    setPropertySearchQuery('');
+  };
 
   const fetchDeals = async () => {
     try {
@@ -58,16 +92,9 @@ export default function CRMPage() {
       setIsLoading(false);
     }
   };
+  
+  // Removed fetchProperties
 
-  const fetchProperties = async () => {
-    try {
-      const res = await fetch('/api/properties');
-      const data = await res.json();
-      if (data.success) setProperties(data.data);
-    } catch (error) {
-      console.error('Failed to fetch properties', error);
-    }
-  };
 
   const handleMoveDeal = async (dealId: string, currentStage: DealStage) => {
     const currentIndex = stages.findIndex(s => s.key === currentStage);
@@ -209,16 +236,33 @@ export default function CRMPage() {
               
               <div>
                 <label className="block text-sm font-medium text-gray-700">Property</label>
-                <select 
-                  className="w-full p-2 border rounded"
-                  value={newDeal.propertyId}
-                  onChange={e => setNewDeal({...newDeal, propertyId: e.target.value})}
-                >
-                  <option value="">Select Property...</option>
-                  {properties.map(p => (
-                    <option key={p.id} value={p.id}>{p.title}</option>
-                  ))}
-                </select>
+                <div className="relative">
+                  <input 
+                    type="text"
+                    className="w-full p-2 border rounded"
+                    placeholder="Search property..."
+                    value={selectedPropertyTitle || propertySearchQuery}
+                    onChange={(e) => {
+                      setPropertySearchQuery(e.target.value);
+                      setSelectedPropertyTitle(''); // Clear selection if user types
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                  />
+                  {showSuggestions && propertySuggestions.length > 0 && (
+                    <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-b shadow-lg max-h-48 overflow-y-auto mt-1">
+                      {propertySuggestions.map(p => (
+                        <div 
+                          key={p.id}
+                          className="p-2 hover:bg-blue-50 cursor-pointer text-sm"
+                          onClick={() => selectProperty(p)}
+                        >
+                          <div className="font-medium">{p.title}</div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div>

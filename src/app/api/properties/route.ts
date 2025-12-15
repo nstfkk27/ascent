@@ -118,6 +118,11 @@ export async function GET(request: NextRequest) {
       'landZoneColor', 'tag'
     ];
     
+    // Pagination
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
+
     const booleanColumns = ['petFriendly', 'furnished', 'pool', 'garden', 'conferenceRoom'];
     
     // Initialize AND array if not exists
@@ -196,12 +201,17 @@ export async function GET(request: NextRequest) {
     });
     
     // Get properties
-    const properties = await prisma.property.findMany({
-      where,
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    const [total, properties] = await prisma.$transaction([
+      prisma.property.count({ where }),
+      prisma.property.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
+    ]);
 
     const serializedProperties = properties.map((p) => ({
       ...p,
@@ -213,12 +223,22 @@ export async function GET(request: NextRequest) {
       monthlyRevenue: p.monthlyRevenue ? p.monthlyRevenue.toNumber() : null,
       latitude: p.latitude ? p.latitude.toNumber() : null,
       longitude: p.longitude ? p.longitude.toNumber() : null,
+      commissionRate: p.commissionRate ? p.commissionRate.toNumber() : null,
+      commissionAmount: p.commissionAmount ? p.commissionAmount.toNumber() : null,
+      coAgentCommissionRate: p.coAgentCommissionRate ? p.coAgentCommissionRate.toNumber() : null,
     }));
     
     return NextResponse.json({
       success: true,
-      count: properties.length,
+      count: total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
       data: serializedProperties,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
+      }
     });
   } catch (error) {
     console.error('Error fetching properties:', error);

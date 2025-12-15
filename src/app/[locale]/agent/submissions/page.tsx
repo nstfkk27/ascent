@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Submission {
   id: string;
@@ -24,29 +25,41 @@ export default function SubmissionsPage() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
+  
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [limit] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, []);
-
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
+    setIsLoading(true);
     try {
-      const res = await fetch('/api/submissions');
+      const res = await fetch(`/api/submissions?page=${page}&limit=${limit}`);
       const data = await res.json();
       if (data.success) {
         setSubmissions(data.data);
+        if (data.pagination) {
+          setTotalPages(data.pagination.totalPages);
+          setTotalItems(data.pagination.total);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch submissions', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [page, limit]);
+
+  useEffect(() => {
+    fetchSubmissions();
+  }, [fetchSubmissions]);
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-800">Property Submissions</h1>
+        <div className="text-sm text-gray-500">Total: {totalItems}</div>
       </div>
 
       {isLoading ? (
@@ -110,6 +123,27 @@ export default function SubmissionsPage() {
                 )}
               </tbody>
             </table>
+          </div>
+          
+          {/* Pagination Controls */}
+          <div className="p-4 border-t flex items-center justify-between bg-gray-50">
+            <button 
+              disabled={page <= 1 || isLoading}
+              onClick={() => setPage(p => p - 1)}
+              className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-white flex items-center gap-1 bg-white text-sm"
+            >
+              <ChevronLeft className="w-4 h-4" /> Prev
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {page} of {totalPages}
+            </span>
+            <button 
+              disabled={page >= totalPages || isLoading}
+              onClick={() => setPage(p => p + 1)}
+              className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-white flex items-center gap-1 bg-white text-sm"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}

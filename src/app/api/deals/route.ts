@@ -5,7 +5,7 @@ import { createClient } from '@/utils/supabase/server';
 const prisma = new PrismaClient();
 
 // GET /api/deals - Get all deals
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -14,21 +14,49 @@ export async function GET() {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
     }
 
-    const deals = await prisma.deal.findMany({
-      include: {
-        property: {
-          select: {
-            title: true,
-            price: true
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
+
+    const [total, deals] = await prisma.$transaction([
+      prisma.deal.count(),
+      prisma.deal.findMany({
+        include: {
+          property: {
+            select: {
+              title: true,
+              price: true
+            }
           }
-        }
-      },
-      orderBy: {
-        updatedAt: 'desc'
+        },
+        orderBy: {
+          updatedAt: 'desc'
+        },
+        skip,
+        take: limit
+      })
+    ]);
+
+    const serializedDeals = deals.map(deal => ({
+      ...deal,
+      amount: deal.amount ? deal.amount.toNumber() : null,
+      property: deal.property ? {
+        ...deal.property,
+        price: deal.property.price ? deal.property.price.toNumber() : null
+      } : null
+    }));
+    
+    return NextResponse.json({ 
+      success: true, 
+      data: serializedDeals,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
       }
     });
-    
-    return NextResponse.json({ success: true, data: deals });
   } catch (error) {
     console.error('Error fetching deals:', error);
     return NextResponse.json(

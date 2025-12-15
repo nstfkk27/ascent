@@ -39,16 +39,34 @@ export async function GET(req: NextRequest) {
     const category = searchParams.get('category');
     const publishedOnly = searchParams.get('published') !== 'false'; // Default to true for public API
     
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
+    const skip = (page - 1) * limit;
+    
     const where: any = {};
     if (category) where.category = category;
     if (publishedOnly) where.published = true;
 
-    const posts = await prisma.post.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-    });
+    const [total, posts] = await prisma.$transaction([
+      prisma.post.count({ where }),
+      prisma.post.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit
+      })
+    ]);
 
-    return NextResponse.json({ success: true, data: posts });
+    return NextResponse.json({ 
+      success: true, 
+      data: posts,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     console.error('Error fetching posts:', error);
     return NextResponse.json({ success: false, error: 'Failed to fetch posts' }, { status: 500 });

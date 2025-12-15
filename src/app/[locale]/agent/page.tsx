@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Property {
   id: string;
@@ -11,38 +12,66 @@ interface Property {
   lastVerifiedAt: string;
 }
 
+interface DashboardStats {
+  activeListings: number;
+  pendingSubmissions: number;
+  freshListings: number;
+  needsCheckListings: number;
+}
+
 export default function AgentDashboard() {
   const [properties, setProperties] = useState<Property[]>([]);
-  const [pendingSubmissions, setPendingSubmissions] = useState(0);
+  const [stats, setStats] = useState<DashboardStats>({
+    activeListings: 0,
+    pendingSubmissions: 0,
+    freshListings: 0,
+    needsCheckListings: 0
+  });
   const [loading, setLoading] = useState(true);
+  
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      const res = await fetch('/api/agent/stats');
+      const data = await res.json();
+      if (data.success) {
+        setStats(data.data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch dashboard stats', err);
+    }
+  }, []);
+
+  const fetchProperties = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/properties?page=${page}&limit=${limit}`);
+      const data = await res.json();
+      
+      if (data.success && Array.isArray(data.data)) {
+        setProperties(data.data);
+        if (data.totalPages) setTotalPages(data.totalPages);
+        if (data.count) setTotalItems(data.count);
+      }
+    } catch (error) {
+      console.error('Failed to fetch properties', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [propsRes, subsRes] = await Promise.all([
-          fetch('/api/properties'),
-          fetch('/api/submissions')
-        ]);
-        
-        const propsData = await propsRes.json();
-        const subsData = await subsRes.json();
+    fetchStats();
+  }, [fetchStats]);
 
-          if (propsData.success && Array.isArray(propsData.data)) {
-          setProperties(propsData.data);
-        }
-        if (subsData.success && Array.isArray(subsData.data)) {
-          const pending = subsData.data.filter((s: any) => s && s.status === 'PENDING').length;
-          setPendingSubmissions(pending);
-        }
-      } catch (error) {
-        console.error('Failed to fetch dashboard data', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchData();
-    // setLoading(false);
-  }, []);
+  useEffect(() => {
+    fetchProperties();
+  }, [fetchProperties]);
 
   const getFreshnessStatus = (lastVerifiedAt: string) => {
     if (!lastVerifiedAt) return { color: 'bg-gray-100 text-gray-800', label: 'Unknown', dot: '⚪' };
@@ -71,6 +100,7 @@ export default function AgentDashboard() {
       
       if (res.ok) {
         setProperties(prev => prev.filter(p => p.id !== id));
+        fetchStats(); // Refresh stats after deletion
       } else {
         alert('Failed to delete property');
       }
@@ -104,13 +134,13 @@ export default function AgentDashboard() {
         {/* Pending Submissions */}
         <Link href="/agent/submissions" className="block">
           <div className={`p-6 rounded-lg shadow-sm border border-gray-200 transition-colors ${
-            pendingSubmissions > 0 ? 'bg-orange-50 border-orange-200' : 'bg-white'
+            stats.pendingSubmissions > 0 ? 'bg-orange-50 border-orange-200' : 'bg-white'
           }`}>
             <h3 className="text-gray-500 text-sm font-medium uppercase">Pending Reviews</h3>
-            <p className={`text-2xl md:text-3xl font-bold mt-2 ${pendingSubmissions > 0 ? 'text-orange-600' : 'text-gray-900'}`}>
-              {pendingSubmissions}
+            <p className={`text-2xl md:text-3xl font-bold mt-2 ${stats.pendingSubmissions > 0 ? 'text-orange-600' : 'text-gray-900'}`}>
+              {stats.pendingSubmissions}
             </p>
-            {pendingSubmissions > 0 && (
+            {stats.pendingSubmissions > 0 && (
               <p className="text-xs text-orange-600 mt-1 font-medium">Action Required</p>
             )}
           </div>
@@ -119,38 +149,29 @@ export default function AgentDashboard() {
         {/* Quick Stats */}
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Active Listings</h3>
-          <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{Array.isArray(properties) ? properties.filter(p => p.status === 'AVAILABLE').length : 0}</p>
+          <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{stats.activeListings}</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Fresh Listings</h3>
           <p className="text-2xl md:text-3xl font-bold text-green-600 mt-2">
-            {Array.isArray(properties) ? properties.filter(p => {
-              if (!p.lastVerifiedAt) return false;
-              const date = new Date(p.lastVerifiedAt);
-              if (isNaN(date.getTime())) return false;
-              const days = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
-              return p.status === 'AVAILABLE' && days < 14;
-            }).length : 0}
+            {stats.freshListings}
           </p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
           <h3 className="text-gray-500 text-sm font-medium uppercase">Needs Check</h3>
           <p className="text-2xl md:text-3xl font-bold text-yellow-600 mt-2">
-            {Array.isArray(properties) ? properties.filter(p => {
-              if (!p.lastVerifiedAt) return false;
-              const date = new Date(p.lastVerifiedAt);
-              if (isNaN(date.getTime())) return false;
-              const days = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
-              return p.status === 'AVAILABLE' && days >= 14;
-            }).length : 0}
+            {stats.needsCheckListings}
           </p>
         </div>
       </div>
 
       {/* Inventory List */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b">
+        <div className="p-6 border-b flex justify-between items-center">
           <h2 className="text-xl font-semibold text-gray-800">Inventory Freshness</h2>
+          <div className="text-sm text-gray-500">
+            Total: {totalItems}
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
@@ -211,6 +232,27 @@ export default function AgentDashboard() {
               })}
             </tbody>
           </table>
+        </div>
+        
+        {/* Pagination Controls */}
+        <div className="p-4 border-t flex items-center justify-between">
+            <button 
+              disabled={page <= 1 || loading}
+              onClick={() => setPage(p => p - 1)}
+              className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 flex items-center gap-1"
+            >
+              <ChevronLeft className="w-4 h-4" /> Prev
+            </button>
+            <span className="text-sm text-gray-600">
+              Page {page} of {totalPages}
+            </span>
+            <button 
+              disabled={page >= totalPages || loading}
+              onClick={() => setPage(p => p + 1)}
+              className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 flex items-center gap-1"
+            >
+              Next <ChevronRight className="w-4 h-4" />
+            </button>
         </div>
       </div>
     </div>

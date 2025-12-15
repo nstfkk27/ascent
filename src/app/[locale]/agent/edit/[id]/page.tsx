@@ -97,6 +97,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     pool: false,
     garden: false,
     projectName: '',
+    projectId: null,
     
     // Investment Specific
     openForYears: 0,
