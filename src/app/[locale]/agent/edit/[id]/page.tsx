@@ -160,6 +160,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
             pool: p.pool || false,
             garden: p.garden || false,
             projectName: p.projectName || '',
+            projectId: p.projectId || null,
             
             openForYears: p.openForYears || 0,
             numberOfStaff: p.numberOfStaff || 0,
