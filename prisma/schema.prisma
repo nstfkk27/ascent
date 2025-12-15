@@ -74,6 +74,14 @@ enum ContactMethod {
   PHONE
 }
 
+enum PropertyCondition {
+  NEW
+  EXCELLENT
+  GOOD
+  FAIR
+  NEEDS_RENOVATION
+}
+
 enum DealStage {
   NEW_LEAD
   VIEWING
