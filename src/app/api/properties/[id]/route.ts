@@ -95,6 +95,10 @@ export async function PUT(
         delete updateData.coAgentCommissionRate;
     }
 
+    // Remove UI-only fields that are not in the Prisma schema
+    delete updateData.subtype;
+    delete updateData.selectedAmenities;
+
     if (body.category) {
       updateData = sanitizePropertyData(updateData);
     }
@@ -110,10 +114,10 @@ export async function PUT(
       success: true,
       data: property,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error updating property:', error);
     return NextResponse.json(
-      { success: false, error: 'Failed to update property' },
+      { success: false, error: error.message || 'Failed to update property' },
       { status: 500 }
     );
   }
