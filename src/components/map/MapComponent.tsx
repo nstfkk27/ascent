@@ -1,16 +1,22 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import Map, { NavigationControl, Source, Layer, MapMouseEvent } from 'react-map-gl/mapbox';
+import Map, { NavigationControl, Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Types
 interface Project {
   id: string;
   name: string;
+  type?: string;
   lat: number | string;
   lng: number | string;
   imageUrl?: string | null;
+  units?: Array<{
+    price?: number | null;
+    rentPrice?: number | null;
+    listingType?: string;
+  }>;
   modelAsset: {
     glbUrl: string;
     placement: any;
@@ -58,6 +64,47 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [mapInstance, setMapInstance] = useState<any>(null);
 
+  // Helper to format price for display
+  const formatPrice = (project: Project): string => {
+    if (!project.units || project.units.length === 0) return '';
+    
+    // Get min price from all units
+    let minPrice: number | null = null;
+    let isRent = false;
+    
+    project.units.forEach(unit => {
+      if (unit.price && (minPrice === null || unit.price < minPrice)) {
+        minPrice = unit.price;
+        isRent = false;
+      }
+      if (unit.rentPrice && (minPrice === null || unit.rentPrice < minPrice)) {
+        minPrice = unit.rentPrice;
+        isRent = true;
+      }
+    });
+    
+    if (!minPrice) return '';
+    
+    // Format: 2.5M or 25K
+    if (minPrice >= 1000000) {
+      return `฿${(minPrice / 1000000).toFixed(1)}M${isRent ? '/mo' : ''}`;
+    } else if (minPrice >= 1000) {
+      return `฿${Math.round(minPrice / 1000)}K${isRent ? '/mo' : ''}`;
+    }
+    return `฿${minPrice}${isRent ? '/mo' : ''}`;
+  };
+
+  // Get marker color based on category
+  const getMarkerColor = (project: Project): string => {
+    switch (project.type) {
+      case 'CONDO': return '#496f5d'; // Green
+      case 'HOUSE': return '#3b82f6'; // Blue
+      case 'LAND': return '#f59e0b'; // Orange
+      case 'INVESTMENT': return '#8b5cf6'; // Purple
+      default: return '#496f5d';
+    }
+  };
+
   // Load 3D models into the map style
   useEffect(() => {
     if (!mapInstance || !projects) return;
@@ -84,57 +131,6 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
     */
   }, [mapInstance, projects]);
 
-  // Create GeoJSON source from projects
-  const projectsGeoJSON = {
-    type: 'FeatureCollection',
-    features: projects.map(p => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: [Number(p.lng), Number(p.lat)]
-      },
-      properties: {
-        id: p.id,
-        name: p.name,
-        hasModel: !!p.modelAsset,
-        modelId: p.modelAsset ? p.id : null
-      }
-    }))
-  };
-
-  const onMouseEnter = useCallback((e: MapMouseEvent) => {
-    if (e.features && e.features[0]) {
-      setHoveredId(e.features[0].properties?.id);
-      // Change cursor
-      const canvas = e.target.getCanvas();
-      canvas.style.cursor = 'pointer';
-    }
-  }, []);
-
-  const onMouseLeave = useCallback((e: MapMouseEvent) => {
-    setHoveredId(null);
-    const canvas = e.target.getCanvas();
-    canvas.style.cursor = '';
-  }, []);
-
-  const onClick = useCallback((e: MapMouseEvent) => {
-    if (e.features && e.features[0]) {
-      const projectId = e.features[0].properties?.id;
-      const project = projects.find(p => p.id === projectId);
-      if (project) {
-        onProjectSelect(project);
-        // Fly to location
-        setViewState(prev => ({
-          ...prev,
-          latitude: Number(project.lat),
-          longitude: Number(project.lng),
-          zoom: 16,
-          transitionDuration: 1000
-        }));
-      }
-    }
-  }, [projects, onProjectSelect]);
-
   const onMapLoad = useCallback((e: any) => {
     const map = e.target;
     setMapInstance(map);
@@ -159,19 +155,6 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
         </div>
       )}
 
-      {/* Custom Controls */}
-      <div className="absolute top-36 right-4 z-10">
-        <button
-          onClick={togglePitch}
-          className="bg-white/90 backdrop-blur px-4 py-2 rounded-lg shadow-lg hover:bg-white text-gray-700 font-medium text-sm border border-gray-200 transition-all flex items-center gap-2"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-          </svg>
-          {viewState.pitch === 0 ? '3D View (45°)' : '2D View (90°)'}
-        </button>
-      </div>
-      
       <Map
         {...viewState}
         onMove={evt => setViewState(evt.viewState)}
@@ -179,116 +162,89 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
         style={{ width: '100%', height: '100%' }}
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}
-        interactiveLayerIds={['project-points', 'project-circles']}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
-        onClick={onClick}
-        // terrain={{ source: 'mapbox-dem', exaggeration: 1.5 }} // Disabled for performance
       >
-        <NavigationControl position="top-right" />
+        {/* Navigation controls positioned below Grid view button */}
+        <NavigationControl position="top-right" style={{ marginTop: '50px' }} />
 
-        {/* 3D Buildings Layer - Disabled to improve performance and highlight only our listings */}
-        {/* <Layer
-          id="3d-buildings"
-          source="composite"
-          source-layer="building"
-          filter={['==', 'extrude', 'true']}
-          type="fill-extrusion"
-          minzoom={14}
-          paint={{
-            'fill-extrusion-color': '#aaa',
-            'fill-extrusion-height': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              15,
-              0,
-              15.05,
-              ['get', 'height']
-            ],
-            'fill-extrusion-base': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              15,
-              0,
-              15.05,
-              ['get', 'min_height']
-            ],
-            'fill-extrusion-opacity': 0.6
-          }}
-        /> */}
-
-        {/* Project Markers */}
-        <Source id="projects" type="geojson" data={projectsGeoJSON as any}>
-          {/* 3D Models Layer - PAUSED */}
-          {/* <Layer
-            id="project-models"
-            type="model"
-            layout={{
-              'model-id': ['get', 'modelId'],
-              'model-scale': [1, 1, 1],
-              'model-rotation': [0, 0, 0],
-              'visibility': 'visible'
-            } as any}
-            paint={{
-              'model-opacity': 1
-            } as any}
-            filter={['has', 'modelId']}
-          /> */}
-
-          {/* Outer Circle (Pulse effect could be added here) */}
-          <Layer
-            id="project-circles"
-            type="circle"
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                10, 4,
-                15, 12
-              ],
-              'circle-color': '#496f5d',
-              'circle-opacity': 0.4,
-              'circle-stroke-width': 1,
-              'circle-stroke-color': '#ffffff'
-            }}
-          />
+        {/* Price Tag Markers */}
+        {projects.map((project) => {
+          const price = formatPrice(project);
+          const color = getMarkerColor(project);
+          const isHovered = hoveredId === project.id;
           
-          {/* Inner Point */}
-          <Layer
-            id="project-points"
-            type="circle"
-            paint={{
-              'circle-radius': [
-                'interpolate', ['linear'], ['zoom'],
-                10, 2,
-                15, 6
-              ],
-              'circle-color': '#496f5d',
-              'circle-stroke-width': 2,
-              'circle-stroke-color': '#ffffff'
-            }}
-          />
-
-          {/* Labels */}
-          <Layer
-            id="project-labels"
-            type="symbol"
-            layout={{
-              'text-field': ['get', 'name'],
-              'text-variable-anchor': ['top', 'bottom', 'left', 'right'],
-              'text-radial-offset': 0.5,
-              'text-justify': 'auto',
-              'text-size': 12
-            }}
-            paint={{
-              'text-color': '#333333',
-              'text-halo-color': '#ffffff',
-              'text-halo-width': 2
-            }}
-          />
-        </Source>
+          return (
+            <Marker
+              key={project.id}
+              longitude={Number(project.lng)}
+              latitude={Number(project.lat)}
+              anchor="bottom"
+              onClick={(e) => {
+                e.originalEvent.stopPropagation();
+                onProjectSelect(project);
+                setViewState(prev => ({
+                  ...prev,
+                  latitude: Number(project.lat),
+                  longitude: Number(project.lng),
+                  zoom: 16,
+                  transitionDuration: 1000
+                }));
+              }}
+            >
+              <div
+                className="relative cursor-pointer group"
+                onMouseEnter={() => setHoveredId(project.id)}
+                onMouseLeave={() => setHoveredId(null)}
+              >
+                {/* Price Tag */}
+                <div
+                  className={`
+                    px-2.5 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap
+                    shadow-lg border-2 border-white
+                    transition-all duration-200 ease-out
+                    ${isHovered ? 'scale-110 -translate-y-1 shadow-xl' : ''}
+                  `}
+                  style={{ 
+                    backgroundColor: isHovered ? '#1f2937' : color,
+                    color: 'white'
+                  }}
+                >
+                  {price || project.name.slice(0, 12)}
+                </div>
+                
+                {/* Arrow/Pointer */}
+                <div 
+                  className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-0 h-0"
+                  style={{
+                    borderLeft: '6px solid transparent',
+                    borderRight: '6px solid transparent',
+                    borderTop: `8px solid ${isHovered ? '#1f2937' : color}`,
+                  }}
+                />
+                
+                {/* Hover tooltip with name */}
+                {isHovered && price && (
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap shadow-lg">
+                    {project.name}
+                  </div>
+                )}
+              </div>
+            </Marker>
+          );
+        })}
       </Map>
+
+      {/* 3D/2D Toggle - Below Mapbox Navigation Controls */}
+      <div className="absolute top-40 right-2.5 z-10">
+        <button
+          onClick={togglePitch}
+          className="bg-white px-2 py-1.5 rounded shadow-md hover:bg-gray-50 text-gray-700 font-medium text-xs border border-gray-300 transition-all flex items-center gap-1.5"
+        >
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          </svg>
+          {viewState.pitch === 0 ? '3D' : '2D'}
+        </button>
+      </div>
     </div>
   );
 }

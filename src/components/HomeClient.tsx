@@ -30,6 +30,8 @@ export default function HomeClient({ projects }: HomeClientProps) {
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
     bedrooms: searchParams.get('bedrooms') || '',
+    area: searchParams.get('area') || '',
+    landZoneColor: searchParams.get('landZoneColor') || '',
     petFriendly: searchParams.get('petFriendly') === 'true',
     furnished: searchParams.get('furnished') === 'true',
     pool: searchParams.get('pool') === 'true',
@@ -144,11 +146,11 @@ export default function HomeClient({ projects }: HomeClientProps) {
         />
       </div>
 
-      {/* Grid View Button */}
-      <div className="absolute top-4 right-16 z-10">
+      {/* Grid View Button - Top Right above map controls */}
+      <div className="absolute top-4 right-4 z-20">
         <Link
           href="/properties"
-          className="flex items-center gap-2 bg-white/90 backdrop-blur px-4 py-2 rounded-lg shadow-md hover:bg-white text-gray-700 font-medium text-sm border border-gray-200 transition-all"
+          className="flex items-center gap-2 bg-white px-3 py-2 rounded shadow-md hover:bg-gray-50 text-gray-700 font-medium text-sm border border-gray-300 transition-all"
         >
           <LayoutGrid className="w-4 h-4" />
           Grid view

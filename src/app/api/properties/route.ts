@@ -27,6 +27,21 @@ export async function GET(request: NextRequest) {
     if (investmentType) {
       where.investmentType = investmentType;
     }
+
+    // Generic subtype parameter - maps to houseType or investmentType based on category
+    const subtype = searchParams.get('subtype');
+    if (subtype) {
+      // Investment subtypes
+      const investmentSubtypes = ['HOTEL', 'CLUB_BAR', 'MASSAGE', 'RESTAURANT', 'WELLNESS', 'GUESTHOUSE', 'RESORT', 'HOSTEL', 'SERVICED_APARTMENT'];
+      // House subtypes
+      const houseSubtypes = ['POOL_VILLA', 'TOWNHOUSE', 'SINGLE_HOUSE', 'TWIN_HOUSE', 'COMMERCIAL_BUILDING'];
+      
+      if (investmentSubtypes.includes(subtype)) {
+        where.investmentType = subtype;
+      } else if (houseSubtypes.includes(subtype)) {
+        where.houseType = subtype;
+      }
+    }
     
     const listingType = searchParams.get('listingType');
     if (listingType) {
@@ -69,6 +84,22 @@ export async function GET(request: NextRequest) {
     
     const status = searchParams.get('status') || 'AVAILABLE';
     where.status = status;
+
+    // New Project filter (built within last 2 years)
+    const newProject = searchParams.get('newProject');
+    if (newProject === 'true') {
+      const currentYear = new Date().getFullYear();
+      where.AND = where.AND || [];
+      where.AND.push({
+        project: {
+          is: {
+            completionYear: {
+              gte: currentYear - 2,
+            },
+          },
+        },
+      });
+    }
 
     const tag = searchParams.get('tag');
     if (tag) {

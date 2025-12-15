@@ -24,6 +24,7 @@ export default function PropertiesPage() {
     city: '',
     area: '',
     tag: '',
+    newProject: false,
     petFriendly: false,
     furnished: false,
     pool: false,
@@ -46,8 +47,10 @@ export default function PropertiesPage() {
     const urlArea = searchParams.get('area');
     const urlQuery = searchParams.get('query');
     const urlTag = searchParams.get('tag');
+    const urlNewProject = searchParams.get('newProject');
 
     if (urlCategory) nextFilters.category = urlCategory;
+    if (urlNewProject === 'true') nextFilters.newProject = true;
     if (urlSubtype) {
       // Navbar uses `subtype=HOUSE` for houses; the API expects `category=HOUSE`.
       if (urlSubtype === 'HOUSE') nextFilters.category = 'HOUSE';

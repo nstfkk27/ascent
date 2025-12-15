@@ -69,17 +69,14 @@ export default function Navbar() {
                 </svg>
               </button>
               <div className={`absolute top-full left-0 mt-1 w-56 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] bg-white rounded-xl shadow-xl border border-gray-100 py-2 transition-all duration-200 transform origin-top-left ${openDropdown === 'house' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
-                <Link href="/properties?subtype=HOUSE" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=HOUSE" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Rent and Sale
                 </Link>
-                <Link href="/properties?subtype=POOL_VILLA" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=HOUSE&subtype=POOL_VILLA" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Pool Villa
                 </Link>
-                <Link href="/properties?subtype=HOUSE&tag=new" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=HOUSE&newProject=true" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   New Project
-                </Link>
-                <Link href="/properties?subtype=HOUSE&tag=renovation" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
-                  For Renovation
                 </Link>
               </div>
             </div>
@@ -97,14 +94,11 @@ export default function Navbar() {
                 </svg>
               </button>
               <div className={`absolute top-full left-0 mt-1 w-56 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] bg-white rounded-xl shadow-xl border border-gray-100 py-2 transition-all duration-200 transform origin-top-left ${openDropdown === 'condo' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
-                <Link href="/properties?subtype=CONDO" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=CONDO" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Rent and Sale
                 </Link>
-                <Link href="/properties?subtype=CONDO&tag=new" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=CONDO&newProject=true" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   New Project
-                </Link>
-                <Link href="/properties?subtype=CONDO&city=Pattaya" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
-                  Condo In Pattaya
                 </Link>
               </div>
             </div>
@@ -123,13 +117,7 @@ export default function Navbar() {
               </button>
               <div className={`absolute top-full left-0 mt-1 w-56 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] bg-white rounded-xl shadow-xl border border-gray-100 py-2 transition-all duration-200 transform origin-top-left ${openDropdown === 'land' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
                 <Link href="/properties?category=LAND" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
-                  All Land
-                </Link>
-                <Link href="/properties?category=LAND&listingType=SALE" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
-                  Land for Sale
-                </Link>
-                <Link href="/properties?category=LAND&listingType=RENT" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
-                  Land for Rent
+                  Rent and Sale
                 </Link>
               </div>
             </div>
@@ -147,19 +135,19 @@ export default function Navbar() {
                 </svg>
               </button>
               <div className={`absolute top-full left-0 mt-1 w-56 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] bg-white rounded-xl shadow-xl border border-gray-100 py-2 transition-all duration-200 transform origin-top-left ${openDropdown === 'investment' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
-                <Link href="/properties?subtype=HOTEL" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=INVESTMENT&subtype=HOTEL" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Hotel
                 </Link>
-                <Link href="/properties?category=BUSINESS&businessType=club" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=INVESTMENT&subtype=CLUB_BAR" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Club and Bar
                 </Link>
-                <Link href="/properties?category=BUSINESS&businessType=massage" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=INVESTMENT&subtype=MASSAGE" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Massage
                 </Link>
-                <Link href="/properties?category=BUSINESS&businessType=restaurant" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=INVESTMENT&subtype=RESTAURANT" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Restaurant
                 </Link>
-                <Link href="/properties?category=BUSINESS&businessType=wellness" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
+                <Link href="/properties?category=INVESTMENT&subtype=WELLNESS" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Wellness
                 </Link>
               </div>
@@ -246,10 +234,9 @@ export default function Navbar() {
               <div className="space-y-2">
                 <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">House</div>
                 <div className="pl-4 space-y-1">
-                  <Link href="/properties?subtype=HOUSE" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Rent and Sale</Link>
-                  <Link href="/properties?subtype=POOL_VILLA" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Pool Villa</Link>
-                  <Link href="/properties?subtype=HOUSE&tag=new" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">New Project</Link>
-                  <Link href="/properties?subtype=HOUSE&tag=renovation" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">For Renovation</Link>
+                  <Link href="/properties?category=HOUSE" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Rent and Sale</Link>
+                  <Link href="/properties?category=HOUSE&subtype=POOL_VILLA" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Pool Villa</Link>
+                  <Link href="/properties?category=HOUSE&newProject=true" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">New Project</Link>
                 </div>
               </div>
 
@@ -257,9 +244,8 @@ export default function Navbar() {
               <div className="space-y-2">
                 <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">Condo</div>
                 <div className="pl-4 space-y-1">
-                  <Link href="/properties?subtype=CONDO" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Rent and Sale</Link>
-                  <Link href="/properties?subtype=CONDO&tag=new" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">New Project</Link>
-                  <Link href="/properties?subtype=CONDO&city=Pattaya" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Condo In Pattaya</Link>
+                  <Link href="/properties?category=CONDO" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Rent and Sale</Link>
+                  <Link href="/properties?category=CONDO&newProject=true" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">New Project</Link>
                 </div>
               </div>
 
@@ -267,9 +253,7 @@ export default function Navbar() {
               <div className="space-y-2">
                 <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">Land</div>
                 <div className="pl-4 space-y-1">
-                  <Link href="/properties?category=LAND" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">All Land</Link>
-                  <Link href="/properties?category=LAND&listingType=SALE" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Land for Sale</Link>
-                  <Link href="/properties?category=LAND&listingType=RENT" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Land for Rent</Link>
+                  <Link href="/properties?category=LAND" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Rent and Sale</Link>
                 </div>
               </div>
 
@@ -277,11 +261,11 @@ export default function Navbar() {
               <div className="space-y-2">
                 <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">Investment</div>
                 <div className="pl-4 space-y-1">
-                  <Link href="/properties?subtype=HOTEL" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Hotel</Link>
-                  <Link href="/properties?category=BUSINESS&businessType=club" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Club and Bar</Link>
-                  <Link href="/properties?category=BUSINESS&businessType=massage" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Massage</Link>
-                  <Link href="/properties?category=BUSINESS&businessType=restaurant" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Restaurant</Link>
-                  <Link href="/properties?category=BUSINESS&businessType=wellness" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Wellness</Link>
+                  <Link href="/properties?category=INVESTMENT&subtype=HOTEL" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Hotel</Link>
+                  <Link href="/properties?category=INVESTMENT&subtype=CLUB_BAR" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Club and Bar</Link>
+                  <Link href="/properties?category=INVESTMENT&subtype=MASSAGE" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Massage</Link>
+                  <Link href="/properties?category=INVESTMENT&subtype=RESTAURANT" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Restaurant</Link>
+                  <Link href="/properties?category=INVESTMENT&subtype=WELLNESS" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Wellness</Link>
                 </div>
               </div>
             </div>
