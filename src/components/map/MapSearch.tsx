@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { 
   PROPERTY_CATEGORIES, 
   LISTING_TYPES, 
@@ -15,6 +15,10 @@ export interface MapFilters {
   minPrice: string;
   maxPrice: string;
   bedrooms: string;
+  petFriendly: boolean;
+  furnished: boolean;
+  pool: boolean;
+  seaView: boolean;
 }
 
 interface MapSearchProps {
@@ -25,17 +29,42 @@ interface MapSearchProps {
 
 export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: MapSearchProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(true); // Default to collapsed on mobile initially
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
-  const handleChange = (name: keyof MapFilters, value: string) => {
-    // Handle price formatting (remove non-digits)
+  const handleChange = (name: keyof MapFilters, value: string | boolean) => {
     if (name === 'minPrice' || name === 'maxPrice') {
-      const rawValue = value.replace(/[^0-9]/g, '');
+      const rawValue = String(value).replace(/[^0-9]/g, '');
       const formattedValue = rawValue ? Number(rawValue).toLocaleString() : '';
       onFilterChange({ ...filters, [name]: formattedValue });
     } else {
       onFilterChange({ ...filters, [name]: value });
     }
+  };
+
+  const toggleFilter = (name: keyof MapFilters) => {
+    onFilterChange({ ...filters, [name]: !filters[name] });
+  };
+
+  // Quick filter chips
+  const quickFilters = [
+    { id: 'petFriendly' as keyof MapFilters, label: 'Pet Friendly', icon: '🐾' },
+    { id: 'furnished' as keyof MapFilters, label: 'Furnished', icon: '🛋️' },
+    { id: 'pool' as keyof MapFilters, label: 'Pool', icon: '🏊' },
+    { id: 'seaView' as keyof MapFilters, label: 'Sea View', icon: '🌊' },
+  ];
+
+  const getActiveFilterCount = () => {
+    let count = 0;
+    if (filters.category) count++;
+    if (filters.listingType) count++;
+    if (filters.minPrice) count++;
+    if (filters.maxPrice) count++;
+    if (filters.bedrooms) count++;
+    if (filters.petFriendly) count++;
+    if (filters.furnished) count++;
+    if (filters.pool) count++;
+    if (filters.seaView) count++;
+    return count;
   };
 
   const getSubtypeOptions = () => {
@@ -147,13 +176,38 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
           </div>
         </div>
 
+        {/* Quick Filter Chips */}
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {quickFilters.map((filter) => (
+            <button
+              key={filter.id}
+              type="button"
+              onClick={() => toggleFilter(filter.id)}
+              className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all duration-200 flex items-center gap-1 ${
+                filters[filter.id]
+                  ? 'bg-[#496f5d] text-white shadow-md'
+                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+            >
+              <span>{filter.icon}</span>
+              <span>{filter.label}</span>
+            </button>
+          ))}
+          
+          {getActiveFilterCount() > 0 && (
+            <span className="ml-auto text-xs text-[#496f5d] font-medium bg-[#e8f0eb] px-2 py-1 rounded-full">
+              {getActiveFilterCount()} active
+            </span>
+          )}
+        </div>
+
         {/* Advanced Toggle */}
         <div className="mt-3 flex items-center justify-between">
           <button
             onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
             className="text-xs font-medium text-[#496f5d] flex items-center gap-1 hover:text-[#3d5c4d] transition-colors"
           >
-            {isAdvancedOpen ? 'Hide Advanced' : 'Advanced Filters'}
+            {isAdvancedOpen ? 'Hide Advanced' : 'More Filters'}
             <svg 
               className={`w-3 h-3 transform transition-transform ${isAdvancedOpen ? 'rotate-180' : ''}`} 
               fill="none" 
@@ -163,43 +217,50 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          
-          {/* Active Filter Count Badge could go here */}
         </div>
 
         {/* Advanced Filters Section */}
         {isAdvancedOpen && (
-          <div className="mt-3 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <div className="mt-3 pt-3 border-t border-gray-100 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+            {/* Bedrooms */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-2">Bedrooms</label>
+              <div className="flex flex-wrap gap-1.5">
+                {['Any', '1+', '2+', '3+', '4+', '5+'].map((bed) => (
+                  <button
+                    key={bed}
+                    type="button"
+                    onClick={() => handleChange('bedrooms', bed === 'Any' ? '' : bed.replace('+', ''))}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                      (bed === 'Any' && !filters.bedrooms) || filters.bedrooms === bed.replace('+', '')
+                        ? 'bg-[#496f5d] text-white shadow-md'
+                        : 'bg-white border border-gray-200 text-gray-600 hover:border-[#496f5d]'
+                    }`}
+                  >
+                    {bed}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Subtype (Dynamic based on Category) */}
             {filters.category && getSubtypeOptions().length > 0 && (
-              <select
-                value={filters.subtype}
-                onChange={(e) => handleChange('subtype', e.target.value)}
-                className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-              >
-                <option value="">All {PROPERTY_CATEGORIES[filters.category as keyof typeof PROPERTY_CATEGORIES]} Types</option>
-                {getSubtypeOptions().map((subtype) => (
-                  <option key={subtype} value={subtype}>
-                    {subtype.replace(/_/g, ' ')}
-                  </option>
-                ))}
-              </select>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-2">Property Type</label>
+                <select
+                  value={filters.subtype}
+                  onChange={(e) => handleChange('subtype', e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                >
+                  <option value="">All {PROPERTY_CATEGORIES[filters.category as keyof typeof PROPERTY_CATEGORIES]} Types</option>
+                  {getSubtypeOptions().map((subtype) => (
+                    <option key={subtype} value={subtype}>
+                      {subtype.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
+              </div>
             )}
-
-            {/* Bedrooms */}
-            <select
-              value={filters.bedrooms}
-              onChange={(e) => handleChange('bedrooms', e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-            >
-              <option value="">Any Bedrooms</option>
-              <option value="0">Studio</option>
-              <option value="1">1+</option>
-              <option value="2">2+</option>
-              <option value="3">3+</option>
-              <option value="4">4+</option>
-              <option value="5">5+</option>
-            </select>
           </div>
         )}
       </div>

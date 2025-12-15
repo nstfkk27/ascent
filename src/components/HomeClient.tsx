@@ -29,7 +29,11 @@ export default function HomeClient({ projects }: HomeClientProps) {
     listingType: searchParams.get('listingType') || '',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
-    bedrooms: searchParams.get('bedrooms') || ''
+    bedrooms: searchParams.get('bedrooms') || '',
+    petFriendly: searchParams.get('petFriendly') === 'true',
+    furnished: searchParams.get('furnished') === 'true',
+    pool: searchParams.get('pool') === 'true',
+    seaView: searchParams.get('seaView') === 'true',
   });
 
   // Debounce URL updates to avoid excessive history entries
@@ -37,7 +41,11 @@ export default function HomeClient({ projects }: HomeClientProps) {
     const timer = setTimeout(() => {
       const params = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
-        if (value) params.set(key, value);
+        if (value === true) {
+          params.set(key, 'true');
+        } else if (value && value !== false) {
+          params.set(key, String(value));
+        }
       });
       router.replace(`/search?${params.toString()}`, { scroll: false });
     }, 500);
