@@ -20,8 +20,6 @@ export default function Navbar() {
   const [agentProfile, setAgentProfile] = useState<{ name?: string; companyName?: string } | null>(null);
   const supabase = createClient();
   const profileRef = useRef<HTMLDivElement>(null);
-  const isAgentArea = pathname?.includes('/agent');
-
   useEffect(() => {
     if (!supabase) return;
 
@@ -71,11 +69,6 @@ export default function Navbar() {
     router.push('/');
     router.refresh();
   };
-
-  // Hide navbar on agent routes (agent area has its own layout)
-  if (isAgentArea) {
-    return null;
-  }
 
   return (
     <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50 transition-all duration-300">
