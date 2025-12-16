@@ -24,16 +24,31 @@ export async function GET() {
     });
 
     if (!agent) {
-       // Fallback for new users who haven't been assigned a profile yet
-       return NextResponse.json({ 
-         authenticated: true, 
-         role: 'AGENT', 
-         name: user.user_metadata?.full_name || user.email.split('@')[0],
-         email: user.email,
+       // Auto-create profile for new users with default AGENT role
+       const newAgent = await prisma.agentProfile.create({
+         data: {
+           email: user.email,
+           name: user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0],
+           role: 'AGENT', // Default role for new signups
+           imageUrl: user.user_metadata?.avatar_url || null,
+           companyName: null,
+           phone: null,
+           whatsapp: null,
+           lineId: null,
+           languages: [],
+         }
+       });
+
+       return NextResponse.json({
+         authenticated: true,
+         id: newAgent.id,
+         role: newAgent.role,
+         name: newAgent.name,
+         email: newAgent.email,
+         imageUrl: newAgent.imageUrl,
          debug: {
-           message: 'Profile not found in DB',
-           searchedEmail: user.email,
-           dbConnection: 'Active'
+           message: 'Profile auto-created on first login',
+           createdAt: new Date().toISOString()
          }
        });
     }
