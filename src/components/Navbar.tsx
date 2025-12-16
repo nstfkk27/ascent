@@ -4,7 +4,7 @@ import { Link } from '@/navigation';
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
-import { Search, Menu, X, LayoutDashboard, Users, Home, LogOut, Calculator, Building, PlusCircle } from 'lucide-react';
+import { Search, Menu, X, LayoutDashboard, Users, Home, LogOut, Calculator, Building, PlusCircle, Rocket, Upload, Inbox, FileText, MessageSquare, List, Settings } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -17,7 +17,7 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const [agentProfile, setAgentProfile] = useState<{ name?: string; companyName?: string } | null>(null);
+  const [agentProfile, setAgentProfile] = useState<{ name?: string; companyName?: string; role?: string } | null>(null);
   const supabase = createClient();
   const profileRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -33,7 +33,7 @@ export default function Navbar() {
           const res = await fetch('/api/agent/me');
           if (res.ok) {
             const data = await res.json();
-            setAgentProfile({ name: data.name, companyName: data.companyName });
+            setAgentProfile({ name: data.name, companyName: data.companyName, role: data.role });
           }
         } catch (e) {
           console.error('Failed to fetch agent profile', e);
@@ -329,7 +329,49 @@ export default function Navbar() {
                         <Calculator className="w-4 h-4" />
                         Smart Tools
                       </Link>
+                      <Link
+                        href="/agent/listings"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d] transition-colors"
+                      >
+                        <List className="w-4 h-4" />
+                        My Listings
+                      </Link>
                     </div>
+                    {/* Admin Tools - only for SUPER_ADMIN */}
+                    {agentProfile?.role === 'SUPER_ADMIN' && (
+                      <div className="border-t border-gray-100 py-1">
+                        <div className="px-4 py-1.5">
+                          <span className="text-xs font-semibold text-gray-400 uppercase">Admin Tools</span>
+                        </div>
+                        <Link href="/agent/submissions" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d]">
+                          <FileText className="w-4 h-4" /> Submissions
+                        </Link>
+                        <Link href="/agent/marketing" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d]">
+                          <Rocket className="w-4 h-4" /> Marketing Center
+                        </Link>
+                        <Link href="/agent/import" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d]">
+                          <Upload className="w-4 h-4" /> Bulk Import
+                        </Link>
+                        <Link href="/agent/leads" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d]">
+                          <Inbox className="w-4 h-4" /> Leads Inbox
+                        </Link>
+                        <Link href="/agent/team" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d]">
+                          <Users className="w-4 h-4" /> Team Management
+                        </Link>
+                        <Link href="/agent/project-manager" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d]">
+                          <Building className="w-4 h-4" /> Project Manager
+                        </Link>
+                      </div>
+                    )}
+                    {/* Submissions for PLATFORM_AGENT */}
+                    {agentProfile?.role === 'PLATFORM_AGENT' && (
+                      <div className="border-t border-gray-100 py-1">
+                        <Link href="/agent/submissions" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d]">
+                          <FileText className="w-4 h-4" /> Submissions
+                        </Link>
+                      </div>
+                    )}
                     <div className="border-t border-gray-100 pt-1">
                       <button
                         onClick={handleLogout}
@@ -381,7 +423,26 @@ export default function Navbar() {
             <Link href="/agent/tools" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
               <Calculator className="w-4 h-4" /> Tools
             </Link>
+            <Link href="/agent/listings" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+              <List className="w-4 h-4" /> My Listings
+            </Link>
           </div>
+          {/* Admin Tools - mobile */}
+          {agentProfile?.role === 'SUPER_ADMIN' && (
+            <div className="border-t border-gray-100 py-1">
+              <div className="px-4 py-1.5"><span className="text-xs font-semibold text-gray-400 uppercase">Admin</span></div>
+              <Link href="/agent/submissions" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><FileText className="w-4 h-4" /> Submissions</Link>
+              <Link href="/agent/marketing" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><Rocket className="w-4 h-4" /> Marketing</Link>
+              <Link href="/agent/import" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><Upload className="w-4 h-4" /> Import</Link>
+              <Link href="/agent/leads" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><Inbox className="w-4 h-4" /> Leads</Link>
+              <Link href="/agent/team" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"><Users className="w-4 h-4" /> Team</Link>
+            </div>
+          )}
+          {agentProfile?.role === 'PLATFORM_AGENT' && (
+            <div className="border-t border-gray-100 py-1">
+              <Link href="/agent/submissions" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><FileText className="w-4 h-4" /> Submissions</Link>
+            </div>
+          )}
           <div className="border-t border-gray-100 pt-1">
             <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full">
               <LogOut className="w-4 h-4" /> Sign Out
