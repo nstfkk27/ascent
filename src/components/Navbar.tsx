@@ -275,7 +275,7 @@ export default function Navbar() {
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center gap-2 pl-1 pr-3 py-1 border border-gray-200 rounded-full hover:border-[#496f5d] hover:shadow-sm transition-all group bg-white"
                 >
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#496f5d] to-[#3d5c4d] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                  <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-[#496f5d] to-[#3d5c4d] overflow-hidden flex-shrink-0 flex items-center justify-center">
                     {user.user_metadata?.avatar_url ? (
                       <Image 
                         src={user.user_metadata.avatar_url} 
