@@ -19,8 +19,17 @@ export async function POST(req: NextRequest) {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
+    if (!user?.email) {
       return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Only SUPER_ADMIN can create new agents
+    const currentAgent = await prisma.agentProfile.findFirst({
+      where: { email: user.email }
+    });
+
+    if (!currentAgent || currentAgent.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ success: false, error: 'Only admins can create agents' }, { status: 403 });
     }
 
     const body = await req.json();

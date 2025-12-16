@@ -76,9 +76,26 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST /api/deals - Create a new deal
+// POST /api/deals - Create a new deal (PROTECTED)
 export async function POST(request: NextRequest) {
   try {
+    // Authentication check
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user?.email) {
+      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    }
+
+    // Verify user is an agent
+    const agent = await prisma.agentProfile.findFirst({
+      where: { email: user.email }
+    });
+
+    if (!agent) {
+      return NextResponse.json({ success: false, error: 'Agent profile required' }, { status: 403 });
+    }
+
     const body = await request.json();
     
     const deal = await prisma.deal.create({

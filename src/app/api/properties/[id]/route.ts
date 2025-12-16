@@ -173,12 +173,59 @@ export async function PUT(
   }
 }
 
-// DELETE /api/properties/[id] - Delete property
+// DELETE /api/properties/[id] - Delete property (PROTECTED)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    // Authentication check
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user?.email) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized - Please login' },
+        { status: 401 }
+      );
+    }
+
+    // Get agent profile and check role
+    const agent = await prisma.agentProfile.findFirst({
+      where: { email: user.email }
+    });
+
+    if (!agent) {
+      return NextResponse.json(
+        { success: false, error: 'Agent profile not found' },
+        { status: 403 }
+      );
+    }
+
+    // Get the property to check ownership
+    const property = await prisma.property.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!property) {
+      return NextResponse.json(
+        { success: false, error: 'Property not found' },
+        { status: 404 }
+      );
+    }
+
+    // Only SUPER_ADMIN can delete any property
+    // Other agents can only delete their own listings
+    const isSuperAdmin = agent.role === 'SUPER_ADMIN';
+    const isOwner = property.agentId === agent.id;
+
+    if (!isSuperAdmin && !isOwner) {
+      return NextResponse.json(
+        { success: false, error: 'You can only delete your own listings' },
+        { status: 403 }
+      );
+    }
+
     await prisma.property.delete({
       where: {
         id: params.id,
