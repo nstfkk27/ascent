@@ -149,7 +149,7 @@ export default function Navbar() {
             </Link>
             <Link 
               href="/search" 
-              className="flex items-center gap-1.5 text-gray-600 hover:text-[#496f5d] font-medium transition-colors"
+              className="flex items-center gap-1.5 text-gray-600 hover:text-[#496f5d] font-medium transition-colors py-2"
             >
               <Search className="w-4 h-4" />
               <span>Find</span>

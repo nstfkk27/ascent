@@ -252,21 +252,8 @@ export default async function MarketIntelligencePage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const profile = await prisma.agentProfile.findFirst({
-    where: { email: user.email! }
-  });
-
-  // For now SUPER_ADMIN only, future: subscription check
-  if (profile?.role !== 'SUPER_ADMIN') {
-    return (
-      <div className="p-8 text-center text-red-600">
-        <AlertCircle className="w-12 h-12 mx-auto mb-4" />
-        <h2 className="text-2xl font-bold">Access Denied</h2>
-        <p>This premium tool is reserved for Super Admins only.</p>
-        <p className="text-sm mt-2 text-gray-500">Future: Unlock with Pro subscription</p>
-      </div>
-    );
-  }
+  // Market Intelligence is now available to all logged-in users
+  // Future: Can add subscription tiers here
 
   // Fetch all intelligence data
   const [priceHunterData, daysOnMarketData, rentalYieldData] = await Promise.all([

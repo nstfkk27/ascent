@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { 
   Plus, Building, Clock, CheckCircle, AlertTriangle, 
   User, Phone, Mail, Save, X, Briefcase, List, Calculator,
-  Home, Rocket, MessageSquare, ChevronRight
+  Home, Rocket, MessageSquare, ChevronRight, Upload, Camera
 } from 'lucide-react';
 
 interface DashboardStats {
@@ -39,6 +39,8 @@ export default function AgentDashboard() {
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<AgentProfile>>({});
   const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -53,6 +55,56 @@ export default function AgentDashboard() {
     }
   }, []);
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size must be less than 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+
+      // Upload to server
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const res = await fetch('/api/upload/profile-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setEditedProfile({ ...editedProfile, imageUrl: data.url });
+      } else {
+        alert('Failed to upload image');
+        setImagePreview(null);
+      }
+    } catch (err) {
+      console.error('Failed to upload image', err);
+      alert('Failed to upload image');
+      setImagePreview(null);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const saveProfile = async () => {
     if (!profile?.id) return;
     setSavingProfile(true);
@@ -66,6 +118,7 @@ export default function AgentDashboard() {
         const data = await res.json();
         setProfile(data.data || editedProfile as AgentProfile);
         setIsEditingProfile(false);
+        setImagePreview(null);
       } else {
         alert('Failed to save profile');
       }
@@ -107,13 +160,32 @@ export default function AgentDashboard() {
           <div className="flex flex-col md:flex-row gap-6">
             {/* Avatar */}
             <div className="flex-shrink-0">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#496f5d] to-[#3d5c4d] flex items-center justify-center text-white text-2xl font-bold shadow-lg">
-                {profile?.imageUrl ? (
-                  <img src={profile.imageUrl} alt="Profile" className="w-full h-full object-cover rounded-2xl" />
+              <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#496f5d] to-[#3d5c4d] flex items-center justify-center text-white text-2xl font-bold shadow-lg overflow-hidden">
+                {imagePreview || editedProfile.imageUrl || profile?.imageUrl ? (
+                  <img src={imagePreview || editedProfile.imageUrl || profile?.imageUrl} alt="Profile" className="w-full h-full object-cover" />
                 ) : (
                   profile?.name?.[0]?.toUpperCase() || 'A'
                 )}
+                {isEditingProfile && (
+                  <label className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer opacity-0 hover:opacity-100 transition-opacity">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                      disabled={uploadingImage}
+                    />
+                    {uploadingImage ? (
+                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                    ) : (
+                      <Camera className="w-6 h-6 text-white" />
+                    )}
+                  </label>
+                )}
               </div>
+              {isEditingProfile && (
+                <p className="text-xs text-gray-500 mt-2 text-center">Click to upload</p>
+              )}
             </div>
 
             {/* Profile Info */}
@@ -174,6 +246,7 @@ export default function AgentDashboard() {
                       onClick={() => {
                         setIsEditingProfile(false);
                         setEditedProfile(profile || {});
+                        setImagePreview(null);
                       }}
                       className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
                     >
