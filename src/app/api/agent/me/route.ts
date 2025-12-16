@@ -14,7 +14,7 @@ export async function GET() {
     }
 
     // Find agent profile by email (case-insensitive)
-    const agent = await prisma.agentProfile.findFirst({
+    let agent = await prisma.agentProfile.findFirst({
       where: { 
         email: {
           equals: user.email,
@@ -25,32 +25,59 @@ export async function GET() {
 
     if (!agent) {
        // Auto-create profile for new users with default AGENT role
-       const newAgent = await prisma.agentProfile.create({
-         data: {
-           email: user.email,
-           name: user.user_metadata?.full_name || user.user_metadata?.name || user.email.split('@')[0],
-           role: 'AGENT', // Default role for new signups
-           imageUrl: user.user_metadata?.avatar_url || null,
-           companyName: null,
-           phone: null,
-           whatsapp: null,
-           lineId: null,
-           languages: [],
-         }
-       });
+       try {
+         // Extract name from various possible sources
+         const userName = 
+           user.user_metadata?.full_name || 
+           user.user_metadata?.name || 
+           user.user_metadata?.user_name ||
+           user.email?.split('@')[0] || 
+           'Agent';
 
-       return NextResponse.json({
-         authenticated: true,
-         id: newAgent.id,
-         role: newAgent.role,
-         name: newAgent.name,
-         email: newAgent.email,
-         imageUrl: newAgent.imageUrl,
-         debug: {
-           message: 'Profile auto-created on first login',
-           createdAt: new Date().toISOString()
-         }
-       });
+         // Create new profile
+         agent = await prisma.agentProfile.create({
+           data: {
+             email: user.email,
+             name: userName,
+             role: 'AGENT', // Default role for new signups
+             imageUrl: user.user_metadata?.avatar_url || user.user_metadata?.picture || null,
+             phone: null,
+             whatsapp: null,
+             lineId: null,
+             languages: [],
+           }
+         });
+
+         return NextResponse.json({
+           authenticated: true,
+           id: agent.id,
+           role: agent.role,
+           name: agent.name,
+           email: agent.email,
+           imageUrl: agent.imageUrl,
+           debug: {
+             message: 'Profile auto-created on first login',
+             createdAt: new Date().toISOString()
+           }
+         });
+       } catch (createError) {
+         console.error('Error creating agent profile:', createError);
+         console.error('User metadata:', JSON.stringify(user.user_metadata, null, 2));
+         console.error('User email:', user.email);
+         
+         // Return a temporary response so user can still access the system
+         return NextResponse.json({
+           authenticated: true,
+           role: 'AGENT',
+           name: user.user_metadata?.full_name || user.email?.split('@')[0] || 'Agent',
+           email: user.email,
+           error: 'Failed to create profile in database',
+           debug: {
+             message: 'Profile creation failed',
+             error: createError instanceof Error ? createError.message : 'Unknown error'
+           }
+         }, { status: 500 });
+       }
     }
 
     return NextResponse.json({
