@@ -17,15 +17,24 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = parseInt(searchParams.get('limit') || '50');
     const skip = (page - 1) * limit;
+    const stage = searchParams.get('stage');
+    const dealType = searchParams.get('dealType');
+
+    // Build where clause
+    const where: any = {};
+    if (stage) where.stage = stage;
+    if (dealType) where.dealType = dealType;
 
     const [total, deals] = await prisma.$transaction([
-      prisma.deal.count(),
+      prisma.deal.count({ where }),
       prisma.deal.findMany({
+        where,
         include: {
           property: {
             select: {
               title: true,
-              price: true
+              price: true,
+              address: true
             }
           }
         },
@@ -40,6 +49,8 @@ export async function GET(request: NextRequest) {
     const serializedDeals = deals.map(deal => ({
       ...deal,
       amount: deal.amount ? deal.amount.toNumber() : null,
+      monthlyRent: (deal as any).monthlyRent ? (deal as any).monthlyRent.toNumber() : null,
+      depositAmount: (deal as any).depositAmount ? (deal as any).depositAmount.toNumber() : null,
       property: deal.property ? {
         ...deal.property,
         price: deal.property.price ? deal.property.price.toNumber() : null
@@ -74,6 +85,7 @@ export async function POST(request: NextRequest) {
       data: {
         clientName: body.clientName,
         clientPhone: body.clientPhone,
+        notes: body.notes,
         stage: body.stage || 'NEW_LEAD',
         amount: body.amount,
         propertyId: body.propertyId,

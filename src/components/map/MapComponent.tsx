@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import Map, { NavigationControl, Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import MapPin from './MapPin';
 
 // Types
 interface Project {
@@ -12,6 +13,7 @@ interface Project {
   lat: number | string;
   lng: number | string;
   imageUrl?: string | null;
+  isStandalone?: boolean;
   units?: Array<{
     price?: number | null;
     rentPrice?: number | null;
@@ -164,7 +166,7 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
         mapboxAccessToken={MAPBOX_TOKEN}
       >
         {/* Navigation controls positioned below Grid view button */}
-        <NavigationControl position="top-right" style={{ marginTop: '50px' }} />
+        <NavigationControl position="top-right" style={{ marginTop: '60px' }} />
 
         {/* Price Tag Markers */}
         {projects.map((project) => {
@@ -190,44 +192,17 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
                 }));
               }}
             >
-              <div
-                className="relative cursor-pointer group"
+              <MapPin
+                label={project.isStandalone 
+                  ? (price || project.name.slice(0, 12)) 
+                  : (project.name.length > 15 ? project.name.slice(0, 15) + '...' : project.name)
+                }
+                color={color}
+                isHovered={isHovered}
+                tooltipText={project.isStandalone && price ? project.name : undefined}
                 onMouseEnter={() => setHoveredId(project.id)}
                 onMouseLeave={() => setHoveredId(null)}
-              >
-                {/* Price Tag */}
-                <div
-                  className={`
-                    px-2.5 py-1.5 rounded-lg font-bold text-xs whitespace-nowrap
-                    shadow-lg border-2 border-white
-                    transition-all duration-200 ease-out
-                    ${isHovered ? 'scale-110 -translate-y-1 shadow-xl' : ''}
-                  `}
-                  style={{ 
-                    backgroundColor: isHovered ? '#1f2937' : color,
-                    color: 'white'
-                  }}
-                >
-                  {price || project.name.slice(0, 12)}
-                </div>
-                
-                {/* Arrow/Pointer */}
-                <div 
-                  className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-0 h-0"
-                  style={{
-                    borderLeft: '6px solid transparent',
-                    borderRight: '6px solid transparent',
-                    borderTop: `8px solid ${isHovered ? '#1f2937' : color}`,
-                  }}
-                />
-                
-                {/* Hover tooltip with name */}
-                {isHovered && price && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap shadow-lg">
-                    {project.name}
-                  </div>
-                )}
-              </div>
+              />
             </Marker>
           );
         })}

@@ -1,19 +1,26 @@
 'use client';
 
 import { Link } from '@/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
-import { Search, Menu, X } from 'lucide-react';
+import { Search, Menu, X, LayoutDashboard, Users, Home, LogOut, Calculator, Building, PlusCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navbar() {
   const t = useTranslations('Navbar');
+  const router = useRouter();
+  const pathname = usePathname();
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [agentProfile, setAgentProfile] = useState<{ name?: string; companyName?: string } | null>(null);
   const supabase = createClient();
+  const profileRef = useRef<HTMLDivElement>(null);
+  const isAgentArea = pathname?.includes('/agent');
 
   useEffect(() => {
     if (!supabase) return;
@@ -21,6 +28,19 @@ export default function Navbar() {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       setUser(user);
+      
+      // Fetch agent profile for display name
+      if (user) {
+        try {
+          const res = await fetch('/api/agent/me');
+          if (res.ok) {
+            const data = await res.json();
+            setAgentProfile({ name: data.name, companyName: data.companyName });
+          }
+        } catch (e) {
+          console.error('Failed to fetch agent profile', e);
+        }
+      }
     };
 
     checkUser();
@@ -34,24 +54,100 @@ export default function Navbar() {
     };
   }, [supabase]);
 
+  // Close profile menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setShowProfileMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setShowProfileMenu(false);
+    router.push('/');
+    router.refresh();
+  };
+
+  // Hide navbar on agent routes (agent area has its own layout)
+  if (isAgentArea) {
+    return null;
+  }
+
   return (
     <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50 transition-all duration-300">
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex text-2xl font-bold text-[#49516f] hover:text-[#8ea4d2] transition-colors tracking-tight leading-none pb-1">
-              Ascent
-            </Link>
-
+      <div className="max-w-[1600px] mx-auto px-4 md:px-6 lg:px-12">
+        {/* Mobile Header: Hamburger | Find | LOGO | Profile */}
+        <div className="flex md:hidden items-center h-14">
+          {/* Left side - fixed width */}
+          <div className="w-20 flex items-center gap-1">
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 text-gray-600 hover:text-[#496f5d] transition-colors"
+            >
+              {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
             <Link 
               href="/search" 
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-[#496f5d] hover:bg-gray-50 rounded-full transition-all group"
+              className="p-2 text-gray-600 hover:text-[#496f5d] transition-colors"
             >
-              <Search className="w-5 h-5 text-gray-500 group-hover:text-[#496f5d]" />
-              <span className="font-medium">Find</span>
+              <Search className="w-5 h-5" />
             </Link>
           </div>
-          <div className="hidden md:flex items-center space-x-10">
+          
+          {/* Center - Logo */}
+          <div className="flex-1 flex justify-center">
+            <Link href="/" className="text-xl font-bold text-[#49516f]">
+              Ascent
+            </Link>
+          </div>
+          
+          {/* Right side - fixed width to match left */}
+          <div className="w-20 flex items-center justify-end">
+            {user ? (
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="w-9 h-9 rounded-full bg-gray-100 overflow-hidden border border-gray-200 relative"
+              >
+                {user.user_metadata?.avatar_url ? (
+                  <Image src={user.user_metadata.avatar_url} alt="Profile" fill className="object-cover" unoptimized />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-[#496f5d] text-white text-sm font-bold">
+                    {user.email?.[0]?.toUpperCase() || 'U'}
+                  </div>
+                )}
+              </button>
+            ) : (
+              <Link href="/login" className="p-2 text-gray-600 hover:text-[#496f5d]">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </Link>
+            )}
+          </div>
+        </div>
+
+        {/* Desktop Header */}
+        <div className="hidden md:flex items-center h-14">
+          {/* Left: Logo + Find - fixed width to balance right side */}
+          <div className="w-48 flex items-center gap-3">
+            <Link href="/" className="text-2xl font-bold text-[#49516f] hover:text-[#8ea4d2] transition-colors">
+              Ascent
+            </Link>
+            <Link 
+              href="/search" 
+              className="flex items-center gap-1.5 text-gray-600 hover:text-[#496f5d] font-medium transition-colors"
+            >
+              <Search className="w-4 h-4" />
+              <span>Find</span>
+            </Link>
+          </div>
+
+          {/* Center: Navigation */}
+          <div className="flex-1 flex items-center justify-center space-x-6">
             {/* <Link href="/properties" className="text-gray-600 hover:text-[#496f5d] font-medium transition-colors">
               Find Property
             </Link> */}
@@ -155,38 +251,104 @@ export default function Navbar() {
           </div>
           
           {/* Right Side Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/listing"
-              className="px-4 py-2 bg-[#496f5d] text-white text-sm font-medium rounded-full hover:bg-[#3d5c4d] transition-all duration-300 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 whitespace-nowrap"
+              className="px-4 py-2 bg-[#496f5d] text-white text-sm font-medium rounded-full hover:bg-[#3d5c4d] transition-all shadow-sm hover:shadow-md"
             >
-              {t('addListing')}
+              Owner
             </Link>
             
             {user ? (
-              <Link
-                href="/agent"
-                className="flex items-center gap-3 pl-2 pr-4 py-1.5 border border-gray-200 rounded-full hover:border-[#496f5d] transition-all duration-300 group bg-white"
-              >
-                <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200 group-hover:border-[#496f5d] transition-colors relative">
-                  {user.user_metadata?.avatar_url ? (
-                    <Image 
-                      src={user.user_metadata.avatar_url} 
-                      alt="Profile" 
-                      fill
-                      className="object-cover" 
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-[#496f5d] text-white text-sm font-bold">
-                      {user.email?.[0]?.toUpperCase() || 'U'}
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setShowProfileMenu(!showProfileMenu)}
+                  className="flex items-center gap-2 pl-1 pr-3 py-1 border border-gray-200 rounded-full hover:border-[#496f5d] hover:shadow-sm transition-all group bg-white"
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#496f5d] to-[#3d5c4d] overflow-hidden flex-shrink-0 flex items-center justify-center">
+                    {user.user_metadata?.avatar_url ? (
+                      <Image 
+                        src={user.user_metadata.avatar_url} 
+                        alt="Profile" 
+                        fill
+                        className="object-cover" 
+                        unoptimized
+                      />
+                    ) : (
+                      <span className="text-white text-sm font-bold">
+                        {(agentProfile?.name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-[#496f5d] max-w-[100px] truncate">
+                    {agentProfile?.name || agentProfile?.companyName || user.user_metadata?.full_name || 'Profile'}
+                  </span>
+                  <svg className={`w-3 h-3 text-gray-400 transition-transform ${showProfileMenu ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Profile Dropdown */}
+                {showProfileMenu && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                    <div className="px-4 py-3 border-b border-gray-100">
+                      <p className="text-sm font-semibold text-gray-900 truncate">{agentProfile?.name || user.user_metadata?.full_name || 'Agent'}</p>
+                      <p className="text-xs text-gray-500 truncate">{agentProfile?.companyName || user.email}</p>
                     </div>
-                  )}
-                </div>
-                <span className="text-sm font-medium text-gray-700 group-hover:text-[#496f5d] max-w-[100px] truncate">
-                  {user.user_metadata?.full_name || user.email?.split('@')[0]}
-                </span>
-              </Link>
+                    <div className="py-1">
+                      <Link
+                        href="/agent/create"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d] transition-colors"
+                      >
+                        <PlusCircle className="w-4 h-4" />
+                        Create Listing
+                      </Link>
+                      <Link
+                        href="/agent"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d] transition-colors"
+                      >
+                        <LayoutDashboard className="w-4 h-4" />
+                        Dashboard
+                      </Link>
+                      <Link
+                        href="/agent/crm"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d] transition-colors"
+                      >
+                        <Users className="w-4 h-4" />
+                        CRM
+                      </Link>
+                      <Link
+                        href="/agent/management"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d] transition-colors"
+                      >
+                        <Building className="w-4 h-4" />
+                        Property Management
+                      </Link>
+                      <Link
+                        href="/agent/tools"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#496f5d] transition-colors"
+                      >
+                        <Calculator className="w-4 h-4" />
+                        Smart Tools
+                      </Link>
+                    </div>
+                    <div className="border-t border-gray-100 pt-1">
+                      <button
+                        onClick={handleLogout}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors w-full"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Sign Out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <Link
                 href="/login"
@@ -200,36 +362,51 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button 
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 text-gray-600 hover:text-[#496f5d] transition-colors"
-            >
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </div>
+      </div>
+
+      {/* Mobile Profile Dropdown (positioned below mobile header) */}
+      {showProfileMenu && user && (
+        <div className="md:hidden absolute right-4 top-16 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+          <div className="px-4 py-2 border-b border-gray-100">
+            <p className="text-sm font-medium text-gray-900 truncate">{user.user_metadata?.full_name || 'Agent'}</p>
+            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+          </div>
+          <div className="py-1">
+            <Link href="/agent/create" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+              <PlusCircle className="w-4 h-4" /> Create Listing
+            </Link>
+            <Link href="/agent" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+              <LayoutDashboard className="w-4 h-4" /> Dashboard
+            </Link>
+            <Link href="/agent/crm" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+              <Users className="w-4 h-4" /> CRM
+            </Link>
+            <Link href="/agent/management" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+              <Building className="w-4 h-4" /> Management
+            </Link>
+            <Link href="/agent/tools" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">
+              <Calculator className="w-4 h-4" /> Tools
+            </Link>
+          </div>
+          <div className="border-t border-gray-100 pt-1">
+            <button onClick={handleLogout} className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 w-full">
+              <LogOut className="w-4 h-4" /> Sign Out
             </button>
           </div>
         </div>
-      </div>
+      )}
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu (Navigation only - no agent tools) */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-t border-gray-100 absolute w-full left-0 top-20 shadow-xl flex flex-col h-[calc(100vh-80px)] overflow-y-auto">
-          <div className="p-6 space-y-6 pb-20">
-            {/* Search Bar Mobile */}
-            <div className="flex items-center justify-between mb-6">
-              <Link 
-                href="/search" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center gap-2 px-4 py-3 bg-gray-50 rounded-xl text-gray-600 flex-grow mr-4"
-              >
-                <Search className="w-5 h-5 text-gray-500" />
-                <span className="font-medium">Find Properties</span>
-              </Link>
+        <div className="md:hidden bg-white border-t border-gray-100 absolute w-full left-0 top-16 shadow-xl flex flex-col h-[calc(100vh-64px)] overflow-y-auto">
+          <div className="p-4 space-y-4 pb-20">
+            {/* Language Switcher */}
+            <div className="flex justify-end">
               <LanguageSwitcher />
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* House Section */}
               <div className="space-y-2">
                 <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">House</div>
@@ -270,39 +447,21 @@ export default function Navbar() {
               </div>
             </div>
 
-            <div className="space-y-4">
+            {/* For Owners */}
+            <div className="space-y-2">
               <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">For Owners</div>
               <Link 
                 href="/listing"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block py-2 text-[#496f5d] font-semibold"
               >
-                {t('addListing')}
+                List Your Property
               </Link>
             </div>
 
-            <div className="pt-4 border-t border-gray-100">
-              {user ? (
-                <Link
-                  href="/agent"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-3 py-2"
-                >
-                  <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden border border-gray-200 relative">
-                    {user.user_metadata?.avatar_url ? (
-                      <Image src={user.user_metadata.avatar_url} alt="Profile" fill className="object-cover" unoptimized />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-[#496f5d] text-white text-sm font-bold">
-                        {user.email?.[0]?.toUpperCase() || 'U'}
-                      </div>
-                    )}
-                  </div>
-                  <div>
-                    <div className="font-medium text-gray-900">{user.user_metadata?.full_name || 'Agent'}</div>
-                    <div className="text-sm text-gray-500">{user.email}</div>
-                  </div>
-                </Link>
-              ) : (
+            {/* Login for non-users */}
+            {!user && (
+              <div className="pt-4 border-t border-gray-100">
                 <Link
                   href="/login"
                   onClick={() => setIsMobileMenuOpen(false)}
@@ -310,8 +469,8 @@ export default function Navbar() {
                 >
                   Login / Register
                 </Link>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
       )}

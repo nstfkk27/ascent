@@ -2,15 +2,11 @@
 
 import Link from 'next/link';
 import { useEffect, useState, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface Property {
-  id: string;
-  title: string;
-  price: number;
-  status: string;
-  lastVerifiedAt: string;
-}
+import { 
+  Plus, Building, Clock, CheckCircle, AlertTriangle, 
+  User, Phone, Mail, Save, X, Briefcase, List, Calculator,
+  Home, Rocket, MessageSquare, ChevronRight
+} from 'lucide-react';
 
 interface DashboardStats {
   activeListings: number;
@@ -19,8 +15,17 @@ interface DashboardStats {
   needsCheckListings: number;
 }
 
+interface AgentProfile {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  lineId?: string;
+  imageUrl?: string;
+  role?: string;
+}
+
 export default function AgentDashboard() {
-  const [properties, setProperties] = useState<Property[]>([]);
   const [stats, setStats] = useState<DashboardStats>({
     activeListings: 0,
     pendingSubmissions: 0,
@@ -29,13 +34,51 @@ export default function AgentDashboard() {
   });
   const [loading, setLoading] = useState(true);
   
-  // Pagination State
-  const [page, setPage] = useState(1);
-  const [limit] = useState(10);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
+  // Profile State
+  const [profile, setProfile] = useState<AgentProfile | null>(null);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<Partial<AgentProfile>>({});
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await fetch('/api/agent/me');
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data);
+        setEditedProfile(data);
+      }
+    } catch (err) {
+      console.error('Failed to fetch profile', err);
+    }
+  }, []);
+
+  const saveProfile = async () => {
+    if (!profile?.id) return;
+    setSavingProfile(true);
+    try {
+      const res = await fetch(`/api/agents/${profile.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editedProfile)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setProfile(data.data || editedProfile as AgentProfile);
+        setIsEditingProfile(false);
+      } else {
+        alert('Failed to save profile');
+      }
+    } catch (err) {
+      console.error('Failed to save profile', err);
+      alert('Failed to save profile');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
 
   const fetchStats = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await fetch('/api/agent/stats');
       const data = await res.json();
@@ -44,216 +87,246 @@ export default function AgentDashboard() {
       }
     } catch (err) {
       console.error('Failed to fetch dashboard stats', err);
-    }
-  }, []);
-
-  const fetchProperties = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/properties?page=${page}&limit=${limit}`);
-      const data = await res.json();
-      
-      if (data.success && Array.isArray(data.data)) {
-        setProperties(data.data);
-        if (data.totalPages) setTotalPages(data.totalPages);
-        if (data.count) setTotalItems(data.count);
-      }
-    } catch (error) {
-      console.error('Failed to fetch properties', error);
     } finally {
       setLoading(false);
     }
-  }, [page, limit]);
+  }, []);
 
   useEffect(() => {
+    fetchProfile();
     fetchStats();
-  }, [fetchStats]);
+  }, [fetchProfile, fetchStats]);
 
-  useEffect(() => {
-    fetchProperties();
-  }, [fetchProperties]);
-
-  const getFreshnessStatus = (lastVerifiedAt: string) => {
-    if (!lastVerifiedAt) return { color: 'bg-gray-100 text-gray-800', label: 'Unknown', dot: '⚪' };
-    const date = new Date(lastVerifiedAt);
-    if (isNaN(date.getTime())) return { color: 'bg-gray-100 text-gray-800', label: 'Invalid', dot: '⚪' };
-    
-    const days = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 3600 * 24));
-    if (days < 14) return { color: 'bg-green-100 text-green-800', label: 'Fresh', dot: '🟢' };
-    if (days < 30) return { color: 'bg-yellow-100 text-yellow-800', label: 'Stale', dot: '🟡' };
-    return { color: 'bg-red-100 text-red-800', label: 'Expired', dot: '🔴' };
-  };
-
-  const copyVerificationLink = (id: string) => {
-    const link = `${window.location.origin}/verify/${id}`;
-    navigator.clipboard.writeText(link);
-    alert('Verification Link Copied! Send this to the owner.');
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this listing?')) return;
-    
-    try {
-      const res = await fetch(`/api/properties/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (res.ok) {
-        setProperties(prev => prev.filter(p => p.id !== id));
-        fetchStats(); // Refresh stats after deletion
-      } else {
-        alert('Failed to delete property');
-      }
-    } catch (error) {
-      console.error('Error deleting property:', error);
-      alert('Error deleting property');
-    }
-  };
+  const isInternalAgent = profile?.role === 'SUPER_ADMIN' || profile?.role === 'PLATFORM_AGENT';
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Listing Management</h1>
-        <div className="flex gap-3">
-          <Link 
-            href="/agent/marketing" 
-            className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors flex items-center gap-2"
-          >
-            <span>🚀</span> Group Blaster
-          </Link>
-          <Link 
-            href="/agent/create" 
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
-          >
-            <span>+</span> New Listing
-          </Link>
+    <div className="space-y-6">
+      {/* Profile Card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="p-6">
+          <div className="flex flex-col md:flex-row gap-6">
+            {/* Avatar */}
+            <div className="flex-shrink-0">
+              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#496f5d] to-[#3d5c4d] flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                {profile?.imageUrl ? (
+                  <img src={profile.imageUrl} alt="Profile" className="w-full h-full object-cover rounded-2xl" />
+                ) : (
+                  profile?.name?.[0]?.toUpperCase() || 'A'
+                )}
+              </div>
+            </div>
+
+            {/* Profile Info */}
+            <div className="flex-1">
+              {isEditingProfile ? (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Name</label>
+                      <input
+                        type="text"
+                        value={editedProfile.name || ''}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, name: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#496f5d] focus:border-transparent text-sm"
+                        placeholder="Your name"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Phone</label>
+                      <input
+                        type="text"
+                        value={editedProfile.phone || ''}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#496f5d] focus:border-transparent text-sm"
+                        placeholder="Phone number"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Line ID</label>
+                      <input
+                        type="text"
+                        value={editedProfile.lineId || ''}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, lineId: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#496f5d] focus:border-transparent text-sm"
+                        placeholder="Line ID"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Email</label>
+                      <input
+                        type="email"
+                        value={editedProfile.email || ''}
+                        disabled
+                        className="w-full px-3 py-2 border border-gray-200 rounded-xl bg-gray-50 text-gray-500 text-sm"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={saveProfile}
+                      disabled={savingProfile}
+                      className="px-4 py-2 bg-[#496f5d] text-white rounded-xl text-sm font-medium hover:bg-[#3d5c4d] transition-colors flex items-center gap-2"
+                    >
+                      <Save className="w-4 h-4" />
+                      {savingProfile ? 'Saving...' : 'Save'}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsEditingProfile(false);
+                        setEditedProfile(profile || {});
+                      }}
+                      className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
+                    >
+                      <X className="w-4 h-4" />
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h2 className="text-xl font-bold text-[#49516f]">{profile?.name || 'Agent'}</h2>
+                      <p className="text-sm text-gray-500 mt-0.5">
+                        {profile?.role === 'SUPER_ADMIN' ? 'Super Admin' : profile?.role === 'PLATFORM_AGENT' ? 'Platform Agent' : 'Partner Agent'}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setIsEditingProfile(true)}
+                      className="px-3 py-1.5 text-sm text-[#496f5d] hover:bg-[#496f5d]/10 rounded-lg transition-colors font-medium"
+                    >
+                      Edit Profile
+                    </button>
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
+                    {profile?.email && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                        {profile.email}
+                      </div>
+                    )}
+                    {profile?.phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone className="w-4 h-4 text-gray-400" />
+                        {profile.phone}
+                      </div>
+                    )}
+                    {profile?.lineId && (
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="w-4 h-4 text-gray-400" />
+                        Line: {profile.lineId}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Pending Submissions */}
-        <Link href="/agent/submissions" className="block">
-          <div className={`p-6 rounded-lg shadow-sm border border-gray-200 transition-colors ${
-            stats.pendingSubmissions > 0 ? 'bg-orange-50 border-orange-200' : 'bg-white'
-          }`}>
-            <h3 className="text-gray-500 text-sm font-medium uppercase">Pending Reviews</h3>
-            <p className={`text-2xl md:text-3xl font-bold mt-2 ${stats.pendingSubmissions > 0 ? 'text-orange-600' : 'text-gray-900'}`}>
-              {stats.pendingSubmissions}
-            </p>
-            {stats.pendingSubmissions > 0 && (
-              <p className="text-xs text-orange-600 mt-1 font-medium">Action Required</p>
-            )}
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Active Listings */}
+        <Link href="/agent/listings" className="block group">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-[#496f5d] flex items-center justify-center">
+                <Building className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Listings</span>
+            </div>
+            <p className="text-3xl font-bold text-[#49516f]">{loading ? '-' : stats.activeListings}</p>
+            <p className="text-xs text-gray-500 mt-1">Active properties</p>
           </div>
         </Link>
 
-        {/* Quick Stats */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-gray-500 text-sm font-medium uppercase">Active Listings</h3>
-          <p className="text-2xl md:text-3xl font-bold text-gray-900 mt-2">{stats.activeListings}</p>
+        {/* Fresh Listings */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-green-500 flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Fresh</span>
+          </div>
+          <p className="text-3xl font-bold text-green-600">{loading ? '-' : stats.freshListings}</p>
+          <p className="text-xs text-gray-500 mt-1">Recently verified</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-gray-500 text-sm font-medium uppercase">Fresh Listings</h3>
-          <p className="text-2xl md:text-3xl font-bold text-green-600 mt-2">
-            {stats.freshListings}
-          </p>
+
+        {/* Needs Check */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-yellow-500 flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Stale</span>
+          </div>
+          <p className="text-3xl font-bold text-yellow-600">{loading ? '-' : stats.needsCheckListings}</p>
+          <p className="text-xs text-gray-500 mt-1">Needs verification</p>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <h3 className="text-gray-500 text-sm font-medium uppercase">Needs Check</h3>
-          <p className="text-2xl md:text-3xl font-bold text-yellow-600 mt-2">
-            {stats.needsCheckListings}
-          </p>
-        </div>
+
+        {/* Pending Submissions - Only for internal agents */}
+        {isInternalAgent && (
+          <Link href="/agent/submissions" className="block group">
+            <div className={`p-5 rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+              stats.pendingSubmissions > 0 
+                ? 'bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200' 
+                : 'bg-white border-gray-100'
+            }`}>
+              <div className="flex items-center gap-3 mb-3">
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                  stats.pendingSubmissions > 0 ? 'bg-orange-500' : 'bg-gray-100'
+                }`}>
+                  <Clock className={`w-5 h-5 ${stats.pendingSubmissions > 0 ? 'text-white' : 'text-gray-500'}`} />
+                </div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Pending</span>
+              </div>
+              <p className={`text-3xl font-bold ${stats.pendingSubmissions > 0 ? 'text-orange-600' : 'text-[#49516f]'}`}>
+                {loading ? '-' : stats.pendingSubmissions}
+              </p>
+              {stats.pendingSubmissions > 0 ? (
+                <p className="text-xs text-orange-600 mt-1 font-medium">Action Required</p>
+              ) : (
+                <p className="text-xs text-gray-500 mt-1">Owner submissions</p>
+              )}
+            </div>
+          </Link>
+        )}
       </div>
 
-      {/* Inventory List */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-800">Inventory Freshness</h2>
-          <div className="text-sm text-gray-500">
-            Total: {totalItems}
+      {/* Tools */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Link 
+          href="/agent/management"
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-blue-500 flex items-center justify-center">
+              <Home className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-[#49516f]">Property Management</h4>
+              <p className="text-sm text-gray-500">Track rentals & tenants</p>
+            </div>
           </div>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-              <tr>
-                <th className="px-6 py-3">Property</th>
-                <th className="px-6 py-3">Price</th>
-                <th className="px-6 py-3">Status</th>
-                <th className="px-6 py-3">Freshness</th>
-                <th className="px-6 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td colSpan={5} className="text-center py-4">Loading...</td></tr>
-              ) : (Array.isArray(properties) ? properties : []).map((property) => {
-                const freshness = getFreshnessStatus(property.lastVerifiedAt);
-                return (
-                  <tr key={property.id} className="bg-white border-b hover:bg-gray-50">
-                    <td className="px-6 py-4 font-medium text-gray-900">{property.title || 'Untitled'}</td>
-                    <td className="px-6 py-4 text-gray-900">฿{property.price?.toLocaleString() ?? 'N/A'}</td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        property.status === 'AVAILABLE' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {property.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2 py-1 rounded-full text-xs flex items-center gap-1 w-fit ${freshness.color}`}>
-                        {freshness.dot} {freshness.label}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 flex gap-2">
-                      <Link 
-                        href={`/agent/edit/${property.id}`}
-                        className="text-blue-600 hover:underline text-xs"
-                      >
-                        Edit
-                      </Link>
-                      <span className="text-gray-300">|</span>
-                      <button 
-                        onClick={() => handleDelete(property.id)}
-                        className="text-red-600 hover:underline text-xs"
-                      >
-                        Delete
-                      </button>
-                      <span className="text-gray-300">|</span>
-                      <button 
-                        onClick={() => copyVerificationLink(property.id)}
-                        className="text-gray-600 hover:underline text-xs"
-                      >
-                        Link
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-        
-        {/* Pagination Controls */}
-        <div className="p-4 border-t flex items-center justify-between">
-            <button 
-              disabled={page <= 1 || loading}
-              onClick={() => setPage(p => p - 1)}
-              className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 flex items-center gap-1"
-            >
-              <ChevronLeft className="w-4 h-4" /> Prev
-            </button>
-            <span className="text-sm text-gray-600">
-              Page {page} of {totalPages}
-            </span>
-            <button 
-              disabled={page >= totalPages || loading}
-              onClick={() => setPage(p => p + 1)}
-              className="px-3 py-1 border rounded disabled:opacity-50 hover:bg-gray-50 flex items-center gap-1"
-            >
-              Next <ChevronRight className="w-4 h-4" />
-            </button>
-        </div>
+          <ChevronRight className="w-5 h-5 text-gray-400" />
+        </Link>
+
+        <Link 
+          href="/agent/marketing"
+          className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-xl bg-pink-500 flex items-center justify-center">
+              <Rocket className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-[#49516f]">Marketing Center</h4>
+              <p className="text-sm text-gray-500">Blast to groups & channels</p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-gray-400" />
+        </Link>
       </div>
     </div>
   );

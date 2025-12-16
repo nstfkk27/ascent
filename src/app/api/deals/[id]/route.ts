@@ -19,6 +19,13 @@ export async function PATCH(
         amount: body.amount,
         clientName: body.clientName,
         clientPhone: body.clientPhone,
+        notes: body.notes,
+        dealType: body.dealType,
+        leaseStartDate: body.leaseStartDate ? new Date(body.leaseStartDate) : undefined,
+        leaseEndDate: body.leaseEndDate ? new Date(body.leaseEndDate) : undefined,
+        monthlyRent: body.monthlyRent,
+        depositAmount: body.depositAmount,
+        nextPaymentDue: body.nextPaymentDue ? new Date(body.nextPaymentDue) : undefined,
       },
       include: {
         property: true
