@@ -76,14 +76,24 @@ export async function PUT(
     const { data: { user } } = await supabase.auth.getUser();
     
     let isInternal = false;
+    let agentId: string | null = null;
     if (user && user.email) {
       const agent = await prisma.agentProfile.findFirst({
           where: { email: user.email }
       });
-      if (agent && (agent.role === 'SUPER_ADMIN' || agent.role === 'PLATFORM_AGENT')) {
+      if (agent) {
+        agentId = agent.id;
+        if (agent.role === 'SUPER_ADMIN' || agent.role === 'PLATFORM_AGENT') {
           isInternal = true;
+        }
       }
     }
+
+    // Get current property to check for price changes
+    const currentProperty = await prisma.property.findUnique({
+      where: { id: params.id },
+      select: { price: true, rentPrice: true }
+    });
 
     let updateData = { ...body };
     
@@ -113,6 +123,42 @@ export async function PUT(
       },
       data: updateData,
     });
+
+    // Track price changes for future analytics
+    if (currentProperty) {
+      const oldPrice = currentProperty.price ? Number(currentProperty.price) : null;
+      const newPrice = body.price ? Number(body.price) : null;
+      const oldRent = currentProperty.rentPrice ? Number(currentProperty.rentPrice) : null;
+      const newRent = body.rentPrice ? Number(body.rentPrice) : null;
+
+      const priceChanged = oldPrice !== newPrice;
+      const rentChanged = oldRent !== newRent;
+
+      if (priceChanged || rentChanged) {
+        let changeType = 'CORRECTION';
+        if (newPrice !== null && oldPrice !== null) {
+          changeType = newPrice > oldPrice ? 'INCREASE' : 'DECREASE';
+        } else if (newRent !== null && oldRent !== null) {
+          changeType = newRent > oldRent ? 'INCREASE' : 'DECREASE';
+        }
+
+        // Record price history (will work after migration)
+        try {
+          await prisma.priceHistory.create({
+            data: {
+              propertyId: params.id,
+              price: newPrice,
+              rentPrice: newRent,
+              changeType: changeType as any,
+              changedBy: agentId,
+            },
+          });
+        } catch (e) {
+          // Silently fail if PriceHistory table doesn't exist yet
+          console.log('Price history tracking skipped (table may not exist yet)');
+        }
+      }
+    }
     
     return NextResponse.json({
       success: true,

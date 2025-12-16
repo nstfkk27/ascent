@@ -126,10 +126,12 @@ model Property {
   coAgentCommissionRate Decimal?            @db.Decimal(5, 2)
   commissionAmount      Decimal?            @db.Decimal(12, 2)
   commissionRate        Decimal?            @db.Decimal(5, 2)
+  agentId               String?             // Listing agent
   deals                 Deal[]
   project               Project?            @relation(fields: [projectId], references: [id])
 
   @@index([city])
+  @@index([agentId])
   @@index([status])
   @@index([featured])
   @@index([category])
@@ -187,17 +189,188 @@ model Post {
 }
 
 model AgentProfile {
-  id        String   @id @default(uuid())
-  name      String
-  email     String?
-  phone     String?
-  lineId    String?
-  imageUrl  String?
-  languages String[]
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  role      UserRole @default(AGENT)
+  id          String    @id @default(uuid())
+  name        String
+  email       String?
+  phone       String?
+  lineId      String?
+  whatsapp    String?
+  imageUrl    String?
+  languages   String[]
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  role        UserRole  @default(AGENT)
+  companyName String?
+  enquiries   Enquiry[]
+}
+
+// ============================================
+// PRICE HISTORY - Track all price changes
+// ============================================
+model PriceHistory {
+  id          String   @id @default(uuid())
+  propertyId  String
+  price       Decimal? @db.Decimal(12, 2)
+  rentPrice   Decimal? @db.Decimal(12, 2)
+  changeType  PriceChangeType
+  changedAt   DateTime @default(now())
+  changedBy   String?  // Agent ID who made the change
+  notes       String?  // Optional reason for change
+  
+  @@index([propertyId])
+  @@index([changedAt])
+}
+
+enum PriceChangeType {
+  INITIAL      // First listing price
+  INCREASE     // Price went up
+  DECREASE     // Price went down (for alerts)
+  CORRECTION   // Data correction
+}
+
+// ============================================
+// ENQUIRY - Track all contact requests
+// ============================================
+model Enquiry {
+  id           String        @id @default(uuid())
+  propertyId   String
+  channel      EnquiryChannel
+  name         String?
+  phone        String?
+  email        String?
+  message      String?
+  status       EnquiryStatus @default(NEW)
+  agentId      String?
+  agent        AgentProfile? @relation(fields: [agentId], references: [id])
+  createdAt    DateTime      @default(now())
+  respondedAt  DateTime?
+  
+  @@index([propertyId])
+  @@index([agentId])
+  @@index([channel])
+  @@index([createdAt])
+}
+
+enum EnquiryChannel {
+  LINE
+  WHATSAPP
+  PHONE
+  EMAIL
+  WEBSITE_FORM
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  CONVERTED
+  CLOSED
+}
+
+// ============================================
+// SOLD PROPERTY - Archive of completed sales/rentals
+// ============================================
+model SoldProperty {
+  id                String           @id @default(uuid())
+  // Original property data (snapshot)
+  originalId        String           // Original property ID for reference
+  title             String
+  description       String?
+  category          PropertyCategory
+  houseType         HouseType?
+  investmentType    InvestmentType?
+  address           String
+  city              String
+  area              String?
+  projectName       String?
+  projectId         String?
+  bedrooms          Int?
+  bathrooms         Int?
+  size              Int
+  floor             Int?
+  latitude          Decimal?         @db.Decimal(10, 8)
+  longitude         Decimal?         @db.Decimal(11, 8)
+  images            String[]
+  
+  // Listing prices (what it was listed for)
+  listingPrice      Decimal?         @db.Decimal(12, 2)
+  listingRentPrice  Decimal?         @db.Decimal(12, 2)
+  listingType       ListingType
+  
+  // Final transaction data
+  soldType          SoldType
+  finalPrice        Decimal?         @db.Decimal(12, 2)  // Actual sale/rent price
+  soldAt            DateTime         @default(now())
+  daysOnMarket      Int?             // How long it took to sell
+  
+  // Agent/commission data
+  agentId           String?
+  commissionEarned  Decimal?         @db.Decimal(12, 2)
+  
+  // Metadata
+  listedAt          DateTime?        // When it was first listed
+  createdAt         DateTime         @default(now())
+  notes             String?
+  
+  @@index([city])
+  @@index([area])
+  @@index([category])
+  @@index([soldAt])
+  @@index([projectId])
+  @@index([soldType])
+}
+
+enum SoldType {
+  SOLD           // Property was sold
+  RENTED         // Property was rented
+  WITHDRAWN      // Owner withdrew listing
+  EXPIRED        // Listing expired without sale
+  OFF_MARKET     // Taken off market (other reason)
+}
+
+// ============================================
+// AREA STATS - Pre-aggregated data for heatmaps
+// ============================================
+model AreaStats {
+  id                  String           @id @default(uuid())
+  city                String
+  area                String?          // Sub-area/district
+  category            PropertyCategory
+  
+  // Price metrics (updated periodically)
+  avgPricePerSqm      Decimal?         @db.Decimal(12, 2)
+  medianPricePerSqm   Decimal?         @db.Decimal(12, 2)
+  minPricePerSqm      Decimal?         @db.Decimal(12, 2)
+  maxPricePerSqm      Decimal?         @db.Decimal(12, 2)
+  
+  // Rent metrics
+  avgRentPerSqm       Decimal?         @db.Decimal(12, 2)
+  avgRentalYield      Decimal?         @db.Decimal(5, 2)
+  
+  // Volume metrics
+  activeListings      Int              @default(0)
+  soldLast30Days      Int              @default(0)
+  soldLast90Days      Int              @default(0)
+  avgDaysOnMarket     Int?
+  
+  // Demand metrics (for future use)
+  enquiriesLast30Days Int              @default(0)
+  viewsLast30Days     Int              @default(0)
+  
+  // Trend data
+  priceChange30Days   Decimal?         @db.Decimal(5, 2)  // % change
+  priceChange90Days   Decimal?         @db.Decimal(5, 2)
+  
+  // Geo data for heatmap rendering
+  centerLat           Decimal?         @db.Decimal(10, 8)
+  centerLng           Decimal?         @db.Decimal(11, 8)
+  boundaryPolygon     Json?            // GeoJSON polygon for area boundary
+  
+  lastUpdated         DateTime         @default(now())
+  
+  @@unique([city, area, category])
+  @@index([city])
+  @@index([category])
 }
 
 enum PropertyCategory {
