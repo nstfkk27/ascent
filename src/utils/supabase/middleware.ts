@@ -1,6 +1,9 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Supported locales for redirect building
+const LOCALES = ['en', 'th', 'cn', 'ru'];
+
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({
     request: {
@@ -25,6 +28,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
+          // Update request cookies for downstream middleware
           request.cookies.set({
             name,
             value,
@@ -35,10 +39,15 @@ export async function updateSession(request: NextRequest) {
               headers: request.headers,
             },
           })
+          // Set cookie on response with secure defaults
           response.cookies.set({
             name,
             value,
             ...options,
+            // Ensure secure cookie settings in production
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            httpOnly: true,
           })
         },
         remove(name: string, options: CookieOptions) {
@@ -56,17 +65,32 @@ export async function updateSession(request: NextRequest) {
             name,
             value: '',
             ...options,
+            maxAge: 0,
           })
         },
       },
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  // Refresh session - this is critical for keeping the session alive
+  // getUser() will automatically refresh the session if needed
+  const { data: { user }, error } = await supabase.auth.getUser()
 
-  // Protect /agent routes
-  if (request.nextUrl.pathname.startsWith('/agent') && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  // Get current locale from path or cookie
+  const pathname = request.nextUrl.pathname;
+  const pathLocale = LOCALES.find(loc => pathname.startsWith(`/${loc}/`) || pathname === `/${loc}`);
+  const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
+  const locale = pathLocale || (cookieLocale && LOCALES.includes(cookieLocale) ? cookieLocale : 'en');
+
+  // Protect /agent routes (with or without locale prefix)
+  const isAgentRoute = pathname.startsWith('/agent') || 
+    LOCALES.some(loc => pathname.startsWith(`/${loc}/agent`));
+  
+  if (isAgentRoute && !user) {
+    const loginUrl = new URL(`/${locale}/login`, request.url);
+    // Preserve the intended destination for post-login redirect
+    loginUrl.searchParams.set('next', pathname);
+    return NextResponse.redirect(loginUrl);
   }
 
   return response

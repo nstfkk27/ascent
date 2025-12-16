@@ -19,7 +19,9 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [agentProfile, setAgentProfile] = useState<{ name?: string; companyName?: string; role?: string } | null>(null);
   const supabase = createClient();
-  const profileRef = useRef<HTMLDivElement>(null);
+  const desktopProfileRef = useRef<HTMLDivElement>(null);
+  const mobileProfileButtonRef = useRef<HTMLDivElement>(null);
+  const mobileProfileMenuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!supabase) return;
 
@@ -55,7 +57,12 @@ export default function Navbar() {
   // Close profile menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      const targetNode = event.target as Node;
+      const clickedInDesktop = !!desktopProfileRef.current?.contains(targetNode);
+      const clickedInMobileButton = !!mobileProfileButtonRef.current?.contains(targetNode);
+      const clickedInMobileMenu = !!mobileProfileMenuRef.current?.contains(targetNode);
+
+      if (!clickedInDesktop && !clickedInMobileButton && !clickedInMobileMenu) {
         setShowProfileMenu(false);
       }
     };
@@ -64,8 +71,18 @@ export default function Navbar() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
     setShowProfileMenu(false);
+    
+    // Sign out on client side first
+    await supabase.auth.signOut();
+    
+    // Also call server-side logout to ensure cookies are cleared properly
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      // Continue even if server logout fails - client logout already succeeded
+    }
+    
     router.push('/');
     router.refresh();
   };
@@ -99,7 +116,7 @@ export default function Navbar() {
           </div>
           
           {/* Right side - fixed width to match left */}
-          <div className="w-20 flex items-center justify-end">
+          <div className="w-20 flex items-center justify-end" ref={mobileProfileButtonRef}>
             {user ? (
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
@@ -253,7 +270,7 @@ export default function Navbar() {
             </Link>
             
             {user ? (
-              <div className="relative" ref={profileRef}>
+              <div className="relative" ref={desktopProfileRef}>
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
                   className="flex items-center gap-2 pl-1 pr-3 py-1 border border-gray-200 rounded-full hover:border-[#496f5d] hover:shadow-sm transition-all group bg-white"
@@ -402,7 +419,7 @@ export default function Navbar() {
 
       {/* Mobile Profile Dropdown (positioned below mobile header) */}
       {showProfileMenu && user && (
-        <div className="md:hidden absolute right-4 top-16 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+        <div ref={mobileProfileMenuRef} className="md:hidden absolute right-4 top-16 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
           <div className="px-4 py-2 border-b border-gray-100">
             <p className="text-sm font-medium text-gray-900 truncate">{user.user_metadata?.full_name || 'Agent'}</p>
             <p className="text-xs text-gray-500 truncate">{user.email}</p>
