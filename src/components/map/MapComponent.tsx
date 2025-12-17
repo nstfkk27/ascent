@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
-import Map, { NavigationControl, Marker } from 'react-map-gl/mapbox';
+import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import MapPin from './MapPin';
 
@@ -55,13 +55,6 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
     }
   }, [flyToLocation]);
 
-  const togglePitch = () => {
-    setViewState(prev => ({
-      ...prev,
-      pitch: prev.pitch === 0 ? 45 : 0,
-      transitionDuration: 1000
-    }));
-  };
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [mapInstance, setMapInstance] = useState<any>(null);
@@ -165,9 +158,6 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}
       >
-        {/* Navigation controls positioned below Grid view button */}
-        <NavigationControl position="top-right" style={{ marginTop: '60px' }} />
-
         {/* Price Tag Markers */}
         {projects.map((project) => {
           const price = formatPrice(project);
@@ -207,19 +197,6 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
           );
         })}
       </Map>
-
-      {/* 3D/2D Toggle - Below Mapbox Navigation Controls */}
-      <div className="absolute top-40 right-2.5 z-10">
-        <button
-          onClick={togglePitch}
-          className="bg-white px-2 py-1.5 rounded shadow-md hover:bg-gray-50 text-gray-700 font-medium text-xs border border-gray-300 transition-all flex items-center gap-1.5"
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
-          </svg>
-          {viewState.pitch === 0 ? '3D' : '2D'}
-        </button>
-      </div>
     </div>
   );
 }

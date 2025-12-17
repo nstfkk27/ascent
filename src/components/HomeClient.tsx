@@ -146,7 +146,7 @@ export default function HomeClient({ projects }: HomeClientProps) {
         />
       </div>
 
-      {/* Grid View Button - Top Right above map controls */}
+      {/* Grid View Button - Top Right */}
       <div className="absolute top-4 right-2.5 z-20">
         <Link
           href="/properties"

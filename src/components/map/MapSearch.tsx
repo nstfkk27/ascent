@@ -28,11 +28,17 @@ interface MapSearchProps {
   filters: MapFilters;
   onFilterChange: (filters: MapFilters) => void;
   onSearchSubmit?: (query: string) => void;
+  isCollapsed?: boolean;
+  onCollapseChange?: (collapsed: boolean) => void;
 }
 
-export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: MapSearchProps) {
+export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isCollapsed: externalIsCollapsed, onCollapseChange }: MapSearchProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [isCollapsed, setIsCollapsed] = useState(true);
+  const [internalIsCollapsed, setInternalIsCollapsed] = useState(true);
+  
+  // Use external state if provided, otherwise use internal state
+  const isCollapsed = externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed;
+  const setIsCollapsed = onCollapseChange || setInternalIsCollapsed;
 
   const handleChange = (name: keyof MapFilters, value: string | boolean) => {
     if (name === 'minPrice' || name === 'maxPrice') {
@@ -106,13 +112,12 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
             </svg>
           </button>
 
-          {/* Row 1: Input + Category */}
-          <div className="flex gap-2">
-            {/* Search Input */}
-            <div className="relative flex-1">
+          {/* Row 1: Search Input (Full width on mobile, with Category & Buy/Rent on desktop) */}
+          <div className="flex flex-col md:flex-row gap-2">
+            <div className="relative flex-1 min-w-0">
               <input
                 type="text"
-                placeholder="Search project name, location..."
+                placeholder="Search Project name, location..."
                 value={filters.query}
                 onChange={(e) => handleChange('query', e.target.value)}
                 onKeyDown={(e) => {
@@ -120,57 +125,66 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                     onSearchSubmit(filters.query);
                   }
                 }}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#496f5d] focus:border-transparent"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               />
-              <svg className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-
-            {/* Category */}
-            <select
-              value={filters.category}
-              onChange={(e) => handleChange('category', e.target.value)}
-              className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-            >
-              <option value="">All Types</option>
-              {Object.entries(PROPERTY_CATEGORIES).map(([key, label]) => (
-                <option key={key} value={key}>{label}</option>
-              ))}
-            </select>
+            <div className="flex gap-2">
+              <select
+                value={filters.category}
+                onChange={(e) => handleChange('category', e.target.value)}
+                className="flex-1 md:w-28 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">Type</option>
+                {Object.entries(PROPERTY_CATEGORIES).map(([key, label]) => (
+                  <option key={key} value={key}>{label}</option>
+                ))}
+              </select>
+              <select
+                value={filters.listingType}
+                onChange={(e) => handleChange('listingType', e.target.value)}
+                className="flex-1 md:w-28 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">Buy/Rent</option>
+                <option value="SALE">For Sale</option>
+                <option value="RENT">For Rent</option>
+              </select>
+            </div>
           </div>
 
-          {/* Row 2: Min/Max Price + More Filters Button */}
+          {/* Row 2/3: Min Price + Max Price + More Button */}
           <div className="flex gap-2 mt-2">
             <input
               type="text"
-              placeholder="Min Price"
+              placeholder="Min"
               value={filters.minPrice}
               onChange={(e) => handleChange('minPrice', e.target.value)}
-              className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+              className="w-28 md:flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 md:px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             <input
               type="text"
-              placeholder="Max Price"
+              placeholder="Max"
               value={filters.maxPrice}
               onChange={(e) => handleChange('maxPrice', e.target.value)}
-              className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+              className="w-28 md:flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 md:px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
             />
             <button
               type="button"
               onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
-              className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
+              className={`w-20 md:w-24 px-2 md:px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-1 md:gap-1.5 whitespace-nowrap ${
                 isAdvancedOpen 
-                  ? 'bg-[#496f5d] text-white' 
-                  : 'bg-[#e8f0eb] text-[#496f5d] hover:bg-[#d1e0d6]'
+                  ? 'bg-primary-600 text-white shadow-soft' 
+                  : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
               }`}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
               </svg>
-              {isAdvancedOpen ? 'Less' : 'More'}
+              <span className="flex-shrink-0">{isAdvancedOpen ? 'Less' : 'More'}</span>
               {getActiveFilterCount() > 0 && (
-                <span className="bg-white/20 text-xs px-1.5 py-0.5 rounded-full">
+                <span className="bg-white/30 text-xs px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
                   {getActiveFilterCount()}
                 </span>
               )}
@@ -181,14 +195,14 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
           {isAdvancedOpen && (
             <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
               
-              {/* CONDO: Area | Bedroom + Pills */}
+              {/* CONDO: Area + Bedrooms + Pills */}
               {filters.category === 'CONDO' && (
                 <>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <select
                       value={filters.area}
                       onChange={(e) => handleChange('area', e.target.value)}
-                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">All Areas</option>
                       {PATTAYA_AREAS.map((area) => (
@@ -198,14 +212,14 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                     <select
                       value={filters.bedrooms}
                       onChange={(e) => handleChange('bedrooms', e.target.value)}
-                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">Bedrooms</option>
-                      <option value="1">1+ Bed</option>
-                      <option value="2">2+ Beds</option>
-                      <option value="3">3+ Beds</option>
-                      <option value="4">4+ Beds</option>
-                      <option value="5">5+ Beds</option>
+                      <option value="1">1+</option>
+                      <option value="2">2+</option>
+                      <option value="3">3+</option>
+                      <option value="4">4+</option>
+                      <option value="5">5+</option>
                     </select>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -214,9 +228,9 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                         key={filter.id}
                         type="button"
                         onClick={() => toggleFilter(filter.id)}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                        className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                           filters[filter.id]
-                            ? 'bg-[#496f5d] text-white shadow-md'
+                            ? 'bg-primary-600 text-white shadow-soft'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
                         }`}
                       >
@@ -228,14 +242,14 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                 </>
               )}
 
-              {/* HOUSE: Subtype | Area, Bedroom, Pet Friendly pill only */}
+              {/* HOUSE: Subtype + Area + Bedrooms + Pet Friendly */}
               {filters.category === 'HOUSE' && (
                 <>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <select
                       value={filters.subtype}
                       onChange={(e) => handleChange('subtype', e.target.value)}
-                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">All House Types</option>
                       {getSubtypeOptions().map((subtype) => (
@@ -247,7 +261,7 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                     <select
                       value={filters.area}
                       onChange={(e) => handleChange('area', e.target.value)}
-                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">All Areas</option>
                       {PATTAYA_AREAS.map((area) => (
@@ -255,27 +269,25 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                       ))}
                     </select>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <select
                       value={filters.bedrooms}
                       onChange={(e) => handleChange('bedrooms', e.target.value)}
-                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">Bedrooms</option>
-                      <option value="1">1+ Bed</option>
-                      <option value="2">2+ Beds</option>
-                      <option value="3">3+ Beds</option>
-                      <option value="4">4+ Beds</option>
-                      <option value="5">5+ Beds</option>
+                      <option value="1">1+</option>
+                      <option value="2">2+</option>
+                      <option value="3">3+</option>
+                      <option value="4">4+</option>
+                      <option value="5">5+</option>
                     </select>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
                     <button
                       type="button"
                       onClick={() => toggleFilter('petFriendly')}
-                      className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                         filters.petFriendly
-                          ? 'bg-[#496f5d] text-white shadow-md'
+                          ? 'bg-primary-600 text-white shadow-soft'
                           : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
                       }`}
                     >
@@ -286,13 +298,13 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                 </>
               )}
 
-              {/* LAND: ZoningColor | Area */}
+              {/* LAND: ZoningColor + Area */}
               {filters.category === 'LAND' && (
-                <div className="flex gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <select
                     value={filters.landZoneColor}
                     onChange={(e) => handleChange('landZoneColor', e.target.value)}
-                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                    className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="">All Zones</option>
                     <option value="RED">Red (Commercial)</option>
@@ -305,7 +317,7 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                   <select
                     value={filters.area}
                     onChange={(e) => handleChange('area', e.target.value)}
-                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                    className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="">All Areas</option>
                     {PATTAYA_AREAS.map((area) => (
@@ -315,32 +327,30 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                 </div>
               )}
 
-              {/* INVESTMENT: Subtype only */}
+              {/* INVESTMENT: Subtype */}
               {filters.category === 'INVESTMENT' && (
-                <div className="flex gap-2">
-                  <select
-                    value={filters.subtype}
-                    onChange={(e) => handleChange('subtype', e.target.value)}
-                    className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-                  >
-                    <option value="">All Investment Types</option>
-                    {getSubtypeOptions().map((subtype) => (
-                      <option key={subtype} value={subtype}>
-                        {subtype.replace(/_/g, ' ')}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <select
+                  value={filters.subtype}
+                  onChange={(e) => handleChange('subtype', e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="">All Investment Types</option>
+                  {getSubtypeOptions().map((subtype) => (
+                    <option key={subtype} value={subtype}>
+                      {subtype.replace(/_/g, ' ')}
+                    </option>
+                  ))}
+                </select>
               )}
 
               {/* No category selected - show generic filters */}
               {!filters.category && (
                 <>
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <select
                       value={filters.area}
                       onChange={(e) => handleChange('area', e.target.value)}
-                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">All Areas</option>
                       {PATTAYA_AREAS.map((area) => (
@@ -350,14 +360,14 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                     <select
                       value={filters.bedrooms}
                       onChange={(e) => handleChange('bedrooms', e.target.value)}
-                      className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     >
                       <option value="">Bedrooms</option>
-                      <option value="1">1+ Bed</option>
-                      <option value="2">2+ Beds</option>
-                      <option value="3">3+ Beds</option>
-                      <option value="4">4+ Beds</option>
-                      <option value="5">5+ Beds</option>
+                      <option value="1">1+</option>
+                      <option value="2">2+</option>
+                      <option value="3">3+</option>
+                      <option value="4">4+</option>
+                      <option value="5">5+</option>
                     </select>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -366,9 +376,9 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit }: M
                         key={filter.id}
                         type="button"
                         onClick={() => toggleFilter(filter.id)}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                        className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                           filters[filter.id]
-                            ? 'bg-[#496f5d] text-white shadow-md'
+                            ? 'bg-primary-600 text-white shadow-soft'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
                         }`}
                       >
