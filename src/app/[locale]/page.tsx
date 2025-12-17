@@ -21,20 +21,20 @@ async function LandingPageContent() {
   const t = await getTranslations('HomePage');
 
   let displayAgents: Agent[] = [
-    { name: "Sarah Johnson", role: "Senior Consultant", color: "bg-emerald-100" },
-    { name: "Michael Chen", role: "Investment Specialist", color: "bg-blue-100" }
+    { name: "Sarah Johnson", role: "Real Estate Consultant", color: "bg-emerald-100" },
+    { name: "Michael Chen", role: "Real Estate Consultant", color: "bg-blue-100" }
   ];
 
   try {
     const dbAgents = await prisma.agentProfile.findMany({
       where: { isActive: true },
       orderBy: { createdAt: 'asc' },
-      take: 4
+      take: 2
     });
     if (dbAgents.length > 0) {
       displayAgents = dbAgents.map((a) => ({
         name: a.name,
-        role: a.role,
+        role: "Real Estate Consultant",
         color: "bg-gray-100",
         imageUrl: a.imageUrl,
         phone: a.phone,
@@ -49,13 +49,13 @@ async function LandingPageContent() {
     <main className="min-h-screen font-sans text-gray-900">
       
       {/* 1. Hero Section */}
-      <section className="relative pt-24 pb-20 lg:pt-36 lg:pb-32 overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-white">
+      <section className="relative pt-24 pb-20 lg:pt-36 lg:pb-32 overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50">
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-          <div className="text-center max-w-4xl mx-auto">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-[#49516f] mb-8 leading-tight">
+          <div className="text-center max-w-4xl mx-auto animate-fade-in">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 leading-tight">
               {t('heroTitle')} <br />
-              <span className="text-[#496f5d] bg-clip-text text-transparent bg-gradient-to-r from-[#496f5d] to-[#6b8c7a]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 animate-float">
                 {t('heroHighlight')}
               </span>
             </h1>
@@ -65,18 +65,20 @@ async function LandingPageContent() {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
                 href="/search"
-                className="inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-full text-white bg-[#496f5d] hover:bg-[#3d5c4d] transition-all shadow-lg hover:shadow-[#496f5d]/30 transform hover:-translate-y-1"
+                className="group inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-full text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 transition-all duration-500 shadow-premium hover:shadow-glow transform hover:scale-105"
               >
-                {t('ctaExplore')} <ArrowRight className="ml-2 h-5 w-5" />
+                {t('ctaExplore')} 
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
               </Link>
             </div>
           </div>
         </div>
         
         {/* Background blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full overflow-hidden -z-10 opacity-40 pointer-events-none">
-            <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-            <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-green-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full overflow-hidden -z-10 opacity-30 pointer-events-none">
+            <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
+            <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
+            <div className="absolute bottom-[20%] left-[50%] w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
         </div>
       </section>
 
