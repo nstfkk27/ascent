@@ -88,7 +88,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-100 sticky top-0 z-50 transition-all duration-300">
+    <nav className="glass border-b border-gray-100 sticky top-0 z-50 transition-all duration-300 shadow-soft">
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 lg:px-12">
         {/* Mobile Header: Hamburger | Find | LOGO | Profile */}
         <div className="flex md:hidden items-center h-14">
@@ -141,9 +141,9 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Header */}
-        <div className="hidden md:flex items-center h-14">
-          {/* Left: Logo + Find - fixed width to balance right side */}
-          <div className="w-48 flex items-center gap-3">
+        <div className="hidden md:flex items-center justify-between h-14">
+          {/* Left: Logo + Find */}
+          <div className="flex items-center gap-8">
             <Link href="/" className="text-2xl font-bold text-[#49516f] hover:text-[#8ea4d2] transition-colors">
               Ascent
             </Link>
@@ -157,11 +157,7 @@ export default function Navbar() {
           </div>
 
           {/* Center: Navigation */}
-          <div className="flex-1 flex items-center justify-center space-x-6">
-            {/* <Link href="/properties" className="text-gray-600 hover:text-[#496f5d] font-medium transition-colors">
-              Find Property
-            </Link> */}
-            
+          <div className="flex items-center space-x-6">
             {/* House Dropdown */}
             <div 
               className="relative group"
@@ -262,12 +258,14 @@ export default function Navbar() {
           
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3">
-            <Link
-              href="/listing"
-              className="px-4 py-2 bg-[#496f5d] text-white text-sm font-medium rounded-full hover:bg-[#3d5c4d] transition-all shadow-sm hover:shadow-md"
-            >
-              Owner
-            </Link>
+            {!user && (
+              <Link
+                href="/listing"
+                className="flex items-center gap-1.5 px-4 py-2 bg-[#496f5d] text-white text-sm font-medium rounded-full hover:bg-[#3d5c4d] transition-all shadow-sm hover:shadow-md"
+              >
+                <span>Own Property?</span>
+              </Link>
+            )}
             
             {user ? (
               <div className="relative" ref={desktopProfileRef}>
