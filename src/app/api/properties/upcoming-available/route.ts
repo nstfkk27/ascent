@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     // Get agent profile to check role
-    const agentProfile = await prisma.agentProfile.findUnique({
+    const agentProfile = await prisma.agentProfile.findFirst({
       where: { email: user.email! },
       select: { role: true }
     });
