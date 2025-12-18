@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
         const project = await prisma.project.create({
           data: {
             name: row.project_name,
+            nameTh: row.project_name_th || null,
             type: row.type as any,
             address: row.address,
             city: row.city,

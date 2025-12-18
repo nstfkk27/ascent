@@ -13,16 +13,28 @@ export async function GET(request: NextRequest) {
     }
 
     // Find projects from the Project Manager system
+    // Search both English and Thai names
     const projects = await prisma.project.findMany({
       where: {
-        name: {
-          contains: query,
-          mode: 'insensitive',
-        },
+        OR: [
+          {
+            name: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+          {
+            nameTh: {
+              contains: query,
+              mode: 'insensitive',
+            },
+          },
+        ],
       },
       select: {
         id: true,
         name: true,
+        nameTh: true,
         lat: true,
         lng: true,
         address: true,

@@ -37,6 +37,7 @@ enum DealType {
 model Project {
   id             String           @id @default(uuid())
   name           String
+  nameTh         String?          // Thai name for bilingual support
   type           PropertyCategory
   address        String
   city           String
@@ -56,6 +57,7 @@ model Project {
   units          Property[]
 
   @@index([name])
+  @@index([nameTh])
   @@index([type])
   @@index([city])
   @@index([address])
