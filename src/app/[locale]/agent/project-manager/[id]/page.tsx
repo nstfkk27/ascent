@@ -42,19 +42,7 @@ export default async function EditProjectPage({ params }: { params: { id: string
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
           </a>
-          <form action={deleteProject.bind(null, project.id)}>
-            <button 
-              type="submit"
-              onClick={(e) => {
-                if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
-                  e.preventDefault();
-                }
-              }}
-              className="text-red-600 hover:text-red-700 text-sm font-medium px-3 py-1 border border-red-600 rounded hover:bg-red-50 transition-colors"
-            >
-              Delete Project
-            </button>
-          </form>
+          <DeleteProjectButton projectId={project.id} />
         </div>
       </div>
 
