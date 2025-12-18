@@ -138,12 +138,24 @@ export default function CreateProjectPage() {
         <div className="lg:col-span-2">
           <form action={createProject} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-6">
             <div className="grid grid-cols-2 gap-6">
-              <div className="col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Project Name (English)</label>
                 <input 
                   name="name" 
                   required 
                   placeholder="e.g. The Riviera Ocean Drive"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Project Name (Thai) 
+                  <span className="text-gray-400 font-normal ml-1">- Optional</span>
+                </label>
+                <input 
+                  name="nameTh" 
+                  placeholder="e.g. เดอะ ริเวียร่า โอเชี่ยน ไดรฟ์"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
                 />
               </div>

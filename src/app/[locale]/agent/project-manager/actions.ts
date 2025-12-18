@@ -50,6 +50,7 @@ export async function createProject(formData: FormData) {
 
 export async function updateProject(id: string, formData: FormData) {
   const name = formData.get('name') as string;
+  const nameTh = formData.get('nameTh') as string;
   const description = formData.get('description') as string;
   const glbUrl = formData.get('glbUrl') as string;
   const completionYear = formData.get('completionYear') ? parseInt(formData.get('completionYear') as string) : null;
@@ -63,6 +64,7 @@ export async function updateProject(id: string, formData: FormData) {
     where: { id },
     data: {
       name,
+      nameTh: nameTh || null,
       description,
       completionYear,
       totalUnits,
