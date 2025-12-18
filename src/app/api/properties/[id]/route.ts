@@ -100,10 +100,10 @@ export async function PUT(
     });
 
     let updateData = { ...body };
-    
-    // Handle empty condition string
-    if (updateData.condition === '') {
-      updateData.condition = null;
+
+    // Backwards compatibility: older clients may send unitFeatures instead of amenities
+    if ((updateData as any).unitFeatures && !(updateData as any).amenities) {
+      (updateData as any).amenities = (updateData as any).unitFeatures;
     }
     
     // Remove restricted fields if not internal
@@ -116,6 +116,8 @@ export async function PUT(
     // Remove UI-only fields that are not in the Prisma schema
     delete updateData.subtype;
     delete updateData.selectedAmenities;
+    delete (updateData as any).condition;
+    delete (updateData as any).unitFeatures;
 
     if (body.category) {
       updateData = sanitizePropertyData(updateData);

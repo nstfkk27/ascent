@@ -287,6 +287,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
+
+    // Backwards compatibility: older clients may send unitFeatures instead of amenities
+    if (body?.unitFeatures && !body?.amenities) {
+      body.amenities = body.unitFeatures;
+    }
     
     // Check User Role for Permissions
     const supabase = createClient();
@@ -341,7 +346,6 @@ export async function POST(request: NextRequest) {
         category: body.category,
         
         // Common features (House & Condo)
-        condition: body.condition || null,
         bedrooms: body.bedrooms || null,
         bathrooms: body.bathrooms || null,
         size: body.size,
@@ -351,6 +355,7 @@ export async function POST(request: NextRequest) {
         garden: body.garden || null,
         pool: body.pool || null,
         floors: body.floors || null,
+        amenities: body.amenities || null,
         
         // Project/Village Name
         projectName: body.projectName || null,
@@ -364,7 +369,6 @@ export async function POST(request: NextRequest) {
         
         // Condo-specific
         floor: body.floor || null,
-        unitFeatures: body.unitFeatures || body.amenities || null,
         
         // Investment-specific
         investmentType: body.investmentType || null,
