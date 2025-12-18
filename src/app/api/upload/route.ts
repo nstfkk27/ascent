@@ -5,7 +5,7 @@ import cloudinary from '@/lib/cloudinary';
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
 // Delete image from Cloudinary
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user) {
