@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Map, { Marker, MapMouseEvent, MarkerDragEvent } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import ImageUpload from '@/components/ImageUpload';
 import { 
   PROPERTY_CATEGORIES, 
   CATEGORY_SUBTYPES, 
@@ -25,8 +26,6 @@ const formatNumber = (num: number) => {
 export default function QuickDropPage() {
   const router = useRouter();
   const [isSaving, setIsSaving] = useState(false);
-  
-  const [isUploading, setIsUploading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   
   // Project Autocomplete State
@@ -124,55 +123,6 @@ export default function QuickDropPage() {
     // Check features for selected subtype
     const features = SUBTYPE_FEATURES[formData.subtype as keyof typeof SUBTYPE_FEATURES] as readonly string[] || [];
     return features.includes(fieldName);
-  };
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    
-    setIsUploading(true);
-    const files = Array.from(e.target.files);
-    const newImages: string[] = [];
-
-    // We need the Supabase client here. 
-    // Note: In a real app, we should import createClient from utils
-    // But for this snippet to work without breaking if utils aren't perfect, 
-    // I'll assume the user has set up the bucket 'properties'
-    
-    // For now, since we might not have the bucket created, 
-    // I will simulate the upload if Supabase fails, or try to upload real if keys exist.
-    
-    try {
-      // Dynamic import to avoid server-side issues if any
-      const { createClient } = await import('@/utils/supabase/client');
-      const supabase = createClient();
-
-      for (const file of files) {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const filePath = `${fileName}`;
-
-        const { error: uploadError } = await supabase.storage
-          .from('properties')
-          .upload(filePath, file);
-
-        if (uploadError) {
-          console.error('Upload error:', uploadError);
-          // Fallback for demo: create a fake URL object
-          newImages.push(URL.createObjectURL(file));
-        } else {
-          const { data } = supabase.storage.from('properties').getPublicUrl(filePath);
-          newImages.push(data.publicUrl);
-        }
-      }
-      setUploadedImages(prev => [...prev, ...newImages]);
-    } catch (err) {
-      console.error('Supabase client error:', err);
-      // Fallback
-      files.forEach(f => newImages.push(URL.createObjectURL(f)));
-      setUploadedImages(prev => [...prev, ...newImages]);
-    } finally {
-      setIsUploading(false);
-    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -397,30 +347,12 @@ export default function QuickDropPage() {
 
           <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
             <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
-            <div className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer relative">
-              <input 
-                type="file" 
-                multiple 
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <p className="text-gray-500 text-sm">
-                {isUploading ? 'Uploading...' : 'Drag & drop images or click to select'}
-              </p>
-            </div>
-            
-            {/* Image Preview Grid */}
-            {uploadedImages.length > 0 && (
-              <div className="grid grid-cols-3 gap-2 mt-4">
-                {uploadedImages.map((img, idx) => (
-                  <div key={idx} className="relative aspect-square bg-gray-100 rounded overflow-hidden border">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img} alt="Preview" className="w-full h-full object-cover" />
-                  </div>
-                ))}
-              </div>
-            )}
+            <ImageUpload
+              images={uploadedImages}
+              onChange={setUploadedImages}
+              maxImages={10}
+              folder="properties"
+            />
           </div>
         </div>
 
