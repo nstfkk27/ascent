@@ -175,10 +175,10 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
 
   return (
     <div className="bg-white/95 backdrop-blur-md shadow-xl rounded-2xl p-4 border border-gray-100">
-      {/* Row 1: Search Input + Category + Buy/Rent */}
+      {/* Single Row Layout: All filters in one row on desktop, stacked on mobile */}
       <div className="flex flex-col md:flex-row gap-2">
         {/* Search Input */}
-        <div className="relative flex-1 min-w-0">
+        <div className="relative md:flex-1 md:max-w-xs">
           <input
             type="text"
             name="query"
@@ -192,56 +192,56 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
           </svg>
         </div>
 
-        <div className="flex gap-2">
-          {/* Category */}
-          <select
-            name="category"
-            value={filters.category}
-            onChange={handleChange}
-            className="flex-1 md:w-28 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="">Type</option>
-            {Object.entries(PROPERTY_CATEGORIES).map(([key, value]) => (
-              <option key={key} value={key}>{value}</option>
-            ))}
-          </select>
+        {/* Category */}
+        <select
+          name="category"
+          value={filters.category}
+          onChange={handleChange}
+          className="md:w-40 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <option value="">Type</option>
+          {Object.entries(PROPERTY_CATEGORIES).map(([key, value]) => (
+            <option key={key} value={key}>{value}</option>
+          ))}
+        </select>
 
-          {/* Listing Type */}
-          <select
-            name="listingType"
-            value={filters.listingType}
-            onChange={handleChange}
-            className="flex-1 md:w-28 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="">Buy/Rent</option>
-            <option value="SALE">For Sale</option>
-            <option value="RENT">For Rent</option>
-          </select>
-        </div>
-      </div>
+        {/* Listing Type */}
+        <select
+          name="listingType"
+          value={filters.listingType}
+          onChange={handleChange}
+          className="md:w-40 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+        >
+          <option value="">Buy/Rent</option>
+          <option value="SALE">For Sale</option>
+          <option value="RENT">For Rent</option>
+        </select>
 
-      {/* Row 2: Min/Max Price + More Filters Button */}
-      <div className="flex gap-2 mt-2">
+        {/* Min Price */}
         <input
           type="text"
           name="minPrice"
           placeholder="Min"
           value={filters.minPrice}
           onChange={handleChange}
-          className="w-28 md:flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 md:px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="md:w-42 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
+
+        {/* Max Price */}
         <input
           type="text"
           name="maxPrice"
           placeholder="Max"
           value={filters.maxPrice}
           onChange={handleChange}
-          className="w-28 md:flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 md:px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          className="md:w-42 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
+
+        {/* More Filters Button */}
         <button
           type="button"
           onClick={() => setShowMoreFilters(!showMoreFilters)}
-          className={`w-20 md:w-24 px-2 md:px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-1 md:gap-1.5 whitespace-nowrap ${
+          className={`md:w-28 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-1.5 whitespace-nowrap ${
             showMoreFilters 
               ? 'bg-primary-600 text-white shadow-soft' 
               : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
@@ -263,44 +263,42 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
       {showMoreFilters && (
         <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
           
-          {/* CONDO: Area | Bedroom + Pills */}
+          {/* CONDO: Area | Bedroom + Pills - Single Row on Desktop */}
           {filters.category === 'CONDO' && (
-            <>
-              <div className="flex gap-2">
-                <select
-                  name="area"
-                  value={filters.area}
-                  onChange={handleChange}
-                  className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-                >
-                  <option value="">All Areas</option>
-                  {PATTAYA_AREAS.map((area) => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
-                <select
-                  name="bedrooms"
-                  value={filters.bedrooms}
-                  onChange={handleChange}
-                  className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-                >
-                  <option value="">Bedrooms</option>
-                  <option value="1">1+ Bed</option>
-                  <option value="2">2+ Beds</option>
-                  <option value="3">3+ Beds</option>
-                  <option value="4">4+ Beds</option>
-                  <option value="5">5+ Beds</option>
-                </select>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-col md:flex-row gap-2">
+              <select
+                name="area"
+                value={filters.area}
+                onChange={handleChange}
+                className="md:w-40 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">All Areas</option>
+                {PATTAYA_AREAS.map((area) => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+              <select
+                name="bedrooms"
+                value={filters.bedrooms}
+                onChange={handleChange}
+                className="md:w-40 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">Bedrooms</option>
+                <option value="1">1+ Bed</option>
+                <option value="2">2+ Beds</option>
+                <option value="3">3+ Beds</option>
+                <option value="4">4+ Beds</option>
+                <option value="5">5+ Beds</option>
+              </select>
+              <div className="flex flex-wrap gap-1.5 md:items-center">
                 {quickFilters.filter(f => f.show).map((filter) => (
                   <button
                     key={filter.id}
                     type="button"
                     onClick={() => toggleFilter(filter.id)}
-                    className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
+                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
                       filters[filter.id]
-                        ? 'bg-[#496f5d] text-white shadow-md'
+                        ? 'bg-primary-600 text-white shadow-soft'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
                     }`}
                   >
@@ -309,78 +307,72 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
                   </button>
                 ))}
               </div>
-            </>
+            </div>
           )}
 
-          {/* HOUSE: Subtype | Area, Bedroom, Pet Friendly pill only */}
+          {/* HOUSE: Subtype | Area | Bedroom | Pet Friendly - Single Row on Desktop */}
           {filters.category === 'HOUSE' && (
-            <>
-              <div className="flex gap-2">
-                <select
-                  name="subtype"
-                  value={filters.subtype}
-                  onChange={handleChange}
-                  className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-                >
-                  <option value="">All House Types</option>
-                  {getSubtypeOptions().map((subtype) => (
-                    <option key={subtype} value={subtype}>
-                      {PROPERTY_SUBTYPES[subtype as keyof typeof PROPERTY_SUBTYPES] || subtype.replace(/_/g, ' ')}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  name="area"
-                  value={filters.area}
-                  onChange={handleChange}
-                  className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-                >
-                  <option value="">All Areas</option>
-                  {PATTAYA_AREAS.map((area) => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex gap-2">
-                <select
-                  name="bedrooms"
-                  value={filters.bedrooms}
-                  onChange={handleChange}
-                  className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-                >
-                  <option value="">Bedrooms</option>
-                  <option value="1">1+ Bed</option>
-                  <option value="2">2+ Beds</option>
-                  <option value="3">3+ Beds</option>
-                  <option value="4">4+ Beds</option>
-                  <option value="5">5+ Beds</option>
-                </select>
-              </div>
-              <div className="flex flex-wrap gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => toggleFilter('petFriendly')}
-                  className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1 ${
-                    filters.petFriendly
-                      ? 'bg-[#496f5d] text-white shadow-md'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
-                  }`}
-                >
-                  <span>🐾</span>
-                  <span>Pet Friendly</span>
-                </button>
-              </div>
-            </>
+            <div className="flex flex-col md:flex-row gap-2">
+              <select
+                name="subtype"
+                value={filters.subtype}
+                onChange={handleChange}
+                className="md:w-40 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">All House Types</option>
+                {getSubtypeOptions().map((subtype) => (
+                  <option key={subtype} value={subtype}>
+                    {PROPERTY_SUBTYPES[subtype as keyof typeof PROPERTY_SUBTYPES] || subtype.replace(/_/g, ' ')}
+                  </option>
+                ))}
+              </select>
+              <select
+                name="area"
+                value={filters.area}
+                onChange={handleChange}
+                className="md:w-40 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">All Areas</option>
+                {PATTAYA_AREAS.map((area) => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+              <select
+                name="bedrooms"
+                value={filters.bedrooms}
+                onChange={handleChange}
+                className="md:w-40 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="">Bedrooms</option>
+                <option value="1">1+ Bed</option>
+                <option value="2">2+ Beds</option>
+                <option value="3">3+ Beds</option>
+                <option value="4">4+ Beds</option>
+                <option value="5">5+ Beds</option>
+              </select>
+              <button
+                type="button"
+                onClick={() => toggleFilter('petFriendly')}
+                className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 md:self-start ${
+                  filters.petFriendly
+                    ? 'bg-primary-600 text-white shadow-soft'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border border-gray-200'
+                }`}
+              >
+                <span>🐾</span>
+                <span>Pet Friendly</span>
+              </button>
+            </div>
           )}
 
-          {/* LAND: ZoningColor | Area */}
+          {/* LAND: ZoningColor | Area - Single Row on Desktop */}
           {filters.category === 'LAND' && (
-            <div className="flex gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
               <select
                 name="landZoneColor"
                 value={filters.landZoneColor}
                 onChange={handleChange}
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                className="md:w-52 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">All Zones</option>
                 <option value="RED">Red (Commercial)</option>
@@ -394,7 +386,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
                 name="area"
                 value={filters.area}
                 onChange={handleChange}
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                className="md:w-40 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">All Areas</option>
                 {PATTAYA_AREAS.map((area) => (
@@ -404,14 +396,14 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             </div>
           )}
 
-          {/* INVESTMENT: Subtype only */}
+          {/* INVESTMENT: Subtype only - Single Row on Desktop */}
           {filters.category === 'INVESTMENT' && (
-            <div className="flex gap-2">
+            <div className="flex flex-col md:flex-row gap-2">
               <select
                 name="subtype"
                 value={filters.subtype}
                 onChange={handleChange}
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                className="md:w-52 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 <option value="">All Investment Types</option>
                 {getSubtypeOptions().map((subtype) => (
