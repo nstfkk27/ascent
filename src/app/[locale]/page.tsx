@@ -55,7 +55,7 @@ async function LandingPageContent() {
           <div className="text-center max-w-4xl mx-auto animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 leading-tight">
               {t('heroTitle')} <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 via-primary-500 to-primary-400 animate-float">
+              <span className="text-[#496f5d] font-bold">
                 {t('heroHighlight')}
               </span>
             </h1>
@@ -65,7 +65,7 @@ async function LandingPageContent() {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Link
                 href="/search"
-                className="group inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-full text-white bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 transition-all duration-500 shadow-premium hover:shadow-glow transform hover:scale-105"
+                className="group inline-flex items-center justify-center px-8 py-4 text-base font-bold rounded-full text-white bg-[#496f5d] hover:bg-[#3d5c4d] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
               >
                 {t('ctaExplore')} 
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />

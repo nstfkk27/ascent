@@ -58,23 +58,23 @@ export default function PropertyCard({ property }: PropertyCardProps) {
 
   return (
     <Link href={`/properties/${property.id}`} className="block group">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02]">
         <div className="relative h-64 overflow-hidden">
           <Image
             src={property.images[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'}
             alt={property.title}
             fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           
           <div className="absolute top-4 right-4">
-            <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-sm ${getCategoryColor(property.category)}`}>
+            <span className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-premium backdrop-blur-sm ${getCategoryColor(property.category)}`}>
               {property.category}
             </span>
           </div>
           <div className="absolute top-4 left-4">
-            <span className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-700 shadow-sm">
+            <span className="glass px-3 py-1.5 rounded-full text-xs font-bold text-gray-700 shadow-soft">
               {property.listingType === 'BOTH' ? 'Sale & Rent' : (property.listingType === 'SALE' ? 'For Sale' : 'For Rent')}
             </span>
           </div>
@@ -91,18 +91,18 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           <div className="flex justify-between items-start mb-2">
             <div>
               {property.projectName && (
-                <p className="text-xs font-medium text-[#8ea4d2] mb-1 uppercase tracking-wide">
+                <p className="text-xs font-semibold text-primary-500 mb-1 uppercase tracking-wide">
                   {property.projectName}
                 </p>
               )}
-              <h3 className="text-lg font-bold text-[#49516f] line-clamp-1 group-hover:text-[#496f5d] transition-colors">
+              <h3 className="text-lg font-bold text-gray-900 line-clamp-1 group-hover:text-primary-600 transition-colors duration-300">
                 {property.title}
               </h3>
             </div>
           </div>
           
           <p className="text-sm text-gray-500 mb-4 flex items-center gap-1 line-clamp-1">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
@@ -112,7 +112,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           <div className="mb-4 pb-4 border-b border-gray-100">
             {property.listingType === 'BOTH' ? (
               <div className="flex items-baseline gap-2">
-                <span className="text-xl font-bold text-[#496f5d]">
+                <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
                   ฿{Number(property.price).toLocaleString()}
                 </span>
                 {property.rentPrice && (
@@ -122,11 +122,11 @@ export default function PropertyCard({ property }: PropertyCardProps) {
                 )}
               </div>
             ) : property.listingType === 'RENT' ? (
-              <p className="text-xl font-bold text-[#496f5d]">
+              <p className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
                 ฿{Number(property.rentPrice || property.price).toLocaleString()}<span className="text-sm font-normal text-gray-500">/mo</span>
               </p>
             ) : (
-              <p className="text-xl font-bold text-[#496f5d]">
+              <p className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
                 ฿{Number(property.price).toLocaleString()}
               </p>
             )}

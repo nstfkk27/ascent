@@ -258,6 +258,7 @@ export async function GET(request: NextRequest) {
       longitude: p.longitude ? p.longitude.toNumber() : null,
       commissionRate: p.commissionRate ? p.commissionRate.toNumber() : null,
       commissionAmount: p.commissionAmount ? p.commissionAmount.toNumber() : null,
+      agentCommissionRate: p.agentCommissionRate ? p.agentCommissionRate.toNumber() : null,
       coAgentCommissionRate: p.coAgentCommissionRate ? p.coAgentCommissionRate.toNumber() : null,
     }));
     
@@ -358,7 +359,8 @@ export async function POST(request: NextRequest) {
         // Commission (Restricted)
         commissionRate: isInternal ? (body.commissionRate || null) : null,
         commissionAmount: isInternal ? (body.commissionAmount || null) : null,
-        coAgentCommissionRate: isInternal ? (body.coAgentCommissionRate || null) : null,
+        agentCommissionRate: body.agentCommissionRate || null, // All agents can set this
+        coAgentCommissionRate: body.coAgentCommissionRate || null, // All agents can set this
         
         // Condo-specific
         floor: body.floor || null,

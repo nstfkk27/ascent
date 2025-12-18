@@ -40,13 +40,17 @@ export async function GET(
     const isAgent = role === 'AGENT';
 
     if (!isInternal) {
-      // Hide full commission details for non-internal users
+      // Hide platform commission details for non-internal users
       (property as any).commissionRate = null;
       (property as any).commissionAmount = null;
+      
+      // Show agent commission rate to all agents (including external AGENT role)
+      // agentCommissionRate remains visible to all authenticated agents
 
       // Hide co-agent rate for public users (non-agents)
       if (!isAgent) {
         (property as any).coAgentCommissionRate = null;
+        (property as any).agentCommissionRate = null; // Also hide for public
       }
     }
     
@@ -106,7 +110,7 @@ export async function PUT(
     if (!isInternal) {
         delete updateData.commissionRate;
         delete updateData.commissionAmount;
-        delete updateData.coAgentCommissionRate;
+        // agentCommissionRate and coAgentCommissionRate can be updated by all agents
     }
 
     // Remove UI-only fields that are not in the Prisma schema

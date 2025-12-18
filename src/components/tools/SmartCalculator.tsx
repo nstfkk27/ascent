@@ -165,7 +165,20 @@ function TransferFeeCalculator() {
             onChange={(e) => setAppraisedValue(parseNumber(e.target.value))}
             className="w-full p-2 border rounded-lg focus:ring-2 focus:ring-[#496f5d] text-gray-900"
           />
-          <p className="text-xs text-gray-500 mt-1">Government assessed value. Used for Transfer Fee & WHT.</p>
+          <div className="flex items-center justify-between mt-1">
+            <p className="text-xs text-gray-500">Government assessed value. Used for Transfer Fee & WHT.</p>
+            <a
+              href="https://assessprice.treasury.go.th/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-[#496f5d] hover:text-[#3d5c4d] font-medium hover:underline flex items-center gap-1 whitespace-nowrap"
+            >
+              Check Appraisal Value
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </a>
+          </div>
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Seller Type</label>
@@ -214,26 +227,26 @@ function TransferFeeCalculator() {
         <div className="space-y-3">
           <div className="flex justify-between">
             <span className="text-gray-600">Transfer Fee (2%)</span>
-            <span className="font-medium">฿{results.transferFee.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+            <span className="font-medium text-gray-900">฿{results.transferFee.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
           </div>
           
           {results.sbt > 0 && (
             <div className="flex justify-between">
               <span className="text-gray-600">Specific Business Tax (3.3%)</span>
-              <span className="font-medium">฿{results.sbt.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+              <span className="font-medium text-gray-900">฿{results.sbt.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
             </div>
           )}
           
           {results.stampDuty > 0 && (
             <div className="flex justify-between">
               <span className="text-gray-600">Stamp Duty (0.5%)</span>
-              <span className="font-medium">฿{results.stampDuty.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+              <span className="font-medium text-gray-900">฿{results.stampDuty.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
             </div>
           )}
           
           <div className="flex justify-between">
             <span className="text-gray-600">Withholding Tax (WHT)</span>
-            <span className="font-medium">฿{results.wht.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+            <span className="font-medium text-gray-900">฿{results.wht.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
           </div>
           
           <div className="pt-4 border-t border-gray-200 mt-4">
@@ -345,11 +358,11 @@ function MortgageCalculator() {
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Loan Amount</span>
-              <span className="font-medium">฿{loanAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+              <span className="font-medium text-gray-900">฿{loanAmount.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-600">Total Interest</span>
-              <span className="font-medium">฿{totalInterest.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
+              <span className="font-medium text-gray-900">฿{totalInterest.toLocaleString(undefined, {maximumFractionDigits: 0})}</span>
             </div>
             <div className="flex justify-between text-sm pt-2 border-t">
               <span className="text-gray-800 font-medium">Total Payment</span>
