@@ -174,36 +174,50 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-lg">
-      {/* Row 1: Input + Category */}
-      <div className="flex gap-2">
+    <div className="bg-white/95 backdrop-blur-md shadow-xl rounded-2xl p-4 border border-gray-100">
+      {/* Row 1: Search Input + Category + Buy/Rent */}
+      <div className="flex flex-col md:flex-row gap-2">
         {/* Search Input */}
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           <input
             type="text"
             name="query"
             placeholder="Search project name, location..."
             value={filters.query}
             onChange={handleChange}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#496f5d] focus:border-transparent"
+            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
-          <svg className="w-4 h-4 text-gray-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
 
-        {/* Category */}
-        <select
-          name="category"
-          value={filters.category}
-          onChange={handleChange}
-          className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
-        >
-          <option value="">All Types</option>
-          {Object.entries(PROPERTY_CATEGORIES).map(([key, value]) => (
-            <option key={key} value={key}>{value}</option>
-          ))}
-        </select>
+        <div className="flex gap-2">
+          {/* Category */}
+          <select
+            name="category"
+            value={filters.category}
+            onChange={handleChange}
+            className="flex-1 md:w-28 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="">Type</option>
+            {Object.entries(PROPERTY_CATEGORIES).map(([key, value]) => (
+              <option key={key} value={key}>{value}</option>
+            ))}
+          </select>
+
+          {/* Listing Type */}
+          <select
+            name="listingType"
+            value={filters.listingType}
+            onChange={handleChange}
+            className="flex-1 md:w-28 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="">Buy/Rent</option>
+            <option value="SALE">For Sale</option>
+            <option value="RENT">For Rent</option>
+          </select>
+        </div>
       </div>
 
       {/* Row 2: Min/Max Price + More Filters Button */}
@@ -211,34 +225,34 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
         <input
           type="text"
           name="minPrice"
-          placeholder="Min Price"
+          placeholder="Min"
           value={filters.minPrice}
           onChange={handleChange}
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+          className="w-28 md:flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 md:px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
         <input
           type="text"
           name="maxPrice"
-          placeholder="Max Price"
+          placeholder="Max"
           value={filters.maxPrice}
           onChange={handleChange}
-          className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+          className="w-28 md:flex-1 bg-gray-50 border border-gray-200 rounded-lg px-2 md:px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
         />
         <button
           type="button"
           onClick={() => setShowMoreFilters(!showMoreFilters)}
-          className={`px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap ${
+          className={`w-20 md:w-24 px-2 md:px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center justify-center gap-1 md:gap-1.5 whitespace-nowrap ${
             showMoreFilters 
-              ? 'bg-[#496f5d] text-white' 
-              : 'bg-[#e8f0eb] text-[#496f5d] hover:bg-[#d1e0d6]'
+              ? 'bg-primary-600 text-white shadow-soft' 
+              : 'bg-primary-50 text-primary-600 hover:bg-primary-100'
           }`}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
           </svg>
-          {showMoreFilters ? 'Less' : 'More'}
+          <span className="flex-shrink-0">{showMoreFilters ? 'Less' : 'More'}</span>
           {getActiveFilterCount() > 0 && (
-            <span className="bg-white/20 text-xs px-1.5 py-0.5 rounded-full">
+            <span className="bg-white/30 text-xs px-1.5 py-0.5 rounded-full font-semibold flex-shrink-0">
               {getActiveFilterCount()}
             </span>
           )}
