@@ -24,6 +24,7 @@ interface ListingFormData {
   size: number;
   bedrooms: number;
   bathrooms: number;
+  isStudio: boolean;
   description: string;
   address: string;
   city: string;
@@ -80,6 +81,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     size: 0,
     bedrooms: 0,
     bathrooms: 0,
+    isStudio: false,
     description: '',
     address: '',
     city: 'Pattaya',
@@ -162,6 +164,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
             size: p.size,
             bedrooms: p.bedrooms || 0,
             bathrooms: p.bathrooms || 0,
+            isStudio: p.isStudio || false,
             description: p.description,
             address: p.address,
             city: p.city,
@@ -673,18 +676,44 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
               </div>
 
               {shouldShowField('bedrooms') && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {formData.subtype === 'HOTEL' ? 'Number of Rooms' : 'Bedrooms'}
-                  </label>
-                  <input 
-                    type="number" 
-                    name="bedrooms"
-                    value={formData.bedrooms}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                  />
-                </div>
+                <>
+                  {/* Studio Checkbox for Condos */}
+                  {formData.category === 'CONDO' && (
+                    <div className="col-span-2">
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="isStudio"
+                          checked={formData.isStudio}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            setFormData(prev => ({
+                              ...prev,
+                              isStudio: isChecked,
+                              bedrooms: isChecked ? 0 : prev.bedrooms
+                            }));
+                          }}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Studio (0 Bedrooms)</span>
+                      </label>
+                    </div>
+                  )}
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {formData.subtype === 'HOTEL' ? 'Number of Rooms' : 'Bedrooms'}
+                    </label>
+                    <input 
+                      type="number" 
+                      name="bedrooms"
+                      value={formData.bedrooms}
+                      onChange={handleChange}
+                      disabled={formData.isStudio}
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:cursor-not-allowed" 
+                    />
+                  </div>
+                </>
               )}
 
               {shouldShowField('bathrooms') && (

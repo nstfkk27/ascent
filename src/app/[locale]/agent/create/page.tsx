@@ -56,6 +56,7 @@ export default function QuickDropPage() {
     size: 0,
     bedrooms: 0,
     bathrooms: 0,
+    isStudio: false,
     description: '',
     address: '',
     city: 'Pattaya', // Default
@@ -640,6 +641,29 @@ export default function QuickDropPage() {
               {/* Dynamic Fields */}
               {shouldShowField('bedrooms') && (
                 <>
+                  {/* Studio Checkbox for Condos */}
+                  {formData.category === 'CONDO' && (
+                    <div className="col-span-2 md:col-span-2">
+                      <label className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="isStudio"
+                          checked={formData.isStudio}
+                          onChange={(e) => {
+                            const isChecked = e.target.checked;
+                            setFormData(prev => ({
+                              ...prev,
+                              isStudio: isChecked,
+                              bedrooms: isChecked ? 0 : prev.bedrooms
+                            }));
+                          }}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700">Studio (0 Bedrooms)</span>
+                      </label>
+                    </div>
+                  )}
+                  
                   <div className="col-span-1 md:col-span-1">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {formData.subtype === 'HOTEL' ? 'Number of Rooms' : 'Bedrooms'}
@@ -649,7 +673,8 @@ export default function QuickDropPage() {
                       name="bedrooms"
                       value={formData.bedrooms}
                       onChange={handleChange}
-                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                      disabled={formData.isStudio}
+                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base disabled:bg-gray-100 disabled:cursor-not-allowed" 
                     />
                   </div>
                   <div className="col-span-1 md:col-span-1">
