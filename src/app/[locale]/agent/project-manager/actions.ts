@@ -162,3 +162,22 @@ export async function deleteFacility(facilityId: string, projectId: string, form
 
   revalidatePath(`/agent/project-manager/${projectId}`);
 }
+
+export async function deleteProject(id: string, formData: FormData) {
+  // Delete all related data first
+  await prisma.facility.deleteMany({
+    where: { projectId: id }
+  });
+  
+  await prisma.modelAsset.deleteMany({
+    where: { projectId: id }
+  });
+  
+  // Delete the project
+  await prisma.project.delete({
+    where: { id }
+  });
+
+  revalidatePath('/agent/project-manager');
+  redirect('/agent/project-manager');
+}
