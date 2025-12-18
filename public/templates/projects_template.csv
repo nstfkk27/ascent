@@ -1,0 +1,3 @@
+project_name,type,address,city,latitude,longitude,developer,completion_year,description,total_units,total_buildings,total_floors,project_image_url
+The Riviera Jomtien,CONDO,123 Beach Road Jomtien,Pattaya,12.923600,100.882500,Riviera Group,2024,"Luxury beachfront condominium with stunning ocean views and world-class facilities",500,3,30,https://example.com/riviera.jpg
+Palm Gardens Village,HOUSE,456 Sukhumvit Road,Pattaya,12.934500,100.877800,Palm Developers,2023,"Exclusive gated community with modern pool villas and 24/7 security",120,0,2,https://example.com/palm.jpg
