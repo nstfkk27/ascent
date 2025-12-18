@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 interface Property {
@@ -33,12 +33,7 @@ export default function MarketingPage() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
-  useEffect(() => {
-    // Load initial recent properties
-    searchProperties('');
-  }, []);
-
-  const searchProperties = async (query: string) => {
+  const searchProperties = useCallback(async (query: string) => {
     setLoading(true);
     try {
       const url = query 
@@ -51,33 +46,33 @@ export default function MarketingPage() {
       if (data.success) {
         setProperties(data.data);
         // If we have no selection yet and results exist, select the first one
-        if (!selectedPropertyId && data.data.length > 0 && !query) {
-          setSelectedPropertyId(data.data[0].id);
-        }
+        setSelectedPropertyId((current) => {
+          if (!current && data.data.length > 0 && !query) {
+            return data.data[0].id;
+          }
+          return current;
+        });
       }
     } catch (err) {
       console.error('Failed to search properties', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    // Load initial recent properties
+    searchProperties('');
+  }, [searchProperties]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
         searchProperties(searchQuery);
     }, 500);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, searchProperties]);
 
-  useEffect(() => {
-    if (!selectedPropertyId) return;
-    const property = properties.find(p => p.id === selectedPropertyId);
-    if (property) {
-      setPostText(generatePost(property));
-    }
-  }, [selectedPropertyId, properties]);
-
-  const generatePost = (p: Property) => {
+  const generatePost = useCallback((p: Property) => {
     const type = p.listingType === 'SALE' ? 'Sale' : 'Rent';
     const emoji = p.category === 'CONDO' ? '🏢' : '🏠';
     
@@ -104,7 +99,15 @@ Tel: 0xx-xxx-xxxx
 Line: @ascentweb
 
 #PattayaRealEstate #PattayaProperty #ThailandRealEstate #${p.category}Pattaya`;
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedPropertyId) return;
+    const property = properties.find(p => p.id === selectedPropertyId);
+    if (property) {
+      setPostText(generatePost(property));
+    }
+  }, [selectedPropertyId, properties, generatePost]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(postText);

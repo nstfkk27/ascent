@@ -1,11 +1,12 @@
 import { prisma } from '@/lib/prisma';
-import { updateProject, linkMatchingUnits, addFacility, deleteFacility, deleteProject } from '../actions';
+import { updateProject, linkMatchingUnits, deleteFacility } from '../actions';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
 import ModelUrlInput from '@/components/agent/ModelUrlInput';
 import AddFacilityForm from '@/components/agent/AddFacilityForm';
 import ImageUrlInput from '@/components/agent/ImageUrlInput';
+import DeleteProjectButton from '@/components/agent/DeleteProjectButton';
 
 export const dynamic = 'force-dynamic';
 

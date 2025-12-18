@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
 import { 
   Plus, Building, Clock, CheckCircle, AlertTriangle, 
@@ -183,6 +184,7 @@ export default function AgentDashboard() {
   }, [fetchStats, profile]);
 
   const isInternalAgent = profile?.role === 'SUPER_ADMIN' || profile?.role === 'PLATFORM_AGENT';
+  const avatarSrc = imagePreview || editedProfile.imageUrl || profile?.imageUrl;
 
   return (
     <div className="space-y-6">
@@ -193,8 +195,15 @@ export default function AgentDashboard() {
             {/* Avatar */}
             <div className="flex-shrink-0">
               <div className="relative w-20 h-20 rounded-2xl bg-gradient-to-br from-[#496f5d] to-[#3d5c4d] flex items-center justify-center text-white text-2xl font-bold shadow-lg overflow-hidden">
-                {imagePreview || editedProfile.imageUrl || profile?.imageUrl ? (
-                  <img src={imagePreview || editedProfile.imageUrl || profile?.imageUrl} alt="Profile" className="w-full h-full object-cover" />
+                {avatarSrc ? (
+                  <Image
+                    src={avatarSrc}
+                    alt="Profile"
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                    unoptimized={Boolean(avatarSrc?.startsWith('data:'))}
+                  />
                 ) : (
                   profile?.name?.[0]?.toUpperCase() || 'A'
                 )}
