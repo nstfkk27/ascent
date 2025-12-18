@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma';
-import { updateProject, linkMatchingUnits, addFacility, deleteFacility } from '../actions';
+import { updateProject, linkMatchingUnits, addFacility, deleteFacility, deleteProject } from '../actions';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
