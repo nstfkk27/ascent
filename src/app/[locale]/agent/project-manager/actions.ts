@@ -69,6 +69,7 @@ export async function createProject(formData: FormData) {
 
 export async function updateProject(id: string, formData: FormData) {
   const name = formData.get('name') as string;
+  const nameTh = formData.get('nameTh') as string;
   const description = formData.get('description') as string;
   const glbUrl = formData.get('glbUrl') as string;
   const completionYear = formData.get('completionYear') ? parseInt(formData.get('completionYear') as string) : null;
@@ -82,12 +83,13 @@ export async function updateProject(id: string, formData: FormData) {
     where: { id },
     data: {
       name,
+      nameTh: nameTh || null,
       description,
       completionYear,
       totalUnits,
       totalFloors,
       totalBuildings,
-      imageUrl,
+      imageUrl: imageUrl || null,
     }
   });
 
@@ -159,23 +161,4 @@ export async function deleteFacility(facilityId: string, projectId: string, form
   });
 
   revalidatePath(`/agent/project-manager/${projectId}`);
-}
-
-export async function deleteProject(id: string, formData: FormData) {
-  // Delete all related data first
-  await prisma.facility.deleteMany({
-    where: { projectId: id }
-  });
-  
-  await prisma.modelAsset.deleteMany({
-    where: { projectId: id }
-  });
-  
-  // Delete the project
-  await prisma.project.delete({
-    where: { id }
-  });
-
-  revalidatePath('/agent/project-manager');
-  redirect('/agent/project-manager');
 }

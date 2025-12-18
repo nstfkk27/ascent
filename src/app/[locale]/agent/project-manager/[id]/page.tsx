@@ -31,16 +31,31 @@ export default async function EditProjectPage({ params }: { params: { id: string
           <h1 className="text-3xl font-bold text-gray-800">Edit Project: {project.name}</h1>
           <p className="text-gray-600">ID: {project.id}</p>
         </div>
-        <a 
-          href={`/project/${project.name}`} 
-          target="_blank"
-          className="text-blue-600 hover:underline text-sm flex items-center gap-1"
-        >
-          View Public Page 
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
-        </a>
+        <div className="flex gap-3">
+          <a 
+            href={`/project/${project.name}`} 
+            target="_blank"
+            className="text-blue-600 hover:underline text-sm flex items-center gap-1"
+          >
+            View Public Page 
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
+          </a>
+          <form action={deleteProject.bind(null, project.id)}>
+            <button 
+              type="submit"
+              onClick={(e) => {
+                if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+                  e.preventDefault();
+                }
+              }}
+              className="text-red-600 hover:text-red-700 text-sm font-medium px-3 py-1 border border-red-600 rounded hover:bg-red-50 transition-colors"
+            >
+              Delete Project
+            </button>
+          </form>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
