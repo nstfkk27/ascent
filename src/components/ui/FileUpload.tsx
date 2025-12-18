@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { createClient } from '@/utils/supabase/client';
 
 interface FileUploadProps {
   bucket: string;
@@ -33,23 +32,24 @@ export default function FileUpload({
       }
 
       const file = event.target.files[0];
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = folder ? `${folder}/${fileName}` : fileName;
 
-      const supabase = createClient();
+      // Upload to Cloudinary via our API
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('folder', folder || bucket);
 
-      const { error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file);
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-      if (uploadError) {
-        throw uploadError;
+      const data = await res.json();
+
+      if (!data.success) {
+        throw new Error(data.error || 'Upload failed');
       }
 
-      const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
-      
-      onUploadComplete(data.publicUrl);
+      onUploadComplete(data.url);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error: any) {

@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 
 export async function createProject(formData: FormData) {
   const name = formData.get('name') as string;
+  const nameTh = formData.get('nameTh') as string;
   const type = formData.get('type') as any;
   const address = formData.get('address') as string;
   const city = formData.get('city') as string;
@@ -19,10 +20,22 @@ export async function createProject(formData: FormData) {
   const totalBuildings = formData.get('totalBuildings') ? parseInt(formData.get('totalBuildings') as string) : null;
   const glbUrl = formData.get('glbUrl') as string;
   const imageUrl = formData.get('imageUrl') as string;
+  const facilitiesJson = formData.get('facilities') as string;
+
+  // Parse facilities
+  let facilities: Array<{ name: string; imageUrl: string }> = [];
+  try {
+    if (facilitiesJson) {
+      facilities = JSON.parse(facilitiesJson);
+    }
+  } catch (e) {
+    console.error('Failed to parse facilities:', e);
+  }
 
   const project = await prisma.project.create({
     data: {
       name,
+      nameTh: nameTh || null,
       type,
       address,
       city,
@@ -40,6 +53,12 @@ export async function createProject(formData: FormData) {
           glbUrl,
           placement: {}
         }
+      } : undefined,
+      facilities: facilities.length > 0 ? {
+        create: facilities.map(f => ({
+          name: f.name,
+          imageUrl: f.imageUrl || null
+        }))
       } : undefined
     }
   });
@@ -50,7 +69,6 @@ export async function createProject(formData: FormData) {
 
 export async function updateProject(id: string, formData: FormData) {
   const name = formData.get('name') as string;
-  const nameTh = formData.get('nameTh') as string;
   const description = formData.get('description') as string;
   const glbUrl = formData.get('glbUrl') as string;
   const completionYear = formData.get('completionYear') ? parseInt(formData.get('completionYear') as string) : null;
@@ -64,7 +82,6 @@ export async function updateProject(id: string, formData: FormData) {
     where: { id },
     data: {
       name,
-      nameTh: nameTh || null,
       description,
       completionYear,
       totalUnits,
