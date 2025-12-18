@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
 // POST - Archive a property as sold (called when deleting/marking as sold)
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     
     if (!user?.email) {
