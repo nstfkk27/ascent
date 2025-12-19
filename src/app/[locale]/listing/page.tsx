@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
+import Map, { Marker, MapMouseEvent, MarkerDragEvent } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 type PropertyCategory = 'HOUSE' | 'CONDO' | 'INVESTMENT';
 type HouseType = 'SINGLE_HOUSE' | 'POOL_VILLA' | 'TOWNHOUSE' | 'SHOPHOUSE';
@@ -23,6 +25,8 @@ export default function ListingPage() {
     city: 'Pattaya',
     state: 'Chonburi',
     zipCode: '',
+    latitude: 12.9236,
+    longitude: 100.8825,
     listingType: 'SALE',
     
     // House
@@ -71,6 +75,45 @@ export default function ListingPage() {
   
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  
+  const [viewState, setViewState] = useState({
+    longitude: 100.8825,
+    latitude: 12.9236,
+    zoom: 12
+  });
+
+  const handleGeocode = async () => {
+    if (!formData.address || !process.env.NEXT_PUBLIC_MAPBOX_TOKEN) return;
+    try {
+      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(formData.address)}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}&limit=1`);
+      const data = await res.json();
+      if (data.features && data.features.length > 0) {
+        const [lng, lat] = data.features[0].center;
+        setFormData(prev => ({ ...prev, latitude: lat, longitude: lng }));
+        setViewState(prev => ({ ...prev, latitude: lat, longitude: lng, zoom: 14 }));
+      }
+    } catch (err) {
+      console.error("Geocoding error:", err);
+    }
+  };
+
+  const handleReverseGeocode = async (lat: number, lng: number) => {
+    if (!process.env.NEXT_PUBLIC_MAPBOX_TOKEN) return;
+    try {
+      const res = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}&limit=1`);
+      const data = await res.json();
+      if (data.features && data.features.length > 0) {
+        setFormData(prev => ({ 
+          ...prev, 
+          address: data.features[0].place_name,
+          latitude: lat,
+          longitude: lng
+        }));
+      }
+    } catch (err) {
+      console.error("Reverse geocoding error:", err);
+    }
+  };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || e.target.files.length === 0) return;
@@ -153,6 +196,8 @@ export default function ListingPage() {
         city: formData.city,
         state: formData.state,
         zipCode: formData.zipCode,
+        latitude: formData.latitude,
+        longitude: formData.longitude,
         category,
         listingType: formData.listingType,
         images: formData.images ? formData.images.split(',').map(url => url.trim()) : [],
@@ -339,15 +384,32 @@ export default function ListingPage() {
             
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Address *</label>
-              <input
-                type="text"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#496f5d] focus:border-transparent placeholder-gray-600 text-gray-900"
-                placeholder="123 Beach Road"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleGeocode();
+                    }
+                  }}
+                  required
+                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#496f5d] focus:border-transparent placeholder-gray-600 text-gray-900"
+                  placeholder="123 Beach Road"
+                />
+                <button
+                  type="button"
+                  onClick={handleGeocode}
+                  className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 border border-gray-300"
+                  title="Find on Map"
+                >
+                  🔍
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Press Enter or click search to find on map</p>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
@@ -387,6 +449,44 @@ export default function ListingPage() {
                   placeholder="20150"
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Pin Location on Map</label>
+              <div className="h-64 rounded-lg overflow-hidden border border-gray-300 relative">
+                {process.env.NEXT_PUBLIC_MAPBOX_TOKEN ? (
+                  <Map
+                    mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
+                    {...viewState}
+                    onMove={evt => setViewState(evt.viewState)}
+                    style={{width: '100%', height: '100%'}}
+                    mapStyle="mapbox://styles/mapbox/streets-v11"
+                    onClick={(e: MapMouseEvent) => {
+                      handleReverseGeocode(e.lngLat.lat, e.lngLat.lng);
+                    }}
+                  >
+                    <Marker 
+                      longitude={formData.longitude} 
+                      latitude={formData.latitude} 
+                      anchor="bottom" 
+                      draggable
+                      onDragEnd={(e: MarkerDragEvent) => {
+                        handleReverseGeocode(e.lngLat.lat, e.lngLat.lng);
+                      }}
+                    >
+                      <div className="text-2xl cursor-pointer animate-bounce">📍</div>
+                    </Marker>
+                  </Map>
+                ) : (
+                  <div className="flex items-center justify-center h-full bg-gray-100 text-gray-500">
+                    Mapbox Token Missing
+                  </div>
+                )}
+                <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded text-xs shadow backdrop-blur-sm">
+                  Lat: {formData.latitude.toFixed(4)}, Lng: {formData.longitude.toFixed(4)}
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">Click or drag the pin to set exact location</p>
             </div>
           </div>
 
@@ -760,20 +860,6 @@ export default function ListingPage() {
                   ))}
                 </div>
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Or Enter Image URLs (comma-separated)
-              </label>
-              <textarea
-                name="images"
-                value={formData.images}
-                onChange={handleChange}
-                rows={3}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#496f5d] focus:border-transparent placeholder-gray-600 text-gray-900"
-                placeholder="https://example.com/image1.jpg, https://example.com/image2.jpg"
-              />
             </div>
           </div>
 

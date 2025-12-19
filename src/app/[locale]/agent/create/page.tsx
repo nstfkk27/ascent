@@ -317,7 +317,7 @@ export default function QuickDropPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-4xl mx-auto px-6">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Quick-Drop Listing Engine</h1>
@@ -325,40 +325,15 @@ export default function QuickDropPage() {
         </div>
         <button 
           onClick={handleExportExcel}
-          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+          className="flex items-center gap-2 px-6 py-3 bg-[#496f5d] text-white rounded-lg font-semibold hover:bg-[#3d5a4a] transition-colors"
         >
-          <span>📊</span> Download Excel/CSV
+          Download CSV
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Input Section (Left) */}
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-            <textarea 
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={6}
-              className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm md:text-base text-gray-900 placeholder-gray-500" 
-              placeholder="Property description..."
-            ></textarea>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Images</label>
-            <ImageUpload
-              images={uploadedImages}
-              onChange={setUploadedImages}
-              maxImages={10}
-              folder="properties"
-            />
-          </div>
-        </div>
-
-        {/* Form Section (Right) */}
-        <div className="lg:col-span-8">
+      <div>
+        {/* Form Section */}      
+        <div>
           <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
             <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">Listing Details</h2>
             
@@ -542,101 +517,12 @@ export default function QuickDropPage() {
                           className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 text-sm md:text-base" 
                           placeholder="When tenant gives notice"
                         />
-                      </div>
+                      </div>                    
                     </>
+                    
                   )}
                 </>
-              )}
-
-              {/* Commission Section - Different fields based on role */}
-              <div className="col-span-2 pt-4 border-t">
-                <h3 className="text-md font-semibold text-gray-800 mb-3">Commission Details</h3>
-                
-                {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') ? (
-                  // Internal agents see both platform and agent commission
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Platform Commission Rate (%) <span className="text-xs text-gray-500">- Internal Only</span></label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="commissionRate"
-                        value={formData.commissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 3.0"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission from property owner</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Agent Commission Rate (%) <span className="text-xs text-green-600">- Visible to Agents</span></label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="agentCommissionRate"
-                        value={formData.agentCommissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 2.0"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission shared with agents</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Fixed Amount (THB)</label>
-                      <input 
-                        type="number" 
-                        name="commissionAmount"
-                        value={formData.commissionAmount}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="Optional fixed amount"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Share (%)</label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="coAgentCommissionRate"
-                        value={formData.coAgentCommissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 1.5"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  // External agents only see agent commission rate
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Commission Rate (%) <span className="text-xs text-green-600">- Shared with Other Agents</span></label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="agentCommissionRate"
-                        value={formData.agentCommissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 2.0"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission you offer to other agents who help sell</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Share (%)</label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="coAgentCommissionRate"
-                        value={formData.coAgentCommissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 1.5"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Optional: Split with co-listing agent</p>
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}           
 
               {/* Dynamic Fields */}
               {shouldShowField('bedrooms') && (
@@ -897,6 +783,19 @@ export default function QuickDropPage() {
                 )}
               </div>
 
+              {/* Description */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea 
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={6}
+                  className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                  placeholder="Property description..."
+                ></textarea>
+              </div>
+
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Address / Location *</label>
                 <div className="flex gap-2">
@@ -979,7 +878,96 @@ export default function QuickDropPage() {
                 </div>
               </div>
 
-              <div className="mt-8 pt-6 border-t flex gap-4 justify-end">
+              {/* Commission Section - Different fields based on role */}
+              <div className="col-span-2 pt-4 border-t">
+                <h3 className="text-md font-semibold text-gray-800 mb-3">Commission Details</h3>
+                
+                {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') ? (
+                  // Internal agents see both platform and agent commission
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Platform Commission Rate (%) <span className="text-xs text-gray-500">- Internal Only</span></label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        name="commissionRate"
+                        value={formData.commissionRate}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="e.g. 3.0"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Commission from property owner</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Agent Commission Rate (%) <span className="text-xs text-green-600">- Visible to Agents</span></label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        name="agentCommissionRate"
+                        value={formData.agentCommissionRate}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="e.g. 2.0"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Commission shared with agents</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Fixed Amount (THB)</label>
+                      <input 
+                        type="number" 
+                        name="commissionAmount"
+                        value={formData.commissionAmount}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="Optional fixed amount"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Share (%)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        name="coAgentCommissionRate"
+                        value={formData.coAgentCommissionRate}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="e.g. 1.5"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  // External agents only see agent commission rate
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Commission Rate (%) <span className="text-xs text-green-600">- Shared with Other Agents</span></label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        name="agentCommissionRate"
+                        value={formData.agentCommissionRate}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="e.g. 2.0"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Commission you offer to other agents who help sell</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Share (%)</label>
+                      <input 
+                        type="number" 
+                        step="0.1"
+                        name="coAgentCommissionRate"
+                        value={formData.coAgentCommissionRate}
+                        onChange={handleChange}
+                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                        placeholder="e.g. 1.5"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">Optional: Split with co-listing agent</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+                  <div className="col-span-2 mt-8 pt-6 border-t flex flex-col sm:flex-row gap-4 justify-center">
                 <button 
                   onClick={() => router.push('/agent')}
                   className="px-6 py-2 border border-gray-300 text-gray-700 rounded hover:bg-gray-50 transition-colors"
@@ -989,10 +977,10 @@ export default function QuickDropPage() {
                 <button 
                   onClick={handleSave}
                   disabled={isSaving}
-                  className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm"
+                  className="px-6 py-4 bg-[#496f5d] text-white rounded-lg font-semibold hover:bg-[#3d5a4a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSaving ? 'Saving...' : '💾 Save Property'}
-                </button>
+                  {isSaving ? 'Saving...' : 'Save Property'}
+                </button>           
               </div>
             </div>
           </div>
