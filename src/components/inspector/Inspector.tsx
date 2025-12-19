@@ -231,22 +231,6 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </div>
-        ) : project.modelAsset ? (
-          <model-viewer
-            ref={modelViewerRef}
-            src={project.modelAsset.glbUrl}
-            ios-src=""
-            poster=""
-            alt={`3D model of ${project.name}`}
-            shadow-intensity="1"
-            camera-controls
-            auto-rotate
-            ar
-            style={{ width: '100%', height: '100%' }}
-            camera-orbit="45deg 55deg 105%"
-          >
-            <div slot="progress-bar"></div>
-          </model-viewer>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-gray-400 bg-gray-100">
             <div className="text-center">
