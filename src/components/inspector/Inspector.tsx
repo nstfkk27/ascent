@@ -369,12 +369,19 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
               {project.facilities.map((facility) => (
                 <div key={facility.id} className="flex-shrink-0 w-24 space-y-1">
                   <div className="w-24 h-24 relative rounded-lg overflow-hidden bg-gray-100">
-                    <Image 
-                      src={facility.imageUrl} 
-                      alt={facility.name}
-                      fill
-                      className="object-cover"
-                    />
+                    {facility.imageUrl && facility.imageUrl.trim() !== '' ? (
+                      <Image 
+                        src={facility.imageUrl} 
+                        alt={facility.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                        No Image
+                      </div>
+                    )}
                   </div>
                   <p className="text-xs text-center text-gray-600 truncate">{facility.name}</p>
                 </div>
@@ -393,12 +400,13 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
               {project.units.map((unit) => (
                 <div key={unit.id} className="group flex gap-4 p-3 rounded-xl border border-gray-100 hover:border-[#496f5d] hover:shadow-md transition-all cursor-pointer bg-white">
                   <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
-                    {unit.images[0] ? (
+                    {unit.images && unit.images[0] && unit.images[0].trim() !== '' ? (
                       <Image 
                         src={unit.images[0]} 
                         alt={unit.title}
                         fill
                         className="object-cover"
+                        unoptimized
                       />
                     ) : (
                       <div className="w-full h-full bg-gray-200" />
