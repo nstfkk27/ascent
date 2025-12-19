@@ -220,7 +220,7 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
       
       {/* Preview Section (Image or 3D) */}
       <div className="h-[300px] bg-gray-900 relative border-b border-gray-100 group">
-        {project.imageUrl ? (
+        {project.imageUrl && project.imageUrl.trim() !== '' ? (
           <div className="relative w-full h-full">
             <Image
               src={project.imageUrl}
@@ -228,6 +228,7 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
               fill
               className="object-cover"
               priority
+              unoptimized
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
           </div>
