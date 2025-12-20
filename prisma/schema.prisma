@@ -467,3 +467,30 @@ enum PostCategory {
   LEGAL
   NEWS
 }
+
+// ============================================
+// WISHLIST - Save favorite properties
+// ============================================
+model Wishlist {
+  id         String   @id @default(uuid())
+  userId     String   // Can be Supabase user ID or session ID for guests
+  propertyId String
+  createdAt  DateTime @default(now())
+  
+  @@unique([userId, propertyId])
+  @@index([userId])
+  @@index([propertyId])
+}
+
+// ============================================
+// COMPARISON - Track properties being compared
+// ============================================
+model Comparison {
+  id         String   @id @default(uuid())
+  userId     String   // Can be Supabase user ID or session ID for guests
+  propertyId String
+  createdAt  DateTime @default(now())
+  
+  @@unique([userId, propertyId])
+  @@index([userId])
+}

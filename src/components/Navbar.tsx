@@ -4,7 +4,7 @@ import { Link } from '@/navigation';
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
-import { Search, Menu, X, LayoutDashboard, Users, Home, LogOut, Calculator, Building, PlusCircle, Rocket, Upload, Inbox, FileText, MessageSquare, List, Settings } from 'lucide-react';
+import { Search, Menu, X, LayoutDashboard, Users, Home, LogOut, Calculator, Building, PlusCircle, Rocket, Upload, Inbox, FileText, MessageSquare, List, Settings, Heart, GitCompare } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -258,6 +258,23 @@ export default function Navbar() {
           
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3">
+            {/* Wishlist & Compare - Always visible */}
+            <Link
+              href="/wishlist"
+              className="p-2 text-gray-600 hover:text-red-500 transition-colors relative"
+              title="Wishlist"
+            >
+              <Heart className="w-5 h-5" />
+            </Link>
+            
+            <Link
+              href="/compare"
+              className="p-2 text-gray-600 hover:text-blue-500 transition-colors relative"
+              title="Compare"
+            >
+              <GitCompare className="w-5 h-5" />
+            </Link>
+
             {!user && (
               <Link
                 href="/listing"

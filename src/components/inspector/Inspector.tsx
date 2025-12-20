@@ -432,7 +432,11 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
             </h3>
             <div className="space-y-3">
               {project.units.map((unit) => (
-                <div key={unit.id} className="group flex gap-4 p-3 rounded-xl border border-gray-100 hover:border-[#496f5d] hover:shadow-md transition-all cursor-pointer bg-white">
+                <Link 
+                  key={unit.id} 
+                  href={`/properties/${unit.id}`}
+                  className="group flex gap-4 p-3 rounded-xl border border-gray-100 hover:border-[#496f5d] hover:shadow-md transition-all cursor-pointer bg-white"
+                >
                   <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
                     {unit.images && unit.images[0] && unit.images[0].trim() !== '' ? (
                       <Image 
@@ -473,7 +477,7 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
                       </span>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
               {project.units.length === 0 && (
                 <p className="text-sm text-gray-500 italic">No units currently listed.</p>

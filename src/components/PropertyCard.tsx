@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { PROPERTY_SUBTYPES, PROPERTY_CATEGORIES } from '@/lib/constants';
+import PropertyActions from '@/components/property/PropertyActions';
 
 interface PropertyCardProps {
   property: {
@@ -77,6 +78,11 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             <span className="glass px-3 py-1.5 rounded-full text-xs font-bold text-gray-700 shadow-soft">
               {property.listingType === 'BOTH' ? 'Sale & Rent' : (property.listingType === 'SALE' ? 'For Sale' : 'For Rent')}
             </span>
+          </div>
+          
+          {/* Wishlist & Compare Actions */}
+          <div className="absolute bottom-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <PropertyActions propertyId={property.id} variant="compact" showLabels={false} />
           </div>
         </div>
         <div className="p-5">

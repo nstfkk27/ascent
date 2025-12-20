@@ -86,6 +86,7 @@ export async function GET() {
       role: agent.role, // SUPER_ADMIN, PLATFORM_AGENT, AGENT
       name: agent.name,
       email: agent.email,
+      companyName: agent.companyName,
       imageUrl: agent.imageUrl,
       debug: {
         message: 'Profile found',
