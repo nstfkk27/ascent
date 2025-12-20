@@ -29,6 +29,8 @@ export interface SearchFilters {
   bedrooms: string;
   city: string;
   area: string;
+  minSize: string;
+  maxSize: string;
   // Special filters
   newProject: boolean;
   // Features
@@ -58,6 +60,8 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     bedrooms: '',
     city: 'Pattaya', // Default to Pattaya
     area: '',
+    minSize: '',
+    maxSize: '',
     newProject: false,
     petFriendly: false,
     furnished: false,
@@ -76,8 +80,8 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     
     let newValue: any = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
 
-    // Handle price formatting
-    if (name === 'minPrice' || name === 'maxPrice') {
+    // Handle price and size formatting
+    if (name === 'minPrice' || name === 'maxPrice' || name === 'minSize' || name === 'maxSize') {
       const rawValue = value.replace(/[^0-9]/g, '');
       newValue = rawValue ? Number(rawValue).toLocaleString() : '';
     }
@@ -124,6 +128,8 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     if (filters.maxPrice) count++;
     if (filters.bedrooms) count++;
     if (filters.area) count++;
+    if (filters.minSize) count++;
+    if (filters.maxSize) count++;
     if (filters.petFriendly) count++;
     if (filters.furnished) count++;
     if (filters.pool) count++;
@@ -144,6 +150,8 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
       bedrooms: '',
       city: 'Pattaya',
       area: '',
+      minSize: '',
+      maxSize: '',
       newProject: false,
       petFriendly: false,
       furnished: false,
@@ -263,7 +271,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
       {showMoreFilters && (
         <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
           
-          {/* CONDO: Area | Bedroom + Pills - Single Row on Desktop */}
+          {/* CONDO: Area | Bedroom | Size + Pills - Single Row on Desktop */}
           {filters.category === 'CONDO' && (
             <div className="flex flex-col md:flex-row gap-2">
               <select
@@ -290,6 +298,22 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
                 <option value="4">4+ Beds</option>
                 <option value="5">5+ Beds</option>
               </select>
+              <input
+                type="text"
+                name="minSize"
+                placeholder="Min sq.m"
+                value={filters.minSize}
+                onChange={handleChange}
+                className="md:w-32 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <input
+                type="text"
+                name="maxSize"
+                placeholder="Max sq.m"
+                value={filters.maxSize}
+                onChange={handleChange}
+                className="md:w-32 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
               <div className="flex flex-wrap gap-1.5 md:items-center">
                 {quickFilters.filter(f => f.show).map((filter) => (
                   <button
@@ -310,7 +334,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             </div>
           )}
 
-          {/* HOUSE: Subtype | Area | Bedroom | Pet Friendly - Single Row on Desktop */}
+          {/* HOUSE: Subtype | Area | Bedroom | Size | Pet Friendly - Single Row on Desktop */}
           {filters.category === 'HOUSE' && (
             <div className="flex flex-col md:flex-row gap-2">
               <select
@@ -350,6 +374,22 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
                 <option value="4">4+ Beds</option>
                 <option value="5">5+ Beds</option>
               </select>
+              <input
+                type="text"
+                name="minSize"
+                placeholder="Min sq.m"
+                value={filters.minSize}
+                onChange={handleChange}
+                className="md:w-32 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <input
+                type="text"
+                name="maxSize"
+                placeholder="Max sq.m"
+                value={filters.maxSize}
+                onChange={handleChange}
+                className="md:w-32 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
               <button
                 type="button"
                 onClick={() => toggleFilter('petFriendly')}
@@ -365,7 +405,7 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
             </div>
           )}
 
-          {/* LAND: ZoningColor | Area - Single Row on Desktop */}
+          {/* LAND: ZoningColor | Area | Size - Single Row on Desktop */}
           {filters.category === 'LAND' && (
             <div className="flex flex-col md:flex-row gap-2">
               <select
@@ -393,6 +433,22 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
                   <option key={area} value={area}>{area}</option>
                 ))}
               </select>
+              <input
+                type="text"
+                name="minSize"
+                placeholder="Min sq.m"
+                value={filters.minSize}
+                onChange={handleChange}
+                className="md:w-32 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
+              <input
+                type="text"
+                name="maxSize"
+                placeholder="Max sq.m"
+                value={filters.maxSize}
+                onChange={handleChange}
+                className="md:w-32 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+              />
             </div>
           )}
 

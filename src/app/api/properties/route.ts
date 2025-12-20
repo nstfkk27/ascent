@@ -77,6 +77,14 @@ export async function GET(request: NextRequest) {
       where.bedrooms = { gte: parseInt(bedrooms) };
     }
     
+    const minSize = searchParams.get('minSize');
+    const maxSize = searchParams.get('maxSize');
+    if (minSize || maxSize) {
+      where.size = {};
+      if (minSize) where.size.gte = parseFloat(minSize.replace(/,/g, ''));
+      if (maxSize) where.size.lte = parseFloat(maxSize.replace(/,/g, ''));
+    }
+    
     const featured = searchParams.get('featured');
     if (featured === 'true') {
       where.featured = true;
@@ -146,7 +154,7 @@ export async function GET(request: NextRequest) {
       'category', 'houseType', 'investmentType', 'listingType', 
       'city', 'area', 'minPrice', 'maxPrice', 'bedrooms', 'featured', 'status',
       'page', 'limit', 'query', 'openForYearsRange', 'staffRange', 'equipmentIncluded',
-      'landZoneColor', 'tag'
+      'landZoneColor', 'tag', 'minSize', 'maxSize'
     ];
     
     // Pagination

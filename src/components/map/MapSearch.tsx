@@ -17,6 +17,8 @@ export interface MapFilters {
   maxPrice: string;
   bedrooms: string;
   area: string;
+  minSize: string;
+  maxSize: string;
   landZoneColor: string;
   petFriendly: boolean;
   furnished: boolean;
@@ -41,7 +43,7 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
   const setIsCollapsed = onCollapseChange || setInternalIsCollapsed;
 
   const handleChange = (name: keyof MapFilters, value: string | boolean) => {
-    if (name === 'minPrice' || name === 'maxPrice') {
+    if (name === 'minPrice' || name === 'maxPrice' || name === 'minSize' || name === 'maxSize') {
       const rawValue = String(value).replace(/[^0-9]/g, '');
       const formattedValue = rawValue ? Number(rawValue).toLocaleString() : '';
       onFilterChange({ ...filters, [name]: formattedValue });
@@ -70,6 +72,8 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
     if (filters.maxPrice) count++;
     if (filters.bedrooms) count++;
     if (filters.area) count++;
+    if (filters.minSize) count++;
+    if (filters.maxSize) count++;
     if (filters.landZoneColor) count++;
     if (filters.petFriendly) count++;
     if (filters.furnished) count++;
@@ -195,7 +199,7 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
           {isAdvancedOpen && (
             <div className="mt-3 pt-3 border-t border-gray-100 space-y-3">
               
-              {/* CONDO: Area + Bedrooms + Pills */}
+              {/* CONDO: Area + Bedrooms + Size + Pills */}
               {filters.category === 'CONDO' && (
                 <>
                   <div className="grid grid-cols-2 gap-2">
@@ -222,6 +226,22 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
                       <option value="5">5+</option>
                     </select>
                   </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Min sq.m"
+                      value={filters.minSize}
+                      onChange={(e) => handleChange('minSize', e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Max sq.m"
+                      value={filters.maxSize}
+                      onChange={(e) => handleChange('maxSize', e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
                   <div className="flex flex-wrap gap-1.5">
                     {quickFilters.map((filter) => (
                       <button
@@ -242,7 +262,7 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
                 </>
               )}
 
-              {/* HOUSE: Subtype + Area + Bedrooms + Pet Friendly */}
+              {/* HOUSE: Subtype + Area + Bedrooms + Size + Pet Friendly */}
               {filters.category === 'HOUSE' && (
                 <>
                   <div className="grid grid-cols-2 gap-2">
@@ -295,36 +315,70 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
                       <span>Pet Friendly</span>
                     </button>
                   </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Min sq.m"
+                      value={filters.minSize}
+                      onChange={(e) => handleChange('minSize', e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Max sq.m"
+                      value={filters.maxSize}
+                      onChange={(e) => handleChange('maxSize', e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
                 </>
               )}
 
-              {/* LAND: ZoningColor + Area */}
+              {/* LAND: ZoningColor + Area + Size */}
               {filters.category === 'LAND' && (
-                <div className="grid grid-cols-2 gap-2">
-                  <select
-                    value={filters.landZoneColor}
-                    onChange={(e) => handleChange('landZoneColor', e.target.value)}
-                    className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="">All Zones</option>
-                    <option value="RED">Red (Commercial)</option>
-                    <option value="ORANGE">Orange (High Density)</option>
-                    <option value="YELLOW">Yellow (Low Density)</option>
-                    <option value="BROWN">Brown (Special)</option>
-                    <option value="PURPLE">Purple (Industrial)</option>
-                    <option value="GREEN">Green (Rural/Agri)</option>
-                  </select>
-                  <select
-                    value={filters.area}
-                    onChange={(e) => handleChange('area', e.target.value)}
-                    className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  >
-                    <option value="">All Areas</option>
-                    {PATTAYA_AREAS.map((area) => (
-                      <option key={area} value={area}>{area}</option>
-                    ))}
-                  </select>
-                </div>
+                <>
+                  <div className="grid grid-cols-2 gap-2">
+                    <select
+                      value={filters.landZoneColor}
+                      onChange={(e) => handleChange('landZoneColor', e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="">All Zones</option>
+                      <option value="RED">Red (Commercial)</option>
+                      <option value="ORANGE">Orange (High Density)</option>
+                      <option value="YELLOW">Yellow (Low Density)</option>
+                      <option value="BROWN">Brown (Special)</option>
+                      <option value="PURPLE">Purple (Industrial)</option>
+                      <option value="GREEN">Green (Rural/Agri)</option>
+                    </select>
+                    <select
+                      value={filters.area}
+                      onChange={(e) => handleChange('area', e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      <option value="">All Areas</option>
+                      {PATTAYA_AREAS.map((area) => (
+                        <option key={area} value={area}>{area}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <input
+                      type="text"
+                      placeholder="Min sq.m"
+                      value={filters.minSize}
+                      onChange={(e) => handleChange('minSize', e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                    <input
+                      type="text"
+                      placeholder="Max sq.m"
+                      value={filters.maxSize}
+                      onChange={(e) => handleChange('maxSize', e.target.value)}
+                      className="bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    />
+                  </div>
+                </>
               )}
 
               {/* INVESTMENT: Subtype */}

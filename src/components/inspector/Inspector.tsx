@@ -71,6 +71,9 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
   const drawerRef = useRef<HTMLDivElement>(null);
   const startY = useRef(0);
   const currentY = useRef(0);
+  
+  // Project Details Accordion State
+  const [isDetailsExpanded, setIsDetailsExpanded] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -262,7 +265,7 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
       </div>
 
       {/* Content Section */}
-      <div className="p-6 space-y-8">
+      <div className="p-6 space-y-6">
         {/* Project/Property Details */}
         {project.isStandalone ? (
           <div className="space-y-4">
@@ -329,63 +332,94 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
           )}
         </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p className="text-gray-500">Developer</p>
-              <p className="font-medium text-gray-900">{project.developer || 'Unknown'}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Completion</p>
-              <p className="font-medium text-gray-900">{project.completionYear || 'Ready to Move'}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Total Units</p>
-              <p className="font-medium text-gray-900">{project.totalUnits || '-'}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Floors</p>
-              <p className="font-medium text-gray-900">{project.totalFloors || '-'}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Buildings</p>
-              <p className="font-medium text-gray-900">{project.totalBuildings || '-'}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Description */}
-        <div>
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">About</h3>
-          <p className="text-gray-600 text-sm leading-relaxed">
-            {project.description || 'No description available.'}
-          </p>
-        </div>
-
-        {/* Facilities */}
-        {project.facilities.length > 0 && (
-          <div>
-            <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Facilities</h3>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {project.facilities.map((facility) => (
-                <div key={facility.id} className="flex-shrink-0 w-24 space-y-1">
-                  <div className="w-24 h-24 relative rounded-lg overflow-hidden bg-gray-100">
-                    {facility.imageUrl && facility.imageUrl.trim() !== '' ? (
-                      <Image 
-                        src={facility.imageUrl} 
-                        alt={facility.name}
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
-                        No Image
-                      </div>
-                    )}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            {/* Collapsible Header */}
+            <button
+              onClick={() => setIsDetailsExpanded(!isDetailsExpanded)}
+              className="w-full px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors flex items-center justify-between group"
+            >
+              <div className="flex items-center gap-2">
+                <svg 
+                  className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${isDetailsExpanded ? 'rotate-90' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Project Details</h3>
+              </div>
+              <span className="text-xs text-gray-500">{isDetailsExpanded ? 'Hide' : 'Show'}</span>
+            </button>
+            
+            {/* Collapsible Content */}
+            <div className={`transition-all duration-300 ease-in-out overflow-hidden ${
+              isDetailsExpanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+              <div className="p-4 space-y-6">
+                {/* Project Stats Grid */}
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-gray-500">Developer</p>
+                    <p className="font-medium text-gray-900">{project.developer || 'Unknown'}</p>
                   </div>
-                  <p className="text-xs text-center text-gray-600 truncate">{facility.name}</p>
+                  <div>
+                    <p className="text-gray-500">Completion</p>
+                    <p className="font-medium text-gray-900">{project.completionYear || 'Ready to Move'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Total Units</p>
+                    <p className="font-medium text-gray-900">{project.totalUnits || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Floors</p>
+                    <p className="font-medium text-gray-900">{project.totalFloors || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-gray-500">Buildings</p>
+                    <p className="font-medium text-gray-900">{project.totalBuildings || '-'}</p>
+                  </div>
                 </div>
-              ))}
+
+                {/* Description */}
+                {project.description && (
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-2">About</h3>
+                    <p className="text-gray-600 text-sm leading-relaxed">
+                      {project.description}
+                    </p>
+                  </div>
+                )}
+
+                {/* Facilities */}
+                {project.facilities.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3">Facilities</h3>
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                      {project.facilities.map((facility) => (
+                        <div key={facility.id} className="flex-shrink-0 w-24 space-y-1">
+                          <div className="w-24 h-24 relative rounded-lg overflow-hidden bg-gray-100">
+                            {facility.imageUrl && facility.imageUrl.trim() !== '' ? (
+                              <Image 
+                                src={facility.imageUrl} 
+                                alt={facility.name}
+                                fill
+                                className="object-cover"
+                                unoptimized
+                              />
+                            ) : (
+                              <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400 text-xs">
+                                No Image
+                              </div>
+                            )}
+                          </div>
+                          <p className="text-xs text-center text-gray-600 truncate">{facility.name}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

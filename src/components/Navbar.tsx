@@ -302,6 +302,17 @@ export default function Navbar() {
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-gray-900 truncate">{agentProfile?.name || user.user_metadata?.full_name || 'Agent'}</p>
                       <p className="text-xs text-gray-500 truncate">{agentProfile?.companyName || user.email}</p>
+                      {agentProfile?.role && (
+                        <div className="mt-1.5">
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide ${
+                            agentProfile.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-700' :
+                            agentProfile.role === 'PLATFORM_AGENT' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
+                            {agentProfile.role.replace('_', ' ')}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="py-1">
                       <Link
@@ -419,8 +430,19 @@ export default function Navbar() {
       {showProfileMenu && user && (
         <div ref={mobileProfileMenuRef} className="md:hidden absolute right-4 top-16 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
           <div className="px-4 py-2 border-b border-gray-100">
-            <p className="text-sm font-medium text-gray-900 truncate">{user.user_metadata?.full_name || 'Agent'}</p>
-            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+            <p className="text-sm font-medium text-gray-900 truncate">{agentProfile?.name || user.user_metadata?.full_name || 'Agent'}</p>
+            <p className="text-xs text-gray-500 truncate">{agentProfile?.companyName || user.email}</p>
+            {agentProfile?.role && (
+              <div className="mt-1.5">
+                <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium uppercase tracking-wide ${
+                  agentProfile.role === 'SUPER_ADMIN' ? 'bg-purple-100 text-purple-700' :
+                  agentProfile.role === 'PLATFORM_AGENT' ? 'bg-blue-100 text-blue-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {agentProfile.role.replace('_', ' ')}
+                </span>
+              </div>
+            )}
           </div>
           <div className="py-1">
             <Link href="/agent/create" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50">

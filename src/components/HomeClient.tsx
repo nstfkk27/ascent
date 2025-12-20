@@ -31,6 +31,8 @@ export default function HomeClient({ projects }: HomeClientProps) {
     maxPrice: searchParams.get('maxPrice') || '',
     bedrooms: searchParams.get('bedrooms') || '',
     area: searchParams.get('area') || '',
+    minSize: searchParams.get('minSize') || '',
+    maxSize: searchParams.get('maxSize') || '',
     landZoneColor: searchParams.get('landZoneColor') || '',
     petFriendly: searchParams.get('petFriendly') === 'true',
     furnished: searchParams.get('furnished') === 'true',
@@ -113,6 +115,13 @@ export default function HomeClient({ projects }: HomeClientProps) {
        if (filters.bedrooms) {
          const minBeds = Number(filters.bedrooms);
          if ((unit.bedrooms || 0) < minBeds) return false;
+       }
+
+       if (filters.minSize || filters.maxSize) {
+         const minSizeNum = filters.minSize ? Number(filters.minSize.replace(/,/g, '')) : 0;
+         const maxSizeNum = filters.maxSize ? Number(filters.maxSize.replace(/,/g, '')) : Infinity;
+         const unitSize = unit.size || 0;
+         if (unitSize < minSizeNum || unitSize > maxSizeNum) return false;
        }
 
        if (filters.subtype) {
