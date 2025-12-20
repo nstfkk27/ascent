@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Property } from '@/types/property';
+import PropertyActions from '@/components/property/PropertyActions';
 
 export default function PropertyDetailPage({ params }: { params: { id: string } }) {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -145,13 +146,16 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                 </span>
               </div>
 
-              <div className="mb-8">
-                <span className="text-5xl font-bold text-[#496f5d]">
-                  ฿{Number(property.price).toLocaleString()}
-                </span>
-                <span className="text-xl text-gray-600 ml-2">
-                  {property.listingType === 'RENT' ? '/ month' : ''}
-                </span>
+              <div className="mb-8 flex items-center justify-between">
+                <div>
+                  <span className="text-5xl font-bold text-[#496f5d]">
+                    ฿{Number(property.price).toLocaleString()}
+                  </span>
+                  <span className="text-xl text-gray-600 ml-2">
+                    {property.listingType === 'RENT' ? '/ month' : ''}
+                  </span>
+                </div>
+                <PropertyActions propertyId={property.id} variant="default" showLabels={true} />
               </div>
 
               {/* Commission Section (Visible only to authorized agents) */}
