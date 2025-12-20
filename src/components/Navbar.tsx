@@ -258,23 +258,6 @@ export default function Navbar() {
           
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3">
-            {/* Wishlist & Compare - Always visible */}
-            <Link
-              href="/wishlist"
-              className="p-2 text-gray-600 hover:text-red-500 transition-colors relative"
-              title="Wishlist"
-            >
-              <Heart className="w-5 h-5" />
-            </Link>
-            
-            <Link
-              href="/compare"
-              className="p-2 text-gray-600 hover:text-blue-500 transition-colors relative"
-              title="Compare"
-            >
-              <GitCompare className="w-5 h-5" />
-            </Link>
-
             {!user && (
               <Link
                 href="/listing"
@@ -379,6 +362,25 @@ export default function Navbar() {
                       >
                         <List className="w-4 h-4" />
                         My Listings
+                      </Link>
+                    </div>
+                    {/* Personal Section */}
+                    <div className="border-t border-gray-100 py-1">
+                      <Link
+                        href="/wishlist"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-500 transition-colors"
+                      >
+                        <Heart className="w-4 h-4" />
+                        My Wishlist
+                      </Link>
+                      <Link
+                        href="/compare"
+                        onClick={() => setShowProfileMenu(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-500 transition-colors"
+                      >
+                        <GitCompare className="w-4 h-4" />
+                        Compare Properties
                       </Link>
                     </div>
                     {/* Admin Tools - only for SUPER_ADMIN */}
