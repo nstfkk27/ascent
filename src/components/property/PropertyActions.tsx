@@ -20,6 +20,7 @@ export default function PropertyActions({
 
   useEffect(() => {
     checkStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [propertyId]);
 
   const checkStatus = async () => {
