@@ -23,6 +23,8 @@ export default function PropertiesPage() {
     bedrooms: '',
     city: '',
     area: '',
+    minSize: '',
+    maxSize: '',
     tag: '',
     newProject: false,
     petFriendly: false,
