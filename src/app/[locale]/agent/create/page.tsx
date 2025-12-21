@@ -796,6 +796,15 @@ export default function QuickDropPage() {
                 ></textarea>
               </div>
 
+              {/* Photo Upload */}
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Property Photos</label>
+                <ImageUpload 
+                  onImagesChange={setUploadedImages}
+                  existingImages={uploadedImages}
+                />
+              </div>
+
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Address / Location *</label>
                 <div className="flex gap-2">
