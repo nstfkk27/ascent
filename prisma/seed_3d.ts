@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { generateReferenceId, generateUniqueSlug } from '../src/utils/propertyHelpers';
 
 const prisma = new PrismaClient();
 
@@ -32,6 +33,8 @@ async function main() {
       units: {
         create: [
           {
+            referenceId: await generateReferenceId(),
+            slug: await generateUniqueSlug('Penthouse Suite'),
             title: 'Penthouse Suite',
             description: 'Top floor luxury suite with panoramic views.',
             price: 15000000,
@@ -48,6 +51,8 @@ async function main() {
             images: ['https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=500&q=60']
           },
           {
+            referenceId: await generateReferenceId(),
+            slug: await generateUniqueSlug('1 Bedroom City View'),
             title: '1 Bedroom City View',
             description: 'Cozy unit perfect for singles or couples.',
             price: 5000000,
@@ -95,6 +100,8 @@ async function main() {
       units: {
         create: [
           {
+            referenceId: await generateReferenceId(),
+            slug: await generateUniqueSlug('Modern Villa Type A'),
             title: 'Modern Villa Type A',
             description: 'Modern villa with private garden.',
             price: 12000000,
