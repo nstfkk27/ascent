@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/lib/prisma';
+import { generateReferenceId, generateUniqueSlug } from '@/utils/propertyHelpers';
 
 // Helper to parse CSV text into array of objects
 function parseCSV(text: string): Record<string, string>[] {
@@ -141,6 +142,8 @@ export async function POST(request: NextRequest) {
 
         await prisma.property.create({
           data: {
+            referenceId: await generateReferenceId(),
+            slug: await generateUniqueSlug(row.unit_title),
             title: row.unit_title,
             description: row.description,
             price: row.price ? parseFloat(row.price) : null,
