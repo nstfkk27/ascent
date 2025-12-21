@@ -1,6 +1,7 @@
 
 import { prisma } from '../lib/prisma';
 import { ListingType, PropertyCategory } from '@prisma/client';
+import { generateReferenceId, generateUniqueSlug } from '../utils/propertyHelpers';
 
 async function main() {
   console.log('--- Creating a BOTH listing ---');
@@ -16,6 +17,8 @@ async function main() {
 
   const property = await prisma.property.create({
     data: {
+      referenceId: await generateReferenceId(),
+      slug: await generateUniqueSlug('Test BOTH Listing'),
       title: 'Test BOTH Listing',
       description: 'This is a test property available for both SALE and RENT.',
       price: 5000000,
