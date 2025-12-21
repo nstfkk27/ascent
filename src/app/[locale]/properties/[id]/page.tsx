@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Property } from '@/types/property';
 import PropertyActions from '@/components/property/PropertyActions';
+import { extractIdFromSlug } from '@/utils/propertyHelpers';
 
 export default function PropertyDetailPage({ params }: { params: { id: string } }) {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -16,7 +17,12 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   useEffect(() => {
     async function fetchProperty() {
       try {
-        const response = await fetch(`/api/properties/${params.id}`);
+        // Extract UUID from compound slug (e.g., "luxury-villa-a1b2c3d4" -> "a1b2c3d4")
+        // If it's already a UUID, extractIdFromSlug will return null and we use params.id directly
+        const uuidFragment = extractIdFromSlug(params.id);
+        const propertyId = uuidFragment || params.id;
+        
+        const response = await fetch(`/api/properties/${propertyId}`);
         const result = await response.json();
         
         if (result.success) {
@@ -134,7 +140,19 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
 
             {/* Property Details */}
             <div className="bg-white rounded-xl shadow-lg p-8">
-              <h1 className="text-4xl font-bold text-[#49516f] mb-4">{property.title}</h1>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h1 className="text-4xl font-bold text-[#49516f] mb-2">{property.title}</h1>
+                  {property.referenceId && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold text-gray-500">Listing ID:</span>
+                      <span className="text-sm font-mono font-bold text-[#496f5d] bg-gray-100 px-3 py-1 rounded-full">
+                        {property.referenceId}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
               
               <div className="flex items-center gap-4 mb-6 text-gray-600">
                 <span className="flex items-center gap-2">

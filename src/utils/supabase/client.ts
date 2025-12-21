@@ -15,32 +15,35 @@ export function createClient() {
         const cookie = document.cookie
           .split('; ')
           .find(row => row.startsWith(`${name}=`));
-        return cookie ? cookie.split('=')[1] : undefined;
+        return cookie ? decodeURIComponent(cookie.split('=')[1]) : undefined;
       },
       set(name: string, value: string, options: any) {
-        let cookie = `${name}=${value}`;
+        let cookie = `${name}=${encodeURIComponent(value)}`;
+        
+        // Always set path to root to ensure cookies are available across all routes
+        cookie += `; path=${options?.path || '/'}`;
+        
         if (options?.maxAge) {
           cookie += `; max-age=${options.maxAge}`;
-        }
-        if (options?.path) {
-          cookie += `; path=${options.path}`;
         }
         if (options?.domain) {
           cookie += `; domain=${options.domain}`;
         }
         if (options?.sameSite) {
           cookie += `; samesite=${options.sameSite}`;
+        } else {
+          // Default to lax for better compatibility
+          cookie += '; samesite=lax';
         }
-        if (options?.secure) {
+        if (options?.secure || window.location.protocol === 'https:') {
           cookie += '; secure';
         }
+        
         document.cookie = cookie;
       },
       remove(name: string, options: any) {
-        let cookie = `${name}=; max-age=0`;
-        if (options?.path) {
-          cookie += `; path=${options.path}`;
-        }
+        // Must match the path used when setting the cookie
+        let cookie = `${name}=; max-age=0; path=${options?.path || '/'}`;
         if (options?.domain) {
           cookie += `; domain=${options.domain}`;
         }

@@ -2,10 +2,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { PROPERTY_SUBTYPES, PROPERTY_CATEGORIES } from '@/lib/constants';
 import PropertyActions from '@/components/property/PropertyActions';
+import { createCompoundSlug } from '@/utils/propertyHelpers';
 
 interface PropertyCardProps {
   property: {
     id: string;
+    slug: string;
+    referenceId?: string;
     title: string;
     price: number;
     rentPrice?: number | null;
@@ -57,8 +60,10 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     return property.category;
   };
 
+  const propertyUrl = `/properties/${createCompoundSlug(property.slug, property.id)}`;
+  
   return (
-    <Link href={`/properties/${property.id}`} className="block group h-full">
+    <Link href={propertyUrl} className="block group h-full">
       <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] h-full flex flex-col">
         <div className="relative h-56 sm:h-64 overflow-hidden flex-shrink-0">
           <Image
