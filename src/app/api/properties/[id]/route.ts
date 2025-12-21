@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
 import { createClient } from '@/utils/supabase/server';
+import { generateUniqueSlug } from '@/utils/propertyHelpers';
 
 
 // GET /api/properties/[id] - Get single property by ID
@@ -118,6 +119,11 @@ export async function PUT(
     delete updateData.selectedAmenities;
     delete (updateData as any).condition;
     delete (updateData as any).unitFeatures;
+
+    // Regenerate slug if title is being updated
+    if (body.title) {
+      updateData.slug = await generateUniqueSlug(body.title, params.id);
+    }
 
     if (body.category) {
       updateData = sanitizePropertyData(updateData);

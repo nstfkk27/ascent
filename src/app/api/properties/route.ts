@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
 import { createClient } from '@/utils/supabase/server';
+import { generateReferenceId, generateUniqueSlug } from '@/utils/propertyHelpers';
 
 // GET /api/properties - Get all properties with optional filters
 export const dynamic = 'force-dynamic';
@@ -340,8 +341,14 @@ export async function POST(request: NextRequest) {
       }
     }
     
+    // Generate unique reference ID and slug
+    const referenceId = await generateReferenceId();
+    const slug = await generateUniqueSlug(body.title);
+    
     // Create property
     const rawData = {
+        referenceId,
+        slug,
         title: body.title,
         description: body.description,
         price: body.price || null,

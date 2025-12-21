@@ -12,6 +12,8 @@ export type PropertyStatus = 'AVAILABLE' | 'PENDING' | 'SOLD' | 'RENTED';
 
 export interface Property {
   id: string;
+  referenceId: string;
+  slug: string;
   title: string;
   description: string;
   price: number;

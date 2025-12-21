@@ -81,6 +81,8 @@ model Facility {
 
 model Property {
   id                    String              @id @default(uuid())
+  referenceId           String              @unique
+  slug                  String              @unique
   title                 String
   description           String
   price                 Decimal?            @db.Decimal(12, 2)
@@ -139,6 +141,8 @@ model Property {
   deals                 Deal[]
   project               Project?            @relation(fields: [projectId], references: [id])
 
+  @@index([referenceId])
+  @@index([slug])
   @@index([city])
   @@index([agentId])
   @@index([status])
