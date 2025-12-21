@@ -483,6 +483,15 @@ export default function Navbar() {
               <List className="w-4 h-4" /> My Listings
             </Link>
           </div>
+          {/* Personal Section */}
+          <div className="border-t border-gray-100 py-1">
+            <Link href="/wishlist" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-red-500">
+              <Heart className="w-4 h-4" /> My Wishlist
+            </Link>
+            <Link href="/compare" onClick={() => setShowProfileMenu(false)} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-500">
+              <GitCompare className="w-4 h-4" /> Compare Properties
+            </Link>
+          </div>
           {/* Admin Tools - mobile */}
           {agentProfile?.role === 'SUPER_ADMIN' && (
             <div className="border-t border-gray-100 py-1">
