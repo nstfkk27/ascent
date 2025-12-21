@@ -47,6 +47,7 @@ export default function ImageUpload({
         const res = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
+          credentials: 'include', // Ensure cookies are sent with request
         });
 
         const data = await res.json();
@@ -60,9 +61,15 @@ export default function ImageUpload({
           });
         } else {
           console.error('Upload failed:', data.error);
+          if (res.status === 401) {
+            alert('Authentication required. Please refresh the page and log in again.');
+          } else {
+            alert(`Upload failed: ${data.error || 'Unknown error'}`);
+          }
         }
       } catch (error) {
         console.error('Upload error:', error);
+        alert(`Upload failed: ${error instanceof Error ? error.message : 'Network error'}`);
       }
     }
 
