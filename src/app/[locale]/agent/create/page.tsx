@@ -800,8 +800,8 @@ export default function QuickDropPage() {
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Property Photos</label>
                 <ImageUpload 
-                  onImagesChange={setUploadedImages}
-                  existingImages={uploadedImages}
+                  images={uploadedImages}
+                  onChange={setUploadedImages}
                 />
               </div>
 
