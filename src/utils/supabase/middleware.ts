@@ -69,8 +69,9 @@ export async function updateSession(request: NextRequest) {
   )
 
   // Refresh session - this is critical for keeping the session alive
-  // getUser() will automatically refresh the session if needed
-  const { data: { user }, error } = await supabase.auth.getUser()
+  // getSession() will automatically refresh the token if it's expiring
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user
 
   // Get current locale from path or cookie
   const pathname = request.nextUrl.pathname;
