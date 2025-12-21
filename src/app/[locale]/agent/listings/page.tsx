@@ -67,16 +67,19 @@ export default function MyListingsPage() {
     try {
       const res = await fetch(`/api/properties/${id}`, {
         method: 'DELETE',
+        credentials: 'include', // Ensure authentication cookies are sent
       });
       
       if (res.ok) {
         setProperties(prev => prev.filter(p => p.id !== id));
+        alert('Property deleted successfully');
       } else {
-        alert('Failed to delete property');
+        const data = await res.json();
+        alert(`Failed to delete property: ${data.error || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error deleting property:', error);
-      alert('Error deleting property');
+      alert('Failed to delete property: Network error');
     }
   };
 

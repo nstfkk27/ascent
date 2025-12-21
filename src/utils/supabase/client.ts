@@ -20,22 +20,22 @@ export function createClient() {
       set(name: string, value: string, options: any) {
         let cookie = `${name}=${encodeURIComponent(value)}`;
         
-        // Always set path to root to ensure cookies are available across all routes
+        // Set path - default to root if not specified
         cookie += `; path=${options?.path || '/'}`;
         
-        if (options?.maxAge) {
+        if (options?.maxAge !== undefined) {
           cookie += `; max-age=${options.maxAge}`;
+        }
+        if (options?.expires) {
+          cookie += `; expires=${options.expires}`;
         }
         if (options?.domain) {
           cookie += `; domain=${options.domain}`;
         }
         if (options?.sameSite) {
           cookie += `; samesite=${options.sameSite}`;
-        } else {
-          // Default to lax for better compatibility
-          cookie += '; samesite=lax';
         }
-        if (options?.secure || window.location.protocol === 'https:') {
+        if (options?.secure) {
           cookie += '; secure';
         }
         

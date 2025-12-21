@@ -39,18 +39,11 @@ export async function updateSession(request: NextRequest) {
               headers: request.headers,
             },
           })
-          // Set cookie on response - preserve options from Supabase
-          // Don't override httpOnly as it prevents client-side access
+          // Set cookie on response - use Supabase's options exactly as provided
           response.cookies.set({
             name,
             value,
             ...options,
-            // Only set secure in production
-            secure: process.env.NODE_ENV === 'production',
-            // Use lax for better compatibility unless specified otherwise
-            sameSite: options.sameSite || 'lax',
-            // Ensure path is always set to root for session cookies
-            path: options.path || '/',
           })
         },
         remove(name: string, options: CookieOptions) {
