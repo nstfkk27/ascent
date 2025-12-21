@@ -7,7 +7,7 @@ import { createCompoundSlug } from '@/utils/propertyHelpers';
 interface PropertyCardProps {
   property: {
     id: string;
-    slug: string;
+    slug?: string;
     referenceId?: string;
     title: string;
     price: number;
@@ -60,7 +60,10 @@ export default function PropertyCard({ property }: PropertyCardProps) {
     return property.category;
   };
 
-  const propertyUrl = `/properties/${createCompoundSlug(property.slug, property.id)}`;
+  // Generate property URL - use slug if available, otherwise fall back to ID
+  const propertyUrl = property.slug 
+    ? `/properties/${createCompoundSlug(property.slug, property.id)}`
+    : `/properties/${property.id}`;
   
   return (
     <Link href={propertyUrl} className="block group h-full">

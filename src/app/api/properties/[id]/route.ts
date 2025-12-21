@@ -5,17 +5,31 @@ import { createClient } from '@/utils/supabase/server';
 import { generateUniqueSlug } from '@/utils/propertyHelpers';
 
 
-// GET /api/properties/[id] - Get single property by ID
+// GET /api/properties/[id] - Get single property by ID or UUID fragment
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const property = await prisma.property.findUnique({
+    // Try to find by full UUID first
+    let property = await prisma.property.findUnique({
       where: {
         id: params.id,
       },
     });
+    
+    // If not found and id looks like a UUID fragment (8 chars), search by UUID prefix
+    if (!property && params.id.length === 8 && /^[a-z0-9]+$/i.test(params.id)) {
+      const properties = await prisma.property.findMany({
+        where: {
+          id: {
+            startsWith: params.id,
+          },
+        },
+        take: 1,
+      });
+      property = properties[0] || null;
+    }
     
     if (!property) {
       return NextResponse.json(
