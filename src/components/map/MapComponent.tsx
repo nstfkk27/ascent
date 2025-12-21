@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import Map, { Marker } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import Supercluster from 'supercluster';
 import MapPin from './MapPin';
+import ClusterMarker from './ClusterMarker';
 
 // Types
 interface Project {
@@ -58,6 +60,45 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
 
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [mapInstance, setMapInstance] = useState<any>(null);
+
+  // Initialize supercluster
+  const supercluster = useMemo(() => {
+    const cluster = new Supercluster({
+      radius: 60,
+      maxZoom: 16,
+      minZoom: 0,
+    });
+
+    // Convert projects to GeoJSON points
+    const points = projects.map(project => ({
+      type: 'Feature' as const,
+      properties: {
+        cluster: false,
+        projectId: project.id,
+        project: project,
+      },
+      geometry: {
+        type: 'Point' as const,
+        coordinates: [Number(project.lng), Number(project.lat)],
+      },
+    }));
+
+    cluster.load(points);
+    return cluster;
+  }, [projects]);
+
+  // Get clusters for current viewport
+  const clusters = useMemo(() => {
+    const zoom = Math.floor(viewState.zoom);
+    const bounds = [
+      viewState.longitude - 1,
+      viewState.latitude - 1,
+      viewState.longitude + 1,
+      viewState.latitude + 1,
+    ] as [number, number, number, number];
+
+    return supercluster.getClusters(bounds, zoom);
+  }, [supercluster, viewState.zoom, viewState.latitude, viewState.longitude]);
 
   // Helper to format price for display
   const formatPrice = (project: Project): string => {
@@ -158,38 +199,93 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
         mapStyle="mapbox://styles/mapbox/streets-v12"
         mapboxAccessToken={MAPBOX_TOKEN}
       >
-        {/* Price Tag Markers */}
-        {projects.map((project) => {
+        {/* Clustered Markers */}
+        {clusters.map((cluster) => {
+          const [longitude, latitude] = cluster.geometry.coordinates;
+          const { cluster: isCluster, point_count: pointCount } = cluster.properties;
+
+          // If it's a cluster, show cluster marker
+          if (isCluster) {
+            return (
+              <Marker
+                key={`cluster-${cluster.id}`}
+                longitude={longitude}
+                latitude={latitude}
+                anchor="center"
+                onClick={(e) => {
+                  e.originalEvent.stopPropagation();
+                  // Zoom into cluster
+                  const expansionZoom = Math.min(
+                    supercluster.getClusterExpansionZoom(cluster.id as number),
+                    20
+                  );
+                  setViewState(prev => ({
+                    ...prev,
+                    latitude,
+                    longitude,
+                    zoom: expansionZoom,
+                    transitionDuration: 500,
+                  }));
+                }}
+              >
+                <ClusterMarker
+                  pointCount={pointCount}
+                  isHovered={hoveredId === `cluster-${cluster.id}`}
+                  onMouseEnter={() => setHoveredId(`cluster-${cluster.id}`)}
+                  onMouseLeave={() => setHoveredId(null)}
+                />
+              </Marker>
+            );
+          }
+
+          // Individual project marker
+          const project = cluster.properties.project as Project;
           const price = formatPrice(project);
           const color = getMarkerColor(project);
           const isHovered = hoveredId === project.id;
           
+          // Zoom-based label visibility
+          const zoom = viewState.zoom;
+          let label = '';
+          let showLabel = true;
+          
+          if (zoom < 13) {
+            // Very zoomed out: no label (clustering handles this)
+            showLabel = false;
+          } else if (zoom < 15) {
+            // Medium zoom: price only
+            label = price || '฿';
+          } else {
+            // Zoomed in: full name or price
+            label = project.isStandalone 
+              ? (price || project.name.slice(0, 12)) 
+              : (project.name.length > 15 ? project.name.slice(0, 15) + '...' : project.name);
+          }
+          
           return (
             <Marker
               key={project.id}
-              longitude={Number(project.lng)}
-              latitude={Number(project.lat)}
+              longitude={longitude}
+              latitude={latitude}
               anchor="bottom"
               onClick={(e) => {
                 e.originalEvent.stopPropagation();
                 onProjectSelect(project);
                 setViewState(prev => ({
                   ...prev,
-                  latitude: Number(project.lat),
-                  longitude: Number(project.lng),
+                  latitude,
+                  longitude,
                   zoom: 16,
                   transitionDuration: 1000
                 }));
               }}
             >
               <MapPin
-                label={project.isStandalone 
-                  ? (price || project.name.slice(0, 12)) 
-                  : (project.name.length > 15 ? project.name.slice(0, 15) + '...' : project.name)
-                }
+                label={showLabel ? label : ''}
                 color={color}
                 isHovered={isHovered}
-                tooltipText={project.isStandalone && price ? project.name : undefined}
+                tooltipText={project.name}
+                showDot={!showLabel}
                 onMouseEnter={() => setHoveredId(project.id)}
                 onMouseLeave={() => setHoveredId(null)}
               />

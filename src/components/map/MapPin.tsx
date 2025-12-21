@@ -5,6 +5,7 @@ interface MapPinProps {
   color: string;
   isHovered: boolean;
   tooltipText?: string;
+  showDot?: boolean;
   // Future props for customization
   variant?: 'default' | 'gold' | 'highlighted';
   badge?: string;
@@ -17,6 +18,7 @@ export default function MapPin({
   color,
   isHovered,
   tooltipText,
+  showDot = false,
   variant = 'default',
   badge,
   onMouseEnter,
@@ -48,6 +50,34 @@ export default function MapPin({
 
   const styles = getVariantStyles();
   const currentBgColor = isHovered ? styles.hoverBgColor : styles.bgColor;
+
+  // If showDot is true, render simple dot instead of label
+  if (showDot) {
+    return (
+      <div
+        className="relative cursor-pointer"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
+        <div
+          className={`
+            w-3 h-3 rounded-full border-2 border-white shadow-lg
+            transition-all duration-200
+            ${isHovered ? 'scale-150 shadow-xl' : ''}
+          `}
+          style={{
+            backgroundColor: currentBgColor,
+          }}
+        />
+        {/* Hover tooltip */}
+        {isHovered && tooltipText && (
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded whitespace-nowrap shadow-lg z-50">
+            {tooltipText}
+          </div>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div
