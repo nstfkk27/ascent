@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { generateReferenceId, generateUniqueSlug } from '../src/utils/propertyHelpers';
 
 const prisma = new PrismaClient();
 
@@ -8,6 +9,8 @@ async function main() {
   // Create House properties
   await prisma.property.create({
     data: {
+      referenceId: await generateReferenceId(),
+      slug: await generateUniqueSlug('Luxury Modern Pool Villa'),
       title: 'Luxury Modern Pool Villa',
       description: 'Stunning 4-bedroom villa in prime Pattaya location with private pool and modern amenities. This beautiful property features spacious living areas, high-quality finishes, and a large outdoor space perfect for entertaining. Located in a quiet neighborhood with easy access to beaches, shopping centers, and international schools.',
       price: 25000000,
@@ -40,6 +43,8 @@ async function main() {
 
   await prisma.property.create({
     data: {
+      referenceId: await generateReferenceId(),
+      slug: await generateUniqueSlug('Modern Single House in Quiet Neighborhood'),
       title: 'Modern Single House in Quiet Neighborhood',
       description: 'Beautifully designed 3-bedroom single house with contemporary architecture and quality finishes throughout. Features an open-plan living area, modern kitchen, and a private garden. Located in a peaceful residential area close to schools and shopping.',
       price: 8500000,
@@ -71,6 +76,8 @@ async function main() {
 
   await prisma.property.create({
     data: {
+      referenceId: await generateReferenceId(),
+      slug: await generateUniqueSlug('Modern Townhouse Near Beach'),
       title: 'Modern Townhouse Near Beach',
       description: '3-story townhouse in a secure gated community near Jomtien Beach. Features 3 bedrooms, modern kitchen, rooftop terrace, and covered parking. Close to international schools, shopping malls, and beach access.',
       price: 6500000,
@@ -101,6 +108,8 @@ async function main() {
 
   await prisma.property.create({
     data: {
+      referenceId: await generateReferenceId(),
+      slug: await generateUniqueSlug('Commercial Shophouse on Main Road'),
       title: 'Commercial Shophouse on Main Road',
       description: '4-story shophouse in prime commercial location on Pattaya 2nd Road. Ground floor suitable for retail/office, upper floors for residential. Excellent for business owners wanting to live and work in the same building.',
       price: 12000000,
@@ -132,6 +141,8 @@ async function main() {
   // Create Condo property
   await prisma.property.create({
     data: {
+      referenceId: await generateReferenceId(),
+      slug: await generateUniqueSlug('Sea View Penthouse'),
       title: 'Sea View Penthouse',
       description: 'Luxurious penthouse with breathtaking ocean views in prestigious Pattaya condominium. Features floor-to-ceiling windows, modern kitchen with premium appliances, and access to world-class amenities including infinity pool, gym, and 24-hour security.',
       price: 18500000,
@@ -162,6 +173,8 @@ async function main() {
   // Create Investment properties
   await prisma.property.create({
     data: {
+      referenceId: await generateReferenceId(),
+      slug: await generateUniqueSlug('Beachfront Restaurant & Bar'),
       title: 'Beachfront Restaurant & Bar',
       description: 'Established beachfront restaurant and bar with stunning ocean views and prime location in Jomtien Beach. This thriving business includes all equipment, furniture, and a loyal customer base. Perfect opportunity for investors looking for a turnkey operation in Pattaya\'s tourist hotspot.',
       price: 15000000,
@@ -191,6 +204,8 @@ async function main() {
 
   await prisma.property.create({
     data: {
+      referenceId: await generateReferenceId(),
+      slug: await generateUniqueSlug('Boutique Hotel - Central Pattaya'),
       title: 'Boutique Hotel - Central Pattaya',
       description: 'Profitable boutique hotel in the heart of Central Pattaya with 20 rooms. Fully operational with excellent occupancy rates year-round. Includes all furniture, equipment, and trained staff. Perfect investment opportunity in Pattaya\'s booming tourism sector.',
       price: 45000000,
