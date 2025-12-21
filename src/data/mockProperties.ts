@@ -6,6 +6,8 @@ import { Property } from '@/types/property';
 // House Example
 export const mockHouseProperty: Property = {
   id: '1',
+  referenceId: 'ASC-100001',
+  slug: 'luxury-modern-pool-villa',
   title: 'Luxury Modern Pool Villa',
   description: 'Stunning 4-bedroom villa in prime Pattaya location with private pool and modern amenities. This beautiful property features spacious living areas, high-quality finishes, and a large outdoor space perfect for entertaining. Located in a quiet neighborhood with easy access to beaches, shopping centers, and international schools.',
   price: 25000000,
@@ -40,6 +42,8 @@ export const mockHouseProperty: Property = {
 // Condo Example
 export const mockCondoProperty: Property = {
   id: '2',
+  referenceId: 'ASC-100002',
+  slug: 'sea-view-penthouse',
   title: 'Sea View Penthouse',
   description: 'Luxurious penthouse with breathtaking ocean views in prestigious Pattaya condominium. Features floor-to-ceiling windows, modern kitchen with premium appliances, and access to world-class amenities including infinity pool, gym, and 24-hour security.',
   price: 18500000,
@@ -82,6 +86,8 @@ export const mockCondoProperty: Property = {
 // Investment Example
 export const mockInvestmentProperty: Property = {
   id: '3',
+  referenceId: 'ASC-100003',
+  slug: 'beachfront-restaurant-bar',
   title: 'Beachfront Restaurant & Bar',
   description: 'Established beachfront restaurant and bar with stunning ocean views and prime location in Jomtien Beach. This thriving business includes all equipment, furniture, and a loyal customer base. Perfect opportunity for investors looking for a turnkey operation in Pattaya\'s tourist hotspot.',
   price: 15000000,
@@ -113,6 +119,8 @@ export const mockInvestmentProperty: Property = {
 // Hotel Investment Example
 export const mockHotelProperty: Property = {
   id: '4',
+  referenceId: 'ASC-100004',
+  slug: 'boutique-hotel-central-pattaya',
   title: 'Boutique Hotel - Central Pattaya',
   description: 'Profitable boutique hotel in the heart of Central Pattaya with 20 rooms. Fully operational with excellent occupancy rates year-round. Includes all furniture, equipment, and trained staff. Perfect investment opportunity in Pattaya\'s booming tourism sector.',
   price: 45000000,
@@ -144,6 +152,8 @@ export const mockHotelProperty: Property = {
 // Single House Example
 export const mockSingleHouse: Property = {
   id: '5',
+  referenceId: 'ASC-100005',
+  slug: 'modern-single-house-quiet-neighborhood',
   title: 'Modern Single House in Quiet Neighborhood',
   description: 'Beautifully designed 3-bedroom single house with contemporary architecture and quality finishes throughout. Features an open-plan living area, modern kitchen, and a private garden. Located in a peaceful residential area close to schools and shopping.',
   price: 8500000,
@@ -177,6 +187,8 @@ export const mockSingleHouse: Property = {
 // Townhouse Example
 export const mockTownhouse: Property = {
   id: '6',
+  referenceId: 'ASC-100006',
+  slug: 'modern-townhouse-near-beach',
   title: 'Modern Townhouse Near Beach',
   description: '3-story townhouse in a secure gated community near Jomtien Beach. Features 3 bedrooms, modern kitchen, rooftop terrace, and covered parking. Close to international schools, shopping malls, and beach access.',
   price: 6500000,
@@ -209,6 +221,8 @@ export const mockTownhouse: Property = {
 // Shophouse Example
 export const mockShophouse: Property = {
   id: '7',
+  referenceId: 'ASC-100007',
+  slug: 'commercial-shophouse-main-road',
   title: 'Commercial Shophouse on Main Road',
   description: '4-story shophouse in prime commercial location on Pattaya 2nd Road. Ground floor suitable for retail/office, upper floors for residential. Excellent for business owners wanting to live and work in the same building.',
   price: 12000000,
