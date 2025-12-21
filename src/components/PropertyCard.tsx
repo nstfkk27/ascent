@@ -58,9 +58,9 @@ export default function PropertyCard({ property }: PropertyCardProps) {
   };
 
   return (
-    <Link href={`/properties/${property.id}`} className="block group">
-      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02]">
-        <div className="relative h-64 overflow-hidden">
+    <Link href={`/properties/${property.id}`} className="block group h-full">
+      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] h-full flex flex-col">
+        <div className="relative h-56 sm:h-64 overflow-hidden flex-shrink-0">
           <Image
             src={property.images[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'}
             alt={property.title}
@@ -85,7 +85,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
             <PropertyActions propertyId={property.id} variant="compact" showLabels={false} />
           </div>
         </div>
-        <div className="p-5">
+        <div className="p-4 sm:p-5 flex-1 flex flex-col">
           {getUpdatedLabel() && (
             <div
               className="text-xs text-gray-500 mb-2"
@@ -94,7 +94,7 @@ export default function PropertyCard({ property }: PropertyCardProps) {
               {getUpdatedLabel()}
             </div>
           )}
-          <div className="flex justify-between items-start mb-2">
+          <div className="flex justify-between items-start mb-2 flex-1">
             <div>
               {property.projectName && (
                 <p className="text-xs font-semibold text-primary-500 mb-1 uppercase tracking-wide">

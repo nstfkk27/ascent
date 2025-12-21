@@ -155,29 +155,36 @@ export default function PropertiesPage() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-4xl font-bold mb-6 text-gray-900">Browse Properties</h1>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        {/* Header */}
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-2">Browse Properties</h1>
+          <p className="text-gray-600 text-sm sm:text-base">Find your perfect property in Pattaya</p>
+        </div>
         
-        <div className="mb-6">
+        {/* Search Filters */}
+        <div className="mb-6 sm:mb-8">
           <SearchFilters onSearch={handleSearch} />
         </div>
 
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-lg text-gray-700">
-            <span className="font-semibold">{filteredProperties.length}</span> properties found
+        {/* Results Header */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
+          <p className="text-base sm:text-lg text-gray-700">
+            <span className="font-semibold text-primary-600">{filteredProperties.length}</span> {filteredProperties.length === 1 ? 'property' : 'properties'} found
           </p>
           <Link 
             href="/search" 
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 bg-primary-600 text-white rounded-xl hover:bg-primary-700 transition-all duration-300 shadow-sm hover:shadow-md font-medium"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
             </svg>
-            Map
+            Map View
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Property Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {filteredProperties.slice(0, displayCount).map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
