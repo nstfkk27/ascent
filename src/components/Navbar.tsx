@@ -298,7 +298,7 @@ export default function Navbar() {
 
                 {/* Profile Dropdown */}
                 {showProfileMenu && (
-                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50">
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 z-50 max-h-[calc(100vh-80px)] overflow-y-auto">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <p className="text-sm font-semibold text-gray-900 truncate">{agentProfile?.name || user.user_metadata?.full_name || 'Agent'}</p>
                       <p className="text-xs text-gray-500 truncate">{agentProfile?.companyName || user.email}</p>
@@ -447,7 +447,7 @@ export default function Navbar() {
 
       {/* Mobile Profile Dropdown (positioned below mobile header) */}
       {showProfileMenu && user && (
-        <div ref={mobileProfileMenuRef} className="md:hidden absolute right-4 top-16 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+        <div ref={mobileProfileMenuRef} className="md:hidden absolute right-4 top-16 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50 max-h-[calc(100vh-80px)] overflow-y-auto">
           <div className="px-4 py-2 border-b border-gray-100">
             <p className="text-sm font-medium text-gray-900 truncate">{agentProfile?.name || user.user_metadata?.full_name || 'Agent'}</p>
             <p className="text-xs text-gray-500 truncate">{agentProfile?.companyName || user.email}</p>

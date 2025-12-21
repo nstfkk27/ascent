@@ -9,5 +9,43 @@ export function createClient() {
     return null as any; // Prevent crash, but functionality will break safely
   }
 
-  return createBrowserClient(url, key);
+  return createBrowserClient(url, key, {
+    cookies: {
+      get(name: string) {
+        const cookie = document.cookie
+          .split('; ')
+          .find(row => row.startsWith(`${name}=`));
+        return cookie ? cookie.split('=')[1] : undefined;
+      },
+      set(name: string, value: string, options: any) {
+        let cookie = `${name}=${value}`;
+        if (options?.maxAge) {
+          cookie += `; max-age=${options.maxAge}`;
+        }
+        if (options?.path) {
+          cookie += `; path=${options.path}`;
+        }
+        if (options?.domain) {
+          cookie += `; domain=${options.domain}`;
+        }
+        if (options?.sameSite) {
+          cookie += `; samesite=${options.sameSite}`;
+        }
+        if (options?.secure) {
+          cookie += '; secure';
+        }
+        document.cookie = cookie;
+      },
+      remove(name: string, options: any) {
+        let cookie = `${name}=; max-age=0`;
+        if (options?.path) {
+          cookie += `; path=${options.path}`;
+        }
+        if (options?.domain) {
+          cookie += `; domain=${options.domain}`;
+        }
+        document.cookie = cookie;
+      },
+    },
+  });
 }
