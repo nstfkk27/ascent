@@ -94,25 +94,26 @@ export async function POST(request: NextRequest) {
 
     // Parse form data
     const formData = await request.formData();
-    const projectsFile = formData.get('projects') as File;
+    const projectsFile = formData.get('projects') as File | null;
     const facilitiesFile = formData.get('facilities') as File | null;
     const unitsFile = formData.get('units') as File | null;
 
-    if (!projectsFile) {
+    // At least one CSV file must be provided
+    if (!projectsFile && !facilitiesFile && !unitsFile) {
       return NextResponse.json({ 
         success: false, 
-        message: 'Missing Projects CSV file',
-        errors: ['Please upload at least the Projects CSV file']
+        message: 'No CSV files provided',
+        errors: ['Please upload at least one CSV file (Projects, Facilities, or Units)']
       }, { status: 400 });
     }
 
     // Read CSV files
-    const projectsText = await projectsFile.text();
+    const projectsText = projectsFile ? await projectsFile.text() : '';
     const facilitiesText = facilitiesFile ? await facilitiesFile.text() : '';
     const unitsText = unitsFile ? await unitsFile.text() : '';
 
     // Parse CSVs
-    const projectsData = parseCSV(projectsText);
+    const projectsData = projectsFile ? parseCSV(projectsText) : [];
     const facilitiesData = facilitiesFile ? parseCSV(facilitiesText) : [];
     const unitsData = unitsFile ? parseCSV(unitsText) : [];
 
@@ -174,10 +175,21 @@ export async function POST(request: NextRequest) {
     // Step 2: Create Facilities (if provided)
     for (const row of facilitiesData) {
       try {
-        const projectId = projectMap.get(row.project_name);
+        // First check projectMap (if projects were uploaded in same batch)
+        let projectId = projectMap.get(row.project_name);
+        
+        // If not in map, look up existing project in database
         if (!projectId) {
-          errors.push(`Facility "${row.facility_name}": Project "${row.project_name}" not found`);
-          continue;
+          const existingProject = await prisma.project.findFirst({
+            where: { name: row.project_name }
+          });
+          
+          if (existingProject) {
+            projectId = existingProject.id;
+          } else {
+            errors.push(`Facility "${row.facility_name}": Project "${row.project_name}" not found in database`);
+            continue;
+          }
         }
 
         await prisma.facility.create({
@@ -197,10 +209,21 @@ export async function POST(request: NextRequest) {
     // Step 3: Create Units (if provided)
     for (const row of unitsData) {
       try {
-        const projectId = projectMap.get(row.project_name);
+        // First check projectMap (if projects were uploaded in same batch)
+        let projectId = projectMap.get(row.project_name);
+        
+        // If not in map, look up existing project in database
         if (!projectId) {
-          errors.push(`Unit "${row.unit_title}": Project "${row.project_name}" not found`);
-          continue;
+          const existingProject = await prisma.project.findFirst({
+            where: { name: row.project_name }
+          });
+          
+          if (existingProject) {
+            projectId = existingProject.id;
+          } else {
+            errors.push(`Unit "${row.unit_title}": Project "${row.project_name}" not found in database`);
+            continue;
+          }
         }
 
         // Build images array

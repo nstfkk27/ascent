@@ -117,7 +117,7 @@ export default function ImportPage() {
 
         <button
           onClick={handleImport}
-          disabled={isImporting || !files.projects}
+          disabled={isImporting || (!files.projects && !files.facilities && !files.units)}
           className="mt-6 w-full px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           {isImporting ? 'Importing...' : 'Start Import'}
