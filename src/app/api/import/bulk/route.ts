@@ -118,35 +118,54 @@ export async function POST(request: NextRequest) {
 
     const errors: string[] = [];
     let projectsCreated = 0;
+    let projectsUpdated = 0;
     let facilitiesCreated = 0;
     let unitsCreated = 0;
 
-    // Step 1: Create Projects
+    // Step 1: Create or Update Projects
     const projectMap = new Map<string, string>(); // project_name -> project_id
     
     for (const row of projectsData) {
       try {
-        const project = await prisma.project.create({
-          data: {
-            name: row.project_name,
-            nameTh: row.project_name_th || null,
-            type: row.type as any,
-            address: row.address,
-            city: row.city,
-            lat: parseFloat(row.latitude),
-            lng: parseFloat(row.longitude),
-            developer: row.developer || null,
-            completionYear: row.completion_year ? parseInt(row.completion_year) : null,
-            description: row.description || null,
-            totalUnits: row.total_units ? parseInt(row.total_units) : null,
-            totalBuildings: row.total_buildings ? parseInt(row.total_buildings) : null,
-            totalFloors: row.total_floors ? parseInt(row.total_floors) : null,
-            imageUrl: row.project_image_url || null,
-          }
+        // Check if project already exists by name
+        const existingProject = await prisma.project.findFirst({
+          where: { name: row.project_name }
         });
+
+        const projectData = {
+          name: row.project_name,
+          nameTh: row.project_name_th || null,
+          type: row.type as any,
+          address: row.address,
+          city: row.city,
+          lat: parseFloat(row.latitude),
+          lng: parseFloat(row.longitude),
+          developer: row.developer || null,
+          completionYear: row.completion_year ? parseInt(row.completion_year) : null,
+          description: row.description || null,
+          totalUnits: row.total_units ? parseInt(row.total_units) : null,
+          totalBuildings: row.total_buildings ? parseInt(row.total_buildings) : null,
+          totalFloors: row.total_floors ? parseInt(row.total_floors) : null,
+          imageUrl: row.project_image_url || null,
+        };
+
+        let project;
+        if (existingProject) {
+          // Update existing project
+          project = await prisma.project.update({
+            where: { id: existingProject.id },
+            data: projectData
+          });
+          projectsUpdated++;
+        } else {
+          // Create new project
+          project = await prisma.project.create({
+            data: projectData
+          });
+          projectsCreated++;
+        }
         
         projectMap.set(row.project_name, project.id);
-        projectsCreated++;
       } catch (error) {
         errors.push(`Project "${row.project_name}": ${String(error)}`);
       }
@@ -230,9 +249,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: `Import completed! Created ${projectsCreated} projects, ${facilitiesCreated} facilities, ${unitsCreated} units`,
+      message: `Import completed! Created ${projectsCreated} projects, updated ${projectsUpdated} projects, ${facilitiesCreated} facilities, ${unitsCreated} units`,
       stats: {
         projectsCreated,
+        projectsUpdated,
         facilitiesCreated,
         unitsCreated,
         errors: errors.length
