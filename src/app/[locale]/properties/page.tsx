@@ -122,7 +122,8 @@ export default function PropertiesPage() {
     if (filters.query && !(
       property.title?.toLowerCase().includes(filters.query.toLowerCase()) ||
       property.city?.toLowerCase().includes(filters.query.toLowerCase()) ||
-      property.address?.toLowerCase().includes(filters.query.toLowerCase())
+      property.address?.toLowerCase().includes(filters.query.toLowerCase()) ||
+      property.referenceId?.toLowerCase().includes(filters.query.toLowerCase())
     )) return false;
     return true;
   });
