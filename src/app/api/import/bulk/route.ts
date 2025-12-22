@@ -3,16 +3,49 @@ import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { generateReferenceId, generateUniqueSlug } from '@/utils/propertyHelpers';
 
-// Helper to parse CSV text into array of objects
+// Helper to parse CSV text into array of objects (RFC 4180 compliant)
 function parseCSV(text: string): Record<string, string>[] {
   const lines = text.trim().split('\n');
   if (lines.length < 2) return [];
   
-  const headers = lines[0].split(',').map(h => h.trim());
+  // Parse a single CSV line handling quoted fields
+  function parseCSVLine(line: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const nextChar = line[i + 1];
+      
+      if (char === '"') {
+        if (inQuotes && nextChar === '"') {
+          // Escaped quote
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // Field separator
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    // Add last field
+    result.push(current.trim());
+    return result;
+  }
+  
+  const headers = parseCSVLine(lines[0]);
   const rows = lines.slice(1);
   
   return rows.map(row => {
-    const values = row.split(',').map(v => v.trim());
+    const values = parseCSVLine(row);
     const obj: Record<string, string> = {};
     headers.forEach((header, idx) => {
       obj[header] = values[idx] || '';
