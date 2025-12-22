@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import SearchAutocomplete from '../SearchAutocomplete';
 import { 
   PROPERTY_CATEGORIES, 
   LISTING_TYPES, 
@@ -119,21 +120,20 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
           {/* Row 1: Search Input (Full width on mobile, with Category & Buy/Rent on desktop) */}
           <div className="flex flex-col md:flex-row gap-2">
             <div className="relative flex-1 min-w-0">
-              <input
-                type="text"
-                placeholder="Search Project name, location..."
-                value={filters.query}
-                onChange={(e) => handleChange('query', e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && onSearchSubmit) {
-                    onSearchSubmit(filters.query);
-                  }
-                }}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              />
-              <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3 z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
+              <SearchAutocomplete
+                value={filters.query}
+                onChange={(value) => handleChange('query', value)}
+                onSelect={(suggestion) => {
+                  if (suggestion.type === 'city') {
+                    handleChange('query', suggestion.name);
+                  }
+                }}
+                placeholder="Search project name, location, or ID..."
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              />
             </div>
             <div className="flex gap-2">
               <select

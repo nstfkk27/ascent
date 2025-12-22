@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import SearchAutocomplete from './SearchAutocomplete';
 import { 
   PROPERTY_CATEGORIES, 
   PROPERTY_SUBTYPES, 
@@ -185,19 +186,28 @@ export default function SearchFilters({ onSearch }: SearchFiltersProps) {
     <div className="bg-white/95 backdrop-blur-md shadow-xl rounded-2xl p-4 border border-gray-100">
       {/* Single Row Layout: All filters in one row on desktop, stacked on mobile */}
       <div className="flex flex-col md:flex-row gap-2">
-        {/* Search Input */}
+        {/* Search Input with Autocomplete */}
         <div className="relative md:flex-1 md:max-w-xs">
-          <input
-            type="text"
-            name="query"
-            placeholder="Search project name, location..."
-            value={filters.query}
-            onChange={handleChange}
-            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          />
-          <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-gray-400 absolute left-3 top-3 z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
+          <SearchAutocomplete
+            value={filters.query}
+            onChange={(value) => {
+              const newFilters = { ...filters, query: value };
+              setFilters(newFilters);
+              onSearch(newFilters);
+            }}
+            onSelect={(suggestion) => {
+              if (suggestion.type === 'city') {
+                const newFilters = { ...filters, query: suggestion.name, city: suggestion.name };
+                setFilters(newFilters);
+                onSearch(newFilters);
+              }
+            }}
+            placeholder="Search project name, location, or ID..."
+            className="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          />
         </div>
 
         {/* Category */}
