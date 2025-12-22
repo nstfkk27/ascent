@@ -92,51 +92,9 @@ export default function CreateProjectPage() {
         <p className="text-gray-600">Start by defining the location and basic details.</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Map & Location */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Find Location</label>
-            <form onSubmit={handleSearch} className="flex gap-2 mb-4">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search place..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-              />
-              <button 
-                type="submit"
-                disabled={isSearching}
-                className="bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 text-gray-600"
-              >
-                🔍
-              </button>
-            </form>
-            
-            <div className="h-64 w-full rounded-lg overflow-hidden relative">
-              <Map
-                {...viewState}
-                onMove={evt => setViewState(evt.viewState)}
-                onClick={handleMapClick}
-                style={{ width: '100%', height: '100%' }}
-                mapStyle="mapbox://styles/mapbox/streets-v12"
-                mapboxAccessToken={MAPBOX_TOKEN}
-              >
-                <NavigationControl position="top-right" />
-                <Marker 
-                  latitude={marker.latitude} 
-                  longitude={marker.longitude} 
-                  color="red"
-                />
-              </Map>
-            </div>
-            <p className="text-xs text-gray-500 mt-2 text-center">Click on map to pinpoint exact location</p>
-          </div>
-        </div>
-
-        {/* Right Column: Form */}
-        <div className="lg:col-span-2">
+      <div className="grid grid-cols-1 gap-8">
+        {/* Form */}
+        <div>
           <form action={createProject} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 space-y-6">
             <div className="grid grid-cols-2 gap-6">
               <div>
@@ -277,6 +235,45 @@ export default function CreateProjectPage() {
                   rows={4}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
+              </div>
+
+              <div className="col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Find Location</label>
+                <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search place..."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                  />
+                  <button 
+                    type="submit"
+                    disabled={isSearching}
+                    className="bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 text-gray-600"
+                  >
+                    🔍
+                  </button>
+                </form>
+                
+                <div className="h-64 w-full rounded-lg overflow-hidden relative">
+                  <Map
+                    {...viewState}
+                    onMove={evt => setViewState(evt.viewState)}
+                    onClick={handleMapClick}
+                    style={{ width: '100%', height: '100%' }}
+                    mapStyle="mapbox://styles/mapbox/streets-v12"
+                    mapboxAccessToken={MAPBOX_TOKEN}
+                  >
+                    <NavigationControl position="top-right" />
+                    <Marker 
+                      latitude={marker.latitude} 
+                      longitude={marker.longitude} 
+                      color="red"
+                    />
+                  </Map>
+                </div>
+                <p className="text-xs text-gray-500 mt-2 text-center">Click on map to pinpoint exact location</p>
               </div>
 
               <div className="col-span-2 pt-4 border-t border-gray-100">
