@@ -226,11 +226,12 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Build images array
+        // Build images array from comma-separated string
         const images: string[] = [];
-        for (let i = 1; i <= 5; i++) {
-          const imageUrl = row[`image_url_${i}`];
-          if (imageUrl) images.push(imageUrl);
+        if (row.images) {
+          // Split by comma and trim whitespace
+          const imageUrls = row.images.split(',').map(url => url.trim()).filter(url => url.length > 0);
+          images.push(...imageUrls);
         }
 
         await prisma.property.create({
