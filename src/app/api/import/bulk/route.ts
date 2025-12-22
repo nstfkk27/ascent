@@ -44,26 +44,26 @@ export async function POST(request: NextRequest) {
     // Parse form data
     const formData = await request.formData();
     const projectsFile = formData.get('projects') as File;
-    const facilitiesFile = formData.get('facilities') as File;
-    const unitsFile = formData.get('units') as File;
+    const facilitiesFile = formData.get('facilities') as File | null;
+    const unitsFile = formData.get('units') as File | null;
 
-    if (!projectsFile || !facilitiesFile || !unitsFile) {
+    if (!projectsFile) {
       return NextResponse.json({ 
         success: false, 
-        message: 'Missing CSV files',
-        errors: ['Please upload all 3 CSV files']
+        message: 'Missing Projects CSV file',
+        errors: ['Please upload at least the Projects CSV file']
       }, { status: 400 });
     }
 
     // Read CSV files
     const projectsText = await projectsFile.text();
-    const facilitiesText = await facilitiesFile.text();
-    const unitsText = await unitsFile.text();
+    const facilitiesText = facilitiesFile ? await facilitiesFile.text() : '';
+    const unitsText = unitsFile ? await unitsFile.text() : '';
 
     // Parse CSVs
     const projectsData = parseCSV(projectsText);
-    const facilitiesData = parseCSV(facilitiesText);
-    const unitsData = parseCSV(unitsText);
+    const facilitiesData = facilitiesFile ? parseCSV(facilitiesText) : [];
+    const unitsData = unitsFile ? parseCSV(unitsText) : [];
 
     const errors: string[] = [];
     let projectsCreated = 0;
@@ -101,7 +101,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 2: Create Facilities
+    // Step 2: Create Facilities (if provided)
     for (const row of facilitiesData) {
       try {
         const projectId = projectMap.get(row.project_name);
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Step 3: Create Units
+    // Step 3: Create Units (if provided)
     for (const row of unitsData) {
       try {
         const projectId = projectMap.get(row.project_name);

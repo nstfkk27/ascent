@@ -19,8 +19,8 @@ export default function ImportPage() {
   };
 
   const handleImport = async () => {
-    if (!files.projects || !files.facilities || !files.units) {
-      alert('Please upload all 3 CSV files');
+    if (!files.projects) {
+      alert('Please upload at least the Projects CSV file');
       return;
     }
 
@@ -29,8 +29,8 @@ export default function ImportPage() {
 
     const formData = new FormData();
     formData.append('projects', files.projects);
-    formData.append('facilities', files.facilities);
-    formData.append('units', files.units);
+    if (files.facilities) formData.append('facilities', files.facilities);
+    if (files.units) formData.append('units', files.units);
 
     try {
       const res = await fetch('/api/import/bulk', {
@@ -82,7 +82,7 @@ export default function ImportPage() {
         </h2>
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">1. Projects CSV</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">1. Projects CSV <span className="text-red-500">*</span></label>
             <input
               type="file"
               accept=".csv"
@@ -93,7 +93,7 @@ export default function ImportPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">2. Facilities CSV</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">2. Facilities CSV <span className="text-gray-400 text-xs">(Optional)</span></label>
             <input
               type="file"
               accept=".csv"
@@ -104,7 +104,7 @@ export default function ImportPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">3. Units CSV</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">3. Units CSV <span className="text-gray-400 text-xs">(Optional)</span></label>
             <input
               type="file"
               accept=".csv"
@@ -117,7 +117,7 @@ export default function ImportPage() {
 
         <button
           onClick={handleImport}
-          disabled={isImporting || !files.projects || !files.facilities || !files.units}
+          disabled={isImporting || !files.projects}
           className="mt-6 w-full px-6 py-3 bg-primary-600 text-white font-semibold rounded-lg hover:bg-primary-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           {isImporting ? 'Importing...' : 'Start Import'}
