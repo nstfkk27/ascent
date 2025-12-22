@@ -4,51 +4,69 @@ import { prisma } from '@/lib/prisma';
 import { generateReferenceId, generateUniqueSlug } from '@/utils/propertyHelpers';
 
 // Helper to parse CSV text into array of objects (RFC 4180 compliant)
+// Handles quoted fields with commas and newlines
 function parseCSV(text: string): Record<string, string>[] {
-  const lines = text.trim().split('\n');
-  if (lines.length < 2) return [];
+  const result: string[][] = [];
+  let current = '';
+  let currentRow: string[] = [];
+  let inQuotes = false;
   
-  // Parse a single CSV line handling quoted fields
-  function parseCSVLine(line: string): string[] {
-    const result: string[] = [];
-    let current = '';
-    let inQuotes = false;
+  // Parse entire CSV character by character
+  for (let i = 0; i < text.length; i++) {
+    const char = text[i];
+    const nextChar = text[i + 1];
     
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      const nextChar = line[i + 1];
-      
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          // Escaped quote
-          current += '"';
-          i++; // Skip next quote
-        } else {
-          // Toggle quote state
-          inQuotes = !inQuotes;
-        }
-      } else if (char === ',' && !inQuotes) {
-        // Field separator
-        result.push(current.trim());
-        current = '';
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        // Escaped quote - add one quote and skip next
+        current += '"';
+        i++;
       } else {
-        current += char;
+        // Toggle quote state
+        inQuotes = !inQuotes;
       }
+    } else if (char === ',' && !inQuotes) {
+      // Field separator
+      currentRow.push(current.trim());
+      current = '';
+    } else if ((char === '\n' || char === '\r') && !inQuotes) {
+      // Row separator (handle both \n and \r\n)
+      if (char === '\r' && nextChar === '\n') {
+        i++; // Skip \n in \r\n
+      }
+      
+      // Add last field and row
+      if (current || currentRow.length > 0) {
+        currentRow.push(current.trim());
+        if (currentRow.some(field => field.length > 0)) {
+          result.push(currentRow);
+        }
+        currentRow = [];
+        current = '';
+      }
+    } else {
+      // Regular character (including newlines inside quotes)
+      current += char;
     }
-    
-    // Add last field
-    result.push(current.trim());
-    return result;
   }
   
-  const headers = parseCSVLine(lines[0]);
-  const rows = lines.slice(1);
+  // Add final field and row if exists
+  if (current || currentRow.length > 0) {
+    currentRow.push(current.trim());
+    if (currentRow.some(field => field.length > 0)) {
+      result.push(currentRow);
+    }
+  }
   
-  return rows.map(row => {
-    const values = parseCSVLine(row);
+  if (result.length < 2) return [];
+  
+  const headers = result[0];
+  const dataRows = result.slice(1);
+  
+  return dataRows.map(row => {
     const obj: Record<string, string> = {};
     headers.forEach((header, idx) => {
-      obj[header] = values[idx] || '';
+      obj[header] = row[idx] || '';
     });
     return obj;
   });
