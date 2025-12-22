@@ -11,8 +11,31 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     
+    // Check User Role for Filtering
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let userRole = 'AGENT';
+    let agentId: string | null = null;
+    
+    if (user && user.email) {
+      const agent = await prisma.agentProfile.findFirst({
+        where: { email: user.email }
+      });
+      if (agent) {
+        userRole = agent.role;
+        agentId = agent.id;
+      }
+    }
+    
     // Build filter object
     const where: any = {};
+    
+    // Role-based filtering: AGENT and PLATFORM_AGENT only see their own listings
+    if ((userRole === 'AGENT' || userRole === 'PLATFORM_AGENT') && agentId) {
+      where.agentId = agentId;
+    }
+    // Only SUPER_ADMIN sees all listings (no filter)
     
     const category = searchParams.get('category');
     if (category) {
@@ -307,12 +330,15 @@ export async function POST(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
     
     let userRole = 'AGENT';
+    let agentId: string | null = null;
+    
     if (user && user.email) {
       const agent = await prisma.agentProfile.findFirst({
         where: { email: user.email }
       });
       if (agent) {
         userRole = agent.role;
+        agentId = agent.id;
       }
     }
     
@@ -404,6 +430,9 @@ export async function POST(request: NextRequest) {
         
         latitude: body.latitude || null,
         longitude: body.longitude || null,
+        
+        // Set the agent who created this listing
+        agentId: agentId,
     };
 
     const cleanData = sanitizePropertyData(rawData);

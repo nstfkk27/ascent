@@ -96,23 +96,42 @@ export async function PUT(
     
     let isInternal = false;
     let agentId: string | null = null;
+    let userRole = 'AGENT';
+    
     if (user && user.email) {
       const agent = await prisma.agentProfile.findFirst({
           where: { email: user.email }
       });
       if (agent) {
         agentId = agent.id;
+        userRole = agent.role;
         if (agent.role === 'SUPER_ADMIN' || agent.role === 'PLATFORM_AGENT') {
           isInternal = true;
         }
       }
     }
 
-    // Get current property to check for price changes
+    // Get current property to check ownership and price changes
     const currentProperty = await prisma.property.findUnique({
       where: { id: params.id },
-      select: { price: true, rentPrice: true }
+      select: { price: true, rentPrice: true, agentId: true }
     });
+
+    if (!currentProperty) {
+      return NextResponse.json(
+        { success: false, error: 'Property not found' },
+        { status: 404 }
+      );
+    }
+
+    // AGENT and PLATFORM_AGENT can only edit their own listings
+    if ((userRole === 'AGENT' || userRole === 'PLATFORM_AGENT') && currentProperty.agentId !== agentId) {
+      return NextResponse.json(
+        { success: false, error: 'You can only edit your own listings' },
+        { status: 403 }
+      );
+    }
+    // Only SUPER_ADMIN can edit any listing
 
     let updateData = { ...body };
 
@@ -241,7 +260,7 @@ export async function DELETE(
     }
 
     // Only SUPER_ADMIN can delete any property
-    // Other agents can only delete their own listings
+    // AGENT and PLATFORM_AGENT can only delete their own listings
     const isSuperAdmin = agent.role === 'SUPER_ADMIN';
     const isOwner = property.agentId === agent.id;
 
