@@ -90,7 +90,16 @@ export async function GET(request: NextRequest) {
     ]);
 
     // Format suggestions
-    const suggestions = [];
+    const suggestions: Array<{
+      type: string;
+      id?: string;
+      slug?: string | null;
+      name: string;
+      nameTh?: string | null;
+      subtitle: string;
+      category?: string;
+      icon: string;
+    }> = [];
 
     // Add projects
     projects.forEach(project => {
@@ -121,7 +130,7 @@ export async function GET(request: NextRequest) {
         type: 'reference',
         id: property.id,
         slug: property.slug,
-        name: property.referenceId,
+        name: property.referenceId || '',
         subtitle: property.projectName || property.title,
         category: property.category,
         icon: 'hash'
