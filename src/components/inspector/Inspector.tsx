@@ -8,6 +8,7 @@ import { createCompoundSlug } from '@/utils/propertyHelpers';
 // Define types locally or import from Prisma
 interface Unit {
   id: string;
+  slug?: string;
   title: string;
   price: number | null;
   rentPrice: number | null;
