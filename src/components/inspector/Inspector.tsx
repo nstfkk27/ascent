@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { createCompoundSlug } from '@/utils/propertyHelpers';
 
 // Define types locally or import from Prisma
 interface Unit {
@@ -431,10 +432,16 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
               Available Units ({project.units.length})
             </h3>
             <div className="space-y-3">
-              {project.units.map((unit) => (
+              {project.units.map((unit) => {
+                // Generate property URL - use slug if available, otherwise fall back to ID
+                const propertyUrl = unit.slug 
+                  ? `/properties/${createCompoundSlug(unit.slug, unit.id)}`
+                  : `/properties/${unit.id}`;
+                
+                return (
                 <Link 
                   key={unit.id} 
-                  href={`/properties/${unit.id}`}
+                  href={propertyUrl}
                   className="group flex gap-4 p-3 rounded-xl border border-gray-100 hover:border-[#496f5d] hover:shadow-md transition-all cursor-pointer bg-white"
                 >
                   <div className="w-20 h-20 relative rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
@@ -478,7 +485,8 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
                     </div>
                   </div>
                 </Link>
-              ))}
+              );
+              })}
               {project.units.length === 0 && (
                 <p className="text-sm text-gray-500 italic">No units currently listed.</p>
               )}
