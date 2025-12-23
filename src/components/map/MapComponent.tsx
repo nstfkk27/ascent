@@ -20,6 +20,8 @@ interface Project {
     price?: number | null;
     rentPrice?: number | null;
     listingType?: string;
+    houseType?: string | null;
+    investmentType?: string | null;
   }>;
   modelAsset: {
     glbUrl: string;
@@ -252,14 +254,17 @@ export default function MapComponent({ projects, onProjectSelect, flyToLocation 
           if (zoom < 13) {
             // Very zoomed out: no label (clustering handles this)
             showLabel = false;
-          } else if (zoom < 15) {
-            // Medium zoom: price only
-            label = price || '฿';
-          } else {
-            // Zoomed in: full name or price
-            label = project.isStandalone 
-              ? (price || project.name.slice(0, 12)) 
-              : (project.name.length > 15 ? project.name.slice(0, 15) + '...' : project.name);
+          } else if (zoom >= 13) {
+            // Medium to close up: show project name or subtype
+            if (project.isStandalone) {
+              // Standalone unit: show subtype (houseType or investmentType)
+              const unit = project.units?.[0];
+              const subtype = unit?.houseType || unit?.investmentType || project.type;
+              label = subtype ? subtype.replace(/_/g, ' ') : project.name.slice(0, 12);
+            } else {
+              // Project: show project name
+              label = project.name.length > 15 ? project.name.slice(0, 15) + '...' : project.name;
+            }
           }
           
           return (

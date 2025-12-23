@@ -53,8 +53,8 @@ async function LandingPageContent() {
         <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
           <div className="text-center max-w-4xl mx-auto animate-fade-in">
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-gray-900 mb-8 leading-tight">
-              {t('heroTitle')} <br />
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
+              <span className="text-gray-600">{t('heroTitle')}</span> <br />
               <span className="text-[#496f5d] font-bold">
                 {t('heroHighlight')}
               </span>
