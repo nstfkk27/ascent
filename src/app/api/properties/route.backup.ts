@@ -1,32 +1,41 @@
-import { NextRequest } from 'next/server';
-import { 
-  withErrorHandler, 
-  withAuth, 
-  withRateLimit,
-  successResponse,
-  paginatedResponse,
-  isInternalAgent,
-} from '@/lib/api';
-import { validatePagination } from '@/lib/validation/schemas';
-import { logger } from '@/lib/logger';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
+import { createClient } from '@/utils/supabase/server';
 import { generateReferenceId, generateUniqueSlug } from '@/utils/propertyHelpers';
 
+// GET /api/properties - Get all properties with optional filters
 export const dynamic = 'force-dynamic';
 
-export const GET = withErrorHandler(
-  withAuth(async (req: NextRequest, context, { agent }) => {
-    const searchParams = req.nextUrl.searchParams;
-    const { page, limit } = validatePagination(searchParams);
-
-    const where: any = {};
-
-    if (agent) {
-      if (agent.role === 'AGENT' || agent.role === 'PLATFORM_AGENT') {
-        where.agentId = agent.id;
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    
+    // Check User Role for Filtering
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let userRole = 'AGENT';
+    let agentId: string | null = null;
+    
+    if (user && user.email) {
+      const agent = await prisma.agentProfile.findFirst({
+        where: { email: user.email }
+      });
+      if (agent) {
+        userRole = agent.role;
+        agentId = agent.id;
       }
     }
+    
+    // Build filter object
+    const where: any = {};
+    
+    // Role-based filtering: AGENT and PLATFORM_AGENT only see their own listings
+    if ((userRole === 'AGENT' || userRole === 'PLATFORM_AGENT') && agentId) {
+      where.agentId = agentId;
+    }
+    // Only SUPER_ADMIN sees all listings (no filter)
     
     const category = searchParams.get('category');
     if (category) {
@@ -172,15 +181,10 @@ export const GET = withErrorHandler(
       'landZoneColor', 'tag', 'minSize', 'maxSize'
     ];
     
+    // Pagination
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '50');
     const skip = (page - 1) * limit;
-
-    logger.info('Fetching properties', {
-      agentId: agent?.id,
-      role: agent?.role,
-      filters: { category: searchParams.get('category'), city: searchParams.get('city'), status: searchParams.get('status') },
-      page,
-      limit,
-    });
 
     const booleanColumns = ['petFriendly', 'furnished', 'pool', 'garden', 'conferenceRoom'];
     
@@ -290,49 +294,84 @@ export const GET = withErrorHandler(
       coAgentCommissionRate: p.coAgentCommissionRate ? p.coAgentCommissionRate.toNumber() : null,
     }));
     
-    return paginatedResponse(serializedProperties, page, limit, total);
-  }, { requireAgent: false })
-);
+    return NextResponse.json({
+      success: true,
+      count: total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data: serializedProperties,
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching properties:', error);
+    return NextResponse.json(
+      { success: false, error: 'Failed to fetch properties' },
+      { status: 500 }
+    );
+  }
+}
 
-export const POST = withErrorHandler(
-  withAuth(async (req: NextRequest, context, { agent }) => {
-    await withRateLimit(req);
+// POST /api/properties - Create new property
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
 
-    const body = await req.json();
-
+    // Backwards compatibility: older clients may send unitFeatures instead of amenities
     if (body?.unitFeatures && !body?.amenities) {
       body.amenities = body.unitFeatures;
     }
-
-    const isInternal = agent ? isInternalAgent(agent.role) : false;
-
+    
+    // Check User Role for Permissions
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let userRole = 'AGENT';
+    let agentId: string | null = null;
+    
+    if (user && user.email) {
+      const agent = await prisma.agentProfile.findFirst({
+        where: { email: user.email }
+      });
+      if (agent) {
+        userRole = agent.role;
+        agentId = agent.id;
+      }
+    }
+    
+    const isInternal = userRole === 'SUPER_ADMIN' || userRole === 'PLATFORM_AGENT';
+    
+    // Validate required fields
     const requiredFields = ['title', 'description', 'address', 'city', 'state', 'zipCode', 'category', 'size'];
     for (const field of requiredFields) {
       if (!body[field]) {
-        throw new Error(`Missing required field: ${field}`);
+        return NextResponse.json(
+          { success: false, error: `Missing required field: ${field}` },
+          { status: 400 }
+        );
       }
     }
 
+    // Dynamic Price Validation
     if (body.listingType === 'SALE' || body.listingType === 'BOTH') {
       if (!body.price) {
-        throw new Error('Missing required field: Sale Price');
+        return NextResponse.json({ success: false, error: 'Missing required field: Sale Price' }, { status: 400 });
       }
     }
     if (body.listingType === 'RENT' || body.listingType === 'BOTH') {
       if (!body.rentPrice) {
-        throw new Error('Missing required field: Rental Price');
+        return NextResponse.json({ success: false, error: 'Missing required field: Rental Price' }, { status: 400 });
       }
     }
     
+    // Generate unique reference ID and slug
     const referenceId = await generateReferenceId();
     const slug = await generateUniqueSlug(body.title);
-
-    logger.info('Creating property', {
-      agentId: agent?.id,
-      category: body.category,
-      city: body.city,
-    });
-
+    
+    // Create property
     const rawData = {
         referenceId,
         slug,
@@ -392,7 +431,8 @@ export const POST = withErrorHandler(
         latitude: body.latitude || null,
         longitude: body.longitude || null,
         
-        agentId: agent?.id,
+        // Set the agent who created this listing
+        agentId: agentId,
     };
 
     const cleanData = sanitizePropertyData(rawData);
@@ -400,13 +440,16 @@ export const POST = withErrorHandler(
     const property = await prisma.property.create({
       data: cleanData,
     });
-
-    logger.info('Property created', {
-      propertyId: property.id,
-      agentId: agent?.id,
-      referenceId: property.referenceId,
-    });
-
-    return successResponse(property, undefined, 201);
-  })
-);
+    
+    return NextResponse.json(
+      { success: true, data: property },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error('Error creating property:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to create property' },
+      { status: 500 }
+    );
+  }
+}

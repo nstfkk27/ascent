@@ -7,7 +7,7 @@ import {
   paginatedResponse,
   isInternalAgent,
 } from '@/lib/api';
-import { validatePagination } from '@/lib/validation/schemas';
+import { propertyCreateSchema, validatePagination } from '@/lib/validation/schemas';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
@@ -27,28 +27,19 @@ export const GET = withErrorHandler(
         where.agentId = agent.id;
       }
     }
-    
-    const category = searchParams.get('category');
-    if (category) {
-      where.category = category;
-    }
-    
-    const houseType = searchParams.get('houseType');
-    if (houseType) {
-      where.houseType = houseType;
-    }
-    
-    const investmentType = searchParams.get('investmentType');
-    if (investmentType) {
-      where.investmentType = investmentType;
-    }
 
-    // Generic subtype parameter - maps to houseType or investmentType based on category
+    const category = searchParams.get('category');
+    if (category) where.category = category;
+
+    const houseType = searchParams.get('houseType');
+    if (houseType) where.houseType = houseType;
+
+    const investmentType = searchParams.get('investmentType');
+    if (investmentType) where.investmentType = investmentType;
+
     const subtype = searchParams.get('subtype');
     if (subtype) {
-      // Investment subtypes
       const investmentSubtypes = ['HOTEL', 'CLUB_BAR', 'MASSAGE', 'RESTAURANT', 'WELLNESS', 'GUESTHOUSE', 'RESORT', 'HOSTEL', 'SERVICED_APARTMENT'];
-      // House subtypes
       const houseSubtypes = ['POOL_VILLA', 'TOWNHOUSE', 'SINGLE_HOUSE', 'TWIN_HOUSE', 'COMMERCIAL_BUILDING'];
       
       if (investmentSubtypes.includes(subtype)) {
@@ -57,28 +48,22 @@ export const GET = withErrorHandler(
         where.houseType = subtype;
       }
     }
-    
+
     const listingType = searchParams.get('listingType');
     if (listingType) {
       if (listingType === 'SALE' || listingType === 'RENT') {
-        // If searching for SALE or RENT, also include BOTH
         where.listingType = { in: [listingType, 'BOTH'] };
       } else {
-        // If searching for BOTH or anything else, match exactly
         where.listingType = listingType;
       }
     }
-    
+
     const city = searchParams.get('city');
-    if (city) {
-      where.city = { contains: city, mode: 'insensitive' };
-    }
+    if (city) where.city = { contains: city, mode: 'insensitive' };
 
     const area = searchParams.get('area');
-    if (area) {
-      where.area = area;
-    }
-    
+    if (area) where.area = area;
+
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     if (minPrice || maxPrice) {
@@ -86,12 +71,10 @@ export const GET = withErrorHandler(
       if (minPrice) where.price.gte = parseFloat(minPrice);
       if (maxPrice) where.price.lte = parseFloat(maxPrice);
     }
-    
+
     const bedrooms = searchParams.get('bedrooms');
-    if (bedrooms) {
-      where.bedrooms = { gte: parseInt(bedrooms) };
-    }
-    
+    if (bedrooms) where.bedrooms = { gte: parseInt(bedrooms) };
+
     const minSize = searchParams.get('minSize');
     const maxSize = searchParams.get('maxSize');
     if (minSize || maxSize) {
@@ -99,16 +82,13 @@ export const GET = withErrorHandler(
       if (minSize) where.size.gte = parseFloat(minSize.replace(/,/g, ''));
       if (maxSize) where.size.lte = parseFloat(maxSize.replace(/,/g, ''));
     }
-    
+
     const featured = searchParams.get('featured');
-    if (featured === 'true') {
-      where.featured = true;
-    }
-    
+    if (featured === 'true') where.featured = true;
+
     const status = searchParams.get('status') || 'AVAILABLE';
     where.status = status;
 
-    // New Project filter (built within last 2 years)
     const newProject = searchParams.get('newProject');
     if (newProject === 'true') {
       const currentYear = new Date().getFullYear();
@@ -116,9 +96,7 @@ export const GET = withErrorHandler(
       where.AND.push({
         project: {
           is: {
-            completionYear: {
-              gte: currentYear - 2,
-            },
+            completionYear: { gte: currentYear - 2 },
           },
         },
       });
@@ -130,21 +108,17 @@ export const GET = withErrorHandler(
       const isNewProject = {
         project: {
           is: {
-            completionYear: {
-              gte: currentYear - 1,
-            },
+            completionYear: { gte: currentYear - 1 },
           },
         },
       };
 
       if (tag === 'new') {
-        // Only listings that belong to a project completed within the last 1 year
         where.AND = where.AND || [];
         where.AND.push(isNewProject);
       }
 
       if (tag === 'renovation') {
-        // Exclude new projects: treat standalone listings as "old" by default
         where.AND = where.AND || [];
         where.AND.push({
           OR: [
@@ -164,36 +138,20 @@ export const GET = withErrorHandler(
       }
     }
 
-    // Dynamic Feature filters
     const knownParams = [
       'category', 'houseType', 'investmentType', 'listingType', 
       'city', 'area', 'minPrice', 'maxPrice', 'bedrooms', 'featured', 'status',
       'page', 'limit', 'query', 'openForYearsRange', 'staffRange', 'equipmentIncluded',
       'landZoneColor', 'tag', 'minSize', 'maxSize'
     ];
-    
-    const skip = (page - 1) * limit;
-
-    logger.info('Fetching properties', {
-      agentId: agent?.id,
-      role: agent?.role,
-      filters: { category: searchParams.get('category'), city: searchParams.get('city'), status: searchParams.get('status') },
-      page,
-      limit,
-    });
 
     const booleanColumns = ['petFriendly', 'furnished', 'pool', 'garden', 'conferenceRoom'];
     
-    // Initialize AND array if not exists
     if (!where.AND) where.AND = [];
 
-    // Handle Land Zone Color
     const landZoneColor = searchParams.get('landZoneColor');
-    if (landZoneColor) {
-      where.landZoneColor = landZoneColor;
-    }
+    if (landZoneColor) where.landZoneColor = landZoneColor;
 
-    // Handle Investment Ranges
     const openForYearsRange = searchParams.get('openForYearsRange');
     if (openForYearsRange) {
       if (openForYearsRange === '10+') {
@@ -215,17 +173,13 @@ export const GET = withErrorHandler(
     }
 
     const equipmentIncluded = searchParams.get('equipmentIncluded');
-    if (equipmentIncluded) {
-      where.equipmentIncluded = equipmentIncluded;
-    }
+    if (equipmentIncluded) where.equipmentIncluded = equipmentIncluded;
 
     searchParams.forEach((value, key) => {
       if (knownParams.includes(key)) return;
       
       if (booleanColumns.includes(key)) {
         if (value === 'true') {
-          // For pool and garden, check both boolean column AND unitFeatures JSON
-          // This handles cases where Investment properties store these in JSON
           if (key === 'pool') {
             where.AND.push({
               OR: [
@@ -250,7 +204,6 @@ export const GET = withErrorHandler(
         return;
       }
       
-      // Assume it's a unit feature in the JSON
       if (value === 'true') {
         where.AND.push({
           unitFeatures: {
@@ -260,17 +213,24 @@ export const GET = withErrorHandler(
         });
       }
     });
-    
-    // Get properties
+
+    const skip = (page - 1) * limit;
+
+    logger.info('Fetching properties', {
+      agentId: agent?.id,
+      role: agent?.role,
+      filters: { category, city, status },
+      page,
+      limit,
+    });
+
     const [total, properties] = await prisma.$transaction([
       prisma.property.count({ where }),
       prisma.property.findMany({
         where,
         skip,
         take: limit,
-        orderBy: {
-          createdAt: 'desc',
-        },
+        orderBy: { createdAt: 'desc' },
       })
     ]);
 
@@ -289,7 +249,7 @@ export const GET = withErrorHandler(
       agentCommissionRate: p.agentCommissionRate ? p.agentCommissionRate.toNumber() : null,
       coAgentCommissionRate: p.coAgentCommissionRate ? p.coAgentCommissionRate.toNumber() : null,
     }));
-    
+
     return paginatedResponse(serializedProperties, page, limit, total);
   }, { requireAgent: false })
 );
@@ -304,95 +264,26 @@ export const POST = withErrorHandler(
       body.amenities = body.unitFeatures;
     }
 
+    const validated = propertyCreateSchema.parse(body);
+
     const isInternal = agent ? isInternalAgent(agent.role) : false;
 
-    const requiredFields = ['title', 'description', 'address', 'city', 'state', 'zipCode', 'category', 'size'];
-    for (const field of requiredFields) {
-      if (!body[field]) {
-        throw new Error(`Missing required field: ${field}`);
-      }
-    }
-
-    if (body.listingType === 'SALE' || body.listingType === 'BOTH') {
-      if (!body.price) {
-        throw new Error('Missing required field: Sale Price');
-      }
-    }
-    if (body.listingType === 'RENT' || body.listingType === 'BOTH') {
-      if (!body.rentPrice) {
-        throw new Error('Missing required field: Rental Price');
-      }
-    }
-    
     const referenceId = await generateReferenceId();
-    const slug = await generateUniqueSlug(body.title);
+    const slug = await generateUniqueSlug(validated.title);
 
     logger.info('Creating property', {
       agentId: agent?.id,
-      category: body.category,
-      city: body.city,
+      category: validated.category,
+      city: validated.city,
     });
 
     const rawData = {
-        referenceId,
-        slug,
-        title: body.title,
-        description: body.description,
-        price: body.price || null,
-        rentPrice: body.rentPrice || null,
-        address: body.address,
-        city: body.city,
-        area: body.area || null,
-        state: body.state,
-        zipCode: body.zipCode,
-        category: body.category,
-        
-        // Common features (House & Condo)
-        bedrooms: body.bedrooms || null,
-        bathrooms: body.bathrooms || null,
-        size: body.size,
-        petFriendly: body.petFriendly || null,
-        parking: body.parking || null,
-        furnished: body.furnished || null,
-        garden: body.garden || null,
-        pool: body.pool || null,
-        floors: body.floors || null,
-        amenities: body.amenities || null,
-        
-        // Project/Village Name
-        projectName: body.projectName || null,
-        projectId: body.projectId || null,
-        
-        // Commission (Restricted)
-        commissionRate: isInternal ? (body.commissionRate || null) : null,
-        commissionAmount: isInternal ? (body.commissionAmount || null) : null,
-        agentCommissionRate: body.agentCommissionRate || null, // All agents can set this
-        coAgentCommissionRate: body.coAgentCommissionRate || null, // All agents can set this
-        
-        // Condo-specific
-        floor: body.floor || null,
-        
-        // Investment-specific
-        investmentType: body.investmentType || null,
-        openForYears: body.openForYears || null,
-        equipmentIncluded: body.equipmentIncluded || null,
-        numberOfStaff: body.numberOfStaff || null,
-        monthlyRevenue: body.monthlyRevenue || null,
-        license: body.license || null,
-        conferenceRoom: body.conferenceRoom || null,
-        
-        // Land-specific
-        landZoneColor: body.landZoneColor || null,
-        
-        status: body.status || 'AVAILABLE',
-        listingType: body.listingType || 'SALE',
-        images: body.images || [],
-        featured: body.featured || false,
-        
-        latitude: body.latitude || null,
-        longitude: body.longitude || null,
-        
-        agentId: agent?.id,
+      referenceId,
+      slug,
+      ...validated,
+      commissionRate: isInternal ? validated.commissionRate : null,
+      commissionAmount: isInternal ? validated.commissionAmount : null,
+      agentId: agent?.id,
     };
 
     const cleanData = sanitizePropertyData(rawData);

@@ -8,6 +8,7 @@ import {
   ForbiddenError,
   isInternalAgent,
 } from '@/lib/api';
+import { propertyUpdateSchema } from '@/lib/validation/schemas';
 import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';

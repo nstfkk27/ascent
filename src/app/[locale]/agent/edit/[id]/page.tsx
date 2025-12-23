@@ -321,10 +321,10 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
       return;
     }
     try {
-      const res = await fetch(`/api/projects?query=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      if (data.projects) {
-        setProjectSuggestions(data.projects);
+      const res = await fetch(`${window.location.origin}/api/projects?query=${encodeURIComponent(query)}`);
+      const result = await res.json();
+      if (result.success && result.data?.projects) {
+        setProjectSuggestions(result.data.projects);
         setShowProjectSuggestions(true);
       }
     } catch (err) {

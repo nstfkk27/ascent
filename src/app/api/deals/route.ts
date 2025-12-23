@@ -1,29 +1,40 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/utils/supabase/server';
+import { 
+  withErrorHandler, 
+  withAuth,
+  successResponse,
+  paginatedResponse,
+  ValidationError
+} from '@/lib/api';
+import { logger } from '@/lib/logger';
+import { z } from 'zod';
+
+const dealCreateSchema = z.object({
+  clientName: z.string().min(1, 'Client name is required'),
+  clientPhone: z.string().optional(),
+  notes: z.string().optional(),
+  stage: z.enum(['NEW_LEAD', 'VIEWING', 'OFFER', 'CONTRACT', 'CLOSED']).optional(),
+  amount: z.number().positive().optional(),
+  propertyId: z.string().uuid(),
+  dealType: z.enum(['SALE', 'RENT']).optional(),
+});
 
 
-// GET /api/deals - Get all deals
-export async function GET(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
+export const GET = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent }) => {
+    const { searchParams } = req.nextUrl;
     const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
     const skip = (page - 1) * limit;
     const stage = searchParams.get('stage');
     const dealType = searchParams.get('dealType');
 
-    // Build where clause
     const where: any = {};
     if (stage) where.stage = stage;
     if (dealType) where.dealType = dealType;
+
+    logger.debug('Fetching deals', { agentId: agent?.id, filters: where, page, limit });
 
     const [total, deals] = await prisma.$transaction([
       prisma.deal.count({ where }),
@@ -32,9 +43,11 @@ export async function GET(request: NextRequest) {
         include: {
           property: {
             select: {
+              id: true,
               title: true,
               price: true,
-              address: true
+              address: true,
+              slug: true,
             }
           }
         },
@@ -56,68 +69,48 @@ export async function GET(request: NextRequest) {
         price: deal.property.price ? deal.property.price.toNumber() : null
       } : null
     }));
+
+    logger.info('Deals fetched', { count: deals.length, total, page });
     
-    return NextResponse.json({ 
-      success: true, 
-      data: serializedDeals,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit)
-      }
-    });
-  } catch (error) {
-    console.error('Error fetching deals:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to fetch deals' },
-      { status: 500 }
-    );
-  }
-}
+    return paginatedResponse(serializedDeals, page, limit, total);
+  })
+);
 
-// POST /api/deals - Create a new deal (PROTECTED)
-export async function POST(request: NextRequest) {
-  try {
-    // Authentication check
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+export const POST = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent }) => {
+    const body = await req.json();
+    const validated = dealCreateSchema.parse(body);
 
-    if (!user?.email) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
+    logger.debug('Creating deal', { agentId: agent?.id, propertyId: validated.propertyId });
 
-    // Verify user is an agent
-    const agent = await prisma.agentProfile.findFirst({
-      where: { email: user.email }
+    const property = await prisma.property.findUnique({
+      where: { id: validated.propertyId },
+      select: { id: true, title: true }
     });
 
-    if (!agent) {
-      return NextResponse.json({ success: false, error: 'Agent profile required' }, { status: 403 });
+    if (!property) {
+      throw new ValidationError('Property not found');
     }
 
-    const body = await request.json();
-    
     const deal = await prisma.deal.create({
       data: {
-        clientName: body.clientName,
-        clientPhone: body.clientPhone,
-        notes: body.notes,
-        stage: body.stage || 'NEW_LEAD',
-        amount: body.amount,
-        propertyId: body.propertyId,
-      },
+        clientName: validated.clientName,
+        clientPhone: validated.clientPhone,
+        notes: validated.notes,
+        stage: validated.stage || 'NEW_LEAD',
+        amount: validated.amount,
+        propertyId: validated.propertyId,
+        dealType: validated.dealType,
+      }
     });
+
+    const serializedDeal = {
+      ...deal,
+      amount: deal.amount ? deal.amount.toNumber() : null,
+    };
+
+    logger.info('Deal created', { dealId: deal.id, propertyId: property.id, agentId: agent?.id });
     
-    return NextResponse.json(
-      { success: true, data: deal },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error('Error creating deal:', error);
-    return NextResponse.json(
-      { success: false, error: 'Failed to create deal' },
-      { status: 500 }
-    );
-  }
-}
+    return successResponse({ deal: serializedDeal }, undefined, 201);
+  })
+);

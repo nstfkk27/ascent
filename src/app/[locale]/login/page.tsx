@@ -32,10 +32,13 @@ export default function LoginPage() {
     setGoogleLoading(true);
     setError(null);
     
+    const redirectUrl = `${location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`;
+    console.log('Google OAuth redirect URL:', redirectUrl);
+    
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${location.origin}/auth/callback?next=${encodeURIComponent(nextUrl)}`,
+        redirectTo: redirectUrl,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -44,6 +47,7 @@ export default function LoginPage() {
     });
 
     if (error) {
+      console.error('Google OAuth error:', error);
       setError(error.message);
       setGoogleLoading(false);
     }

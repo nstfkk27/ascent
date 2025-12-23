@@ -191,10 +191,10 @@ export default function QuickDropPage() {
     }
 
     try {
-      const res = await fetch(`/api/projects?query=${encodeURIComponent(query)}`);
-      const data = await res.json();
-      if (data.projects) {
-        setProjectSuggestions(data.projects);
+      const res = await fetch(`${window.location.origin}/api/projects?query=${encodeURIComponent(query)}`);
+      const result = await res.json();
+      if (result.success && result.data?.projects) {
+        setProjectSuggestions(result.data.projects);
         setShowProjectSuggestions(true);
       }
     } catch (err) {
@@ -269,21 +269,24 @@ export default function QuickDropPage() {
         }
       }
 
-      const res = await fetch('/api/properties', {
+      const res = await fetch(`${window.location.origin}/api/properties`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      if (res.ok) {
+      const result = await res.json();
+
+      if (res.ok && result.success) {
         alert('Property saved successfully!');
         router.push('/agent');
       } else {
-        const error = await res.json();
-        alert('Error saving property: ' + error.error);
+        const errorMsg = result.error || result.details || 'An unexpected error occurred';
+        alert('Error saving property: ' + errorMsg);
       }
     } catch (err) {
-      alert('Failed to save property');
+      console.error('Save error:', err);
+      alert('Failed to save property: ' + (err instanceof Error ? err.message : 'Network error'));
     } finally {
       setIsSaving(false);
     }

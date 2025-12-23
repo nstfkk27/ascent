@@ -16,14 +16,19 @@ export async function GET(request: Request) {
   const localeCookie = cookieStore.get('NEXT_LOCALE')?.value;
   const locale = localeCookie && ['en', 'th', 'cn', 'ru'].includes(localeCookie) ? localeCookie : 'en';
   
+  // Use correct origin based on environment
+  const redirectOrigin = process.env.NODE_ENV === 'development' 
+    ? 'http://localhost:3000' 
+    : origin;
+  
   // Build locale-aware redirect path
   const buildRedirectUrl = (path: string) => {
     // If path already starts with a locale, use as-is
     if (/^\/(en|th|cn|ru)(\/|$)/.test(path)) {
-      return `${origin}${path}`;
+      return `${redirectOrigin}${path}`;
     }
     // Otherwise prepend locale
-    return `${origin}/${locale}${path.startsWith('/') ? path : '/' + path}`;
+    return `${redirectOrigin}/${locale}${path.startsWith('/') ? path : '/' + path}`;
   };
 
   const supabase = createClient();
