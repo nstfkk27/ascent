@@ -37,11 +37,19 @@ interface MapSearchProps {
 
 export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isCollapsed: externalIsCollapsed, onCollapseChange }: MapSearchProps) {
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [internalIsCollapsed, setInternalIsCollapsed] = useState(true);
+  const [internalIsCollapsed, setInternalIsCollapsed] = useState(false);
   
   // Use external state if provided, otherwise use internal state
   const isCollapsed = externalIsCollapsed !== undefined ? externalIsCollapsed : internalIsCollapsed;
-  const setIsCollapsed = onCollapseChange || setInternalIsCollapsed;
+  
+  const handleToggleCollapse = (collapsed: boolean) => {
+    console.log('Toggle collapse:', collapsed, 'Current:', isCollapsed);
+    if (onCollapseChange) {
+      onCollapseChange(collapsed);
+    } else {
+      setInternalIsCollapsed(collapsed);
+    }
+  };
 
   const handleChange = (name: keyof MapFilters, value: string | boolean) => {
     if (name === 'minPrice' || name === 'maxPrice' || name === 'minSize' || name === 'maxSize') {
@@ -90,10 +98,10 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
 
   return (
     <>
-      {/* Mobile Collapse Button (Only visible when collapsed on mobile) */}
+      {/* Collapse Button (visible when collapsed) */}
       <button
-        onClick={() => setIsCollapsed(false)}
-        className={`md:hidden absolute top-4 left-4 z-20 bg-white shadow-lg p-3 rounded-full text-gray-700 hover:text-[#496f5d] transition-all duration-300 ${!isCollapsed ? 'opacity-0 pointer-events-none scale-75' : 'opacity-100 scale-100'}`}
+        onClick={() => handleToggleCollapse(false)}
+        className={`absolute top-4 left-4 z-20 bg-white shadow-lg p-3 rounded-full text-gray-700 hover:text-[#496f5d] transition-all duration-300 ${!isCollapsed ? 'opacity-0 pointer-events-none scale-75' : 'opacity-100 scale-100'}`}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -103,14 +111,14 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
       {/* Search Container */}
       <div 
         className={`absolute top-4 z-20 w-full max-w-xl px-4 md:px-0 left-1/2 -translate-x-1/2 md:left-4 md:translate-x-0 transition-all duration-300 origin-top-left ${
-          isCollapsed ? 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto scale-95 md:scale-100' : 'opacity-100 scale-100'
+          isCollapsed ? 'opacity-0 pointer-events-none scale-95' : 'opacity-100 scale-100'
         }`}
       >
         <div className="bg-white/95 backdrop-blur-md shadow-xl rounded-2xl p-4 border border-gray-100 relative">
-          {/* Mobile Close Button */}
+          {/* Close Button */}
           <button 
-            onClick={() => setIsCollapsed(true)}
-            className="md:hidden absolute -top-2 -right-2 bg-white rounded-full p-1.5 shadow-md border border-gray-100 text-gray-500 z-30"
+            onClick={() => handleToggleCollapse(true)}
+            className="absolute -top-2 -right-2 bg-white rounded-full p-1.5 shadow-md border border-gray-100 text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-colors z-30"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -165,7 +165,7 @@ export default function PropertiesPage() {
         
         {/* Search Filters */}
         <div className="mb-6 sm:mb-8">
-          <SearchFilters onSearch={handleSearch} />
+          <SearchFilters onSearch={handleSearch} initialFilters={filters} />
         </div>
 
         {/* Results Header */}

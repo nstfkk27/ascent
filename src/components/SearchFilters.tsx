@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import SearchAutocomplete from './SearchAutocomplete';
 import { 
   PROPERTY_CATEGORIES, 
@@ -18,6 +18,7 @@ import {
 
 interface SearchFiltersProps {
   onSearch: (filters: SearchFilters) => void;
+  initialFilters?: Partial<SearchFilters>;
 }
 
 export interface SearchFilters {
@@ -49,32 +50,62 @@ export interface SearchFilters {
   [key: string]: any;
 }
 
-export default function SearchFilters({ onSearch }: SearchFiltersProps) {
+export default function SearchFilters({ onSearch, initialFilters }: SearchFiltersProps) {
   const [showMoreFilters, setShowMoreFilters] = useState(false);
   const [filters, setFilters] = useState<SearchFilters>({
-    query: '',
-    category: '',
-    subtype: '',
-    listingType: '',
-    minPrice: '',
-    maxPrice: '',
-    bedrooms: '',
-    city: 'Pattaya', // Default to Pattaya
-    area: '',
-    minSize: '',
-    maxSize: '',
-    newProject: false,
-    petFriendly: false,
-    furnished: false,
-    pool: false,
-    garden: false,
-    seaView: false,
-    conferenceRoom: false,
-    openForYearsRange: '',
-    staffRange: '',
-    equipmentIncluded: '',
-    landZoneColor: '',
+    query: initialFilters?.query || '',
+    category: initialFilters?.category || '',
+    subtype: initialFilters?.subtype || '',
+    listingType: initialFilters?.listingType || '',
+    minPrice: initialFilters?.minPrice || '',
+    maxPrice: initialFilters?.maxPrice || '',
+    bedrooms: initialFilters?.bedrooms || '',
+    city: initialFilters?.city || 'Pattaya', // Default to Pattaya
+    area: initialFilters?.area || '',
+    minSize: initialFilters?.minSize || '',
+    maxSize: initialFilters?.maxSize || '',
+    newProject: initialFilters?.newProject || false,
+    petFriendly: initialFilters?.petFriendly || false,
+    furnished: initialFilters?.furnished || false,
+    pool: initialFilters?.pool || false,
+    garden: initialFilters?.garden || false,
+    seaView: initialFilters?.seaView || false,
+    conferenceRoom: initialFilters?.conferenceRoom || false,
+    openForYearsRange: initialFilters?.openForYearsRange || '',
+    staffRange: initialFilters?.staffRange || '',
+    equipmentIncluded: initialFilters?.equipmentIncluded || '',
+    landZoneColor: initialFilters?.landZoneColor || '',
   });
+
+  // Sync with initialFilters when they change (e.g., from URL params)
+  useEffect(() => {
+    if (initialFilters) {
+      setFilters({
+        query: initialFilters?.query || '',
+        category: initialFilters?.category || '',
+        subtype: initialFilters?.subtype || '',
+        listingType: initialFilters?.listingType || '',
+        minPrice: initialFilters?.minPrice || '',
+        maxPrice: initialFilters?.maxPrice || '',
+        bedrooms: initialFilters?.bedrooms || '',
+        city: initialFilters?.city || 'Pattaya',
+        area: initialFilters?.area || '',
+        minSize: initialFilters?.minSize || '',
+        maxSize: initialFilters?.maxSize || '',
+        newProject: initialFilters?.newProject || false,
+        petFriendly: initialFilters?.petFriendly || false,
+        furnished: initialFilters?.furnished || false,
+        pool: initialFilters?.pool || false,
+        garden: initialFilters?.garden || false,
+        seaView: initialFilters?.seaView || false,
+        conferenceRoom: initialFilters?.conferenceRoom || false,
+        openForYearsRange: initialFilters?.openForYearsRange || '',
+        staffRange: initialFilters?.staffRange || '',
+        equipmentIncluded: initialFilters?.equipmentIncluded || '',
+        landZoneColor: initialFilters?.landZoneColor || '',
+      });
+    }
+  }, [initialFilters]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
