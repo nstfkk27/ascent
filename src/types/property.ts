@@ -81,6 +81,9 @@ export interface Property {
   images: string[];
   featured: boolean;
   
+  // Agent
+  agentId?: string | null;
+  
   // Location coordinates
   latitude?: number | null;
   longitude?: number | null;

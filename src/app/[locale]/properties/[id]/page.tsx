@@ -42,19 +42,23 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
 
   useEffect(() => {
     async function fetchAgent() {
+      if (!property?.agentId) return;
+      
       try {
-        const response = await fetch('/api/agents');
+        const response = await fetch(`/api/agents/${property.agentId}`);
         const result = await response.json();
-        if (result?.success && Array.isArray(result.data) && result.data.length > 0) {
-          setAgent(result.data[0]);
+        if (result?.success && result.data) {
+          setAgent(result.data);
         }
       } catch (err) {
         setAgent(null);
       }
     }
 
-    fetchAgent();
-  }, []);
+    if (property) {
+      fetchAgent();
+    }
+  }, [property]);
   
   if (loading) {
     return (
@@ -84,7 +88,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Back Button */}
-      <div className="max-w-[1600px] mx-auto px-6 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Link 
           href="/properties"
           className="inline-flex items-center gap-2 text-[#49516f] hover:text-[#8ea4d2] transition-colors"
@@ -96,12 +100,34 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
         </Link>
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-6 pb-16">
-        <div className="grid lg:grid-cols-3 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left Column - Images & Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Image Gallery */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+              {/* Header: Location & ID */}
+              <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-gray-100">
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span className="font-semibold">
+                    {property.city}
+                    {property.area && ` > ${property.area}`}
+                  </span>
+                </div>
+                {property.referenceId && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-gray-500">ID:</span>
+                    <span className="text-xs font-mono font-bold text-[#496f5d] bg-gray-100 px-2 py-1 rounded">
+                      {property.referenceId}
+                    </span>
+                  </div>
+                )}
+              </div>
+
               {/* Main Image */}
               <div className="relative h-[500px] bg-gray-200">
                 <Image
@@ -504,141 +530,81 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
             </div>
           </div>
 
-          {/* Right Column - Contact Form */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-lg p-6 sticky top-6">
-              <h3 className="text-2xl font-bold text-[#49516f] mb-6">Contact Agent</h3>
+          {/* Right Column - Compact Enquiry */}
+          <div className="lg:col-span-1 space-y-6">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold text-[#49516f] mb-4">Enquire Now</h3>
               
-              <form className="space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Name</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#496f5d] focus:border-transparent"
-                    placeholder="Your name"
-                  />
+              {agent && (
+                <div className="mb-6">
+                  <p className="text-base font-bold text-[#49516f] mb-1">{agent.name || 'Ascent Property'}</p>
+                  {agent.phone && (
+                    <p className="text-sm text-gray-600">{agent.phone}</p>
+                  )}
                 </div>
+              )}
 
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#496f5d] focus:border-transparent"
-                    placeholder="your@email.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
-                  <input
-                    type="tel"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#496f5d] focus:border-transparent"
-                    placeholder="+66 123 456 789"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Message</label>
-                  <textarea
-                    rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#496f5d] focus:border-transparent"
-                    placeholder="I'm interested in this property..."
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full bg-[#496f5d] text-white py-3 rounded-lg font-semibold hover:bg-[#3d5a4a] transition-colors"
-                >
-                  Send Message
-                </button>
-              </form>
-
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm text-gray-600 mb-4">Or contact us directly:</p>
-                <div className="space-y-3">
-                  {agent?.phone && (
-                    <a href={`tel:${agent.phone}`} className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="grid grid-cols-2 gap-3 mb-6">
+                {agent?.phone && (
+                  <>
+                    <a
+                      href={`tel:${agent.phone}`}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-[#496f5d] text-white rounded-lg hover:bg-[#3d5a4a] transition-colors text-sm font-semibold"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                       </svg>
-                      {agent.phone}
+                      Call
                     </a>
-                  )}
-
-                  {agent?.email && (
-                    <a href={`mailto:${agent.email}`} className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                      {agent.email}
-                    </a>
-                  )}
-
-                  {agent?.lineId && (
-                    <a
-                      href={`https://line.me/ti/p/~${encodeURIComponent(agent.lineId)}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 15a4 4 0 01-4 4H8l-5 3V7a4 4 0 014-4h10a4 4 0 014 4v8z" />
-                      </svg>
-                      Line: {agent.lineId}
-                    </a>
-                  )}
-
-                  {agent?.phone && (
                     <a
                       href={`https://wa.me/${String(agent.phone).replace(/\D/g, '')}`}
                       target="_blank"
                       rel="noreferrer"
-                      className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]"
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-sm font-semibold"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 9h.01M12 9h.01M16 9h.01M21 12c0 4.418-4.03 8-9 8a9.86 9.86 0 01-4-.8L3 20l1.2-3.6A7.63 7.63 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                       </svg>
                       WhatsApp
                     </a>
-                  )}
+                  </>
+                )}
+              </div>
 
-                  {(agent?.facebookUrl || agent?.facebook) && (
-                    <a
-                      href={agent.facebookUrl || agent.facebook}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3V2z" />
-                      </svg>
-                      Facebook
-                    </a>
-                  )}
+              {agent?.lineId && (
+                <a
+                  href={`https://line.me/ti/p/~${encodeURIComponent(agent.lineId)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-[#00B900] text-white rounded-lg hover:bg-[#00A000] transition-colors text-sm font-semibold mb-3 w-full"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/>
+                  </svg>
+                  Line
+                </a>
+              )}
 
-                  {(agent?.instagramUrl || agent?.instagram) && (
-                    <a
-                      href={agent.instagramUrl || agent.instagram}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="flex items-center gap-3 text-[#49516f] hover:text-[#8ea4d2]"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.5 6.5h.01" />
-                      </svg>
-                      Instagram
-                    </a>
-                  )}
+              {agent?.email && (
+                <a
+                  href={`mailto:${agent.email}`}
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-semibold w-full"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Email
+                </a>
+              )}
+            </div>
 
-                  {!agent?.phone && !agent?.email && !agent?.lineId && (
-                    <div className="text-sm text-gray-500">
-                      Please use the contact form above.
-                    </div>
-                  )}
-                </div>
+            {/* Similar Listings */}
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="text-xl font-bold text-[#49516f] mb-4">Similar Listings</h3>
+              <div className="space-y-4">
+                <p className="text-sm text-gray-500 text-center py-8">
+                  Similar properties will be displayed here
+                </p>
               </div>
             </div>
           </div>
