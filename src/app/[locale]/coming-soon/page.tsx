@@ -15,14 +15,14 @@ export default function ComingSoonPage() {
             Coming Soon
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 mb-8">
-            We're building something amazing
+            We&apos;re building something amazing
           </p>
         </div>
 
         {/* Description */}
         <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl p-8 mb-8">
           <p className="text-lg text-gray-700 mb-6">
-            Our platform is currently under construction. We're working hard to bring you the best real estate experience in Pattaya.
+            Our platform is currently under construction. We&apos;re working hard to bring you the best real estate experience in Pattaya.
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
             <div className="flex flex-col items-center">

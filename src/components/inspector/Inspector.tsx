@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createCompoundSlug } from '@/utils/propertyHelpers';
@@ -181,6 +181,18 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
     import('@google/model-viewer').catch(console.error);
   }, []);
 
+  const handlePreviousFacility = useCallback(() => {
+    if (!project || selectedFacilityIndex === null) return;
+    const newIndex = selectedFacilityIndex > 0 ? selectedFacilityIndex - 1 : project.facilities.length - 1;
+    setSelectedFacilityIndex(newIndex);
+  }, [project, selectedFacilityIndex]);
+
+  const handleNextFacility = useCallback(() => {
+    if (!project || selectedFacilityIndex === null) return;
+    const newIndex = selectedFacilityIndex < project.facilities.length - 1 ? selectedFacilityIndex + 1 : 0;
+    setSelectedFacilityIndex(newIndex);
+  }, [project, selectedFacilityIndex]);
+
   // Keyboard navigation for facility modal
   useEffect(() => {
     if (selectedFacilityIndex === null || !project) return;
@@ -199,19 +211,7 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedFacilityIndex, project]);
-
-  const handlePreviousFacility = () => {
-    if (!project || selectedFacilityIndex === null) return;
-    const newIndex = selectedFacilityIndex > 0 ? selectedFacilityIndex - 1 : project.facilities.length - 1;
-    setSelectedFacilityIndex(newIndex);
-  };
-
-  const handleNextFacility = () => {
-    if (!project || selectedFacilityIndex === null) return;
-    const newIndex = selectedFacilityIndex < project.facilities.length - 1 ? selectedFacilityIndex + 1 : 0;
-    setSelectedFacilityIndex(newIndex);
-  };
+  }, [selectedFacilityIndex, project, handlePreviousFacility, handleNextFacility]);
 
   const handleFacilityTouchStart = (e: React.TouchEvent) => {
     setIsFacilitySwiping(true);
