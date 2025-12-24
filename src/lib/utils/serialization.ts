@@ -11,8 +11,9 @@ export function serializeDecimals<T extends Record<string, any>>(
 ): T {
   const result = { ...obj };
   for (const field of fields) {
-    if (result[field] instanceof Decimal) {
-      (result[field] as any) = (result[field] as Decimal).toNumber();
+    const value = result[field];
+    if (value && typeof value === 'object' && 'toNumber' in value) {
+      (result[field] as any) = (value as Decimal).toNumber();
     }
   }
   return result;
