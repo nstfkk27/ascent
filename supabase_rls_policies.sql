@@ -23,6 +23,7 @@ ALTER TABLE "Comparison" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "PriceAlert" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "PremiumFeature" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "Notification" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "_prisma_migrations" ENABLE ROW LEVEL SECURITY;
 
 -- ============================================
 -- SERVICE ROLE POLICIES (Prisma Access)
@@ -101,6 +102,10 @@ CREATE POLICY "Service role has full access to Notification" ON "Notification"
   FOR ALL
   USING (auth.role() = 'service_role');
 
+CREATE POLICY "Service role has full access to _prisma_migrations" ON "_prisma_migrations"
+  FOR ALL
+  USING (auth.role() = 'service_role');
+
 -- ============================================
 -- BLOCK ANONYMOUS ACCESS
 -- ============================================
@@ -175,6 +180,10 @@ CREATE POLICY "Block anonymous access to PremiumFeature" ON "PremiumFeature"
   USING (auth.role() != 'anon');
 
 CREATE POLICY "Block anonymous access to Notification" ON "Notification"
+  FOR ALL
+  USING (auth.role() != 'anon');
+
+CREATE POLICY "Block anonymous access to _prisma_migrations" ON "_prisma_migrations"
   FOR ALL
   USING (auth.role() != 'anon');
 

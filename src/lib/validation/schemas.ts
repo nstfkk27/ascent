@@ -151,6 +151,7 @@ export const dealSchema = z.object({
   propertyId: z.string().uuid('Invalid property ID'),
   amount: z.number().positive().optional().nullable(),
   dealType: z.enum(['SALE', 'RENT']).default('SALE'),
+  stage: z.enum(['LEAD', 'VIEWING', 'NEGOTIATION', 'CLOSED_WON', 'CLOSED_LOST']).optional().nullable(),
   
   leaseStartDate: z.string().datetime().optional().nullable(),
   leaseEndDate: z.string().datetime().optional().nullable(),
@@ -158,6 +159,8 @@ export const dealSchema = z.object({
   depositAmount: z.number().positive().optional().nullable(),
   nextPaymentDue: z.string().datetime().optional().nullable(),
 });
+
+export const dealUpdateSchema = dealSchema.partial().omit({ propertyId: true });
 
 export const paginationSchema = z.object({
   page: z.number().int().positive().default(1),

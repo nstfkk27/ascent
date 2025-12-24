@@ -1,39 +1,44 @@
-import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/lib/prisma';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { hasFeatureAccess } from '@/lib/premiumFeatures';
+import { 
+  withErrorHandler, 
+  withAuth, 
+  successResponse,
+  ValidationError,
+  NotFoundError,
+  ForbiddenError
+} from '@/lib/api';
+import { logger } from '@/lib/logger';
+import { serializeDecimal } from '@/lib/utils/serialization';
+import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
-// GET - Fetch user's price alerts
-export async function GET(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+const priceAlertSchema = z.object({
+  propertyId: z.string().uuid('Invalid property ID'),
+  alertType: z.enum(['PRICE_DROP', 'PRICE_INCREASE', 'ANY_CHANGE']),
+  targetPrice: z.number().positive().optional(),
+  percentageChange: z.number().min(1).max(100).optional(),
+});
+
+export const GET = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent, user }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
     }
 
-    // Check if user has access to price alerts feature
-    const agentProfile = await prisma.agentProfile.findFirst({
-      where: { email: user.email! },
-      select: { role: true }
-    });
-
-    if (!hasFeatureAccess(agentProfile?.role, 'PRICE_ALERTS')) {
-      return NextResponse.json({ 
-        error: 'Premium feature',
-        message: 'Price alerts are available for SUPER_ADMIN and PLATFORM_AGENT accounts only'
-      }, { status: 403 });
+    if (!hasFeatureAccess(agent.role, 'PRICE_ALERTS')) {
+      throw new ForbiddenError('Price alerts are available for SUPER_ADMIN and PLATFORM_AGENT accounts only');
     }
+
+    logger.debug('Fetching price alerts', { userId: user.id, agentId: agent.id });
 
     const alerts = await prisma.priceAlert.findMany({
       where: { userId: user.id },
       orderBy: { createdAt: 'desc' }
     });
 
-    // Fetch property details for each alert
     const propertyIds = alerts.map(alert => alert.propertyId);
     const properties = await prisma.property.findMany({
       where: { id: { in: propertyIds } },
@@ -52,133 +57,106 @@ export async function GET(request: NextRequest) {
       const property = properties.find(p => p.id === alert.propertyId);
       return {
         ...alert,
-        targetPrice: alert.targetPrice?.toString(),
-        lastCheckedPrice: alert.lastCheckedPrice?.toString(),
+        targetPrice: alert.targetPrice ? serializeDecimal(alert.targetPrice) : null,
+        lastCheckedPrice: alert.lastCheckedPrice ? serializeDecimal(alert.lastCheckedPrice) : null,
         property: property ? {
           ...property,
-          price: property.price?.toString(),
-          rentPrice: property.rentPrice?.toString()
+          price: property.price ? serializeDecimal(property.price) : null,
+          rentPrice: property.rentPrice ? serializeDecimal(property.rentPrice) : null
         } : null
       };
     });
 
-    return NextResponse.json({ alerts: alertsWithProperties });
-  } catch (error) {
-    console.error('Error fetching price alerts:', error);
-    return NextResponse.json({ error: 'Failed to fetch price alerts' }, { status: 500 });
-  }
-}
+    logger.info('Price alerts fetched', { userId: user.id, count: alerts.length });
 
-// POST - Create a price alert
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
+    return successResponse({ alerts: alertsWithProperties });
+  })
+);
+
+export const POST = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent, user }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
     }
 
-    // Check if user has access to price alerts feature
-    const agentProfile = await prisma.agentProfile.findFirst({
-      where: { email: user.email! },
-      select: { role: true }
-    });
-
-    if (!hasFeatureAccess(agentProfile?.role, 'PRICE_ALERTS')) {
-      return NextResponse.json({ 
-        error: 'Premium feature',
-        message: 'Price alerts are available for SUPER_ADMIN and PLATFORM_AGENT accounts only',
-        upgradeRequired: true
-      }, { status: 403 });
+    if (!hasFeatureAccess(agent.role, 'PRICE_ALERTS')) {
+      throw new ForbiddenError('Price alerts are available for SUPER_ADMIN and PLATFORM_AGENT accounts only');
     }
 
-    const { propertyId, alertType, targetPrice, percentageChange } = await request.json();
+    const body = await req.json();
+    const validated = priceAlertSchema.parse(body);
 
-    if (!propertyId || !alertType) {
-      return NextResponse.json({ error: 'Property ID and alert type required' }, { status: 400 });
-    }
+    logger.debug('Creating price alert', { userId: user.id, propertyId: validated.propertyId });
 
-    // Get current property price
     const property = await prisma.property.findUnique({
-      where: { id: propertyId },
+      where: { id: validated.propertyId },
       select: { price: true, rentPrice: true }
     });
 
     if (!property) {
-      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+      throw new NotFoundError('Property not found');
     }
 
     const currentPrice = property.price || property.rentPrice;
 
-    // Create or update price alert
     const alert = await prisma.priceAlert.upsert({
       where: {
         userId_propertyId: {
           userId: user.id,
-          propertyId
+          propertyId: validated.propertyId
         }
       },
       create: {
         userId: user.id,
-        propertyId,
-        alertType,
-        targetPrice: targetPrice ? parseFloat(targetPrice) : null,
-        percentageChange,
+        propertyId: validated.propertyId,
+        alertType: validated.alertType,
+        targetPrice: validated.targetPrice,
+        percentageChange: validated.percentageChange,
         lastCheckedPrice: currentPrice,
         isActive: true
       },
       update: {
-        alertType,
-        targetPrice: targetPrice ? parseFloat(targetPrice) : null,
-        percentageChange,
+        alertType: validated.alertType,
+        targetPrice: validated.targetPrice,
+        percentageChange: validated.percentageChange,
         lastCheckedPrice: currentPrice,
         isActive: true
       }
     });
 
-    return NextResponse.json({ 
-      success: true, 
+    logger.info('Price alert created', { userId: user.id, alertId: alert.id });
+
+    return successResponse({ 
       message: 'Price alert created',
       alert: {
         ...alert,
-        targetPrice: alert.targetPrice?.toString(),
-        lastCheckedPrice: alert.lastCheckedPrice?.toString()
+        targetPrice: alert.targetPrice ? serializeDecimal(alert.targetPrice) : null,
+        lastCheckedPrice: alert.lastCheckedPrice ? serializeDecimal(alert.lastCheckedPrice) : null
       }
     });
-  } catch (error) {
-    console.error('Error creating price alert:', error);
-    return NextResponse.json({ error: 'Failed to create price alert' }, { status: 500 });
-  }
-}
+  })
+);
 
-// DELETE - Remove a price alert
-export async function DELETE(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
-    }
-
-    const { searchParams } = new URL(request.url);
+export const DELETE = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { user }) => {
+    const { searchParams } = new URL(req.url);
     const alertId = searchParams.get('alertId');
 
     if (!alertId) {
-      return NextResponse.json({ error: 'Alert ID required' }, { status: 400 });
+      throw new ValidationError('Alert ID required');
     }
+
+    logger.debug('Deleting price alert', { userId: user.id, alertId });
 
     await prisma.priceAlert.delete({
       where: {
         id: alertId,
-        userId: user.id // Ensure user can only delete their own alerts
+        userId: user.id
       }
     });
 
-    return NextResponse.json({ success: true, message: 'Price alert deleted' });
-  } catch (error) {
-    console.error('Error deleting price alert:', error);
-    return NextResponse.json({ error: 'Failed to delete price alert' }, { status: 500 });
-  }
-}
+    logger.info('Price alert deleted', { userId: user.id, alertId });
+
+    return successResponse({ message: 'Price alert deleted' });
+  })
+);

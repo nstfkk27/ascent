@@ -1,42 +1,30 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/utils/supabase/server';
+import { 
+  withErrorHandler, 
+  withAuth, 
+  successResponse,
+  ValidationError
+} from '@/lib/api';
+import { logger } from '@/lib/logger';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(req: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+export const GET = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
     }
 
-    // Get agent profile and role
-    let userRole = 'AGENT';
-    let agentId: string | null = null;
-    
-    if (user.email) {
-      const agent = await prisma.agentProfile.findFirst({
-        where: { email: user.email }
-      });
-      if (agent) {
-        userRole = agent.role;
-        agentId = agent.id;
-      }
-    }
+    logger.debug('Fetching dashboard stats', { agentId: agent.id, role: agent.role });
 
     const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000);
 
-    // Build where clause based on role
     const propertyWhere: any = { status: 'AVAILABLE' };
     
-    // AGENT and PLATFORM_AGENT only see their own listings
-    if ((userRole === 'AGENT' || userRole === 'PLATFORM_AGENT') && agentId) {
-      propertyWhere.agentId = agentId;
+    if (agent.role === 'AGENT' || agent.role === 'PLATFORM_AGENT') {
+      propertyWhere.agentId = agent.id;
     }
-    // SUPER_ADMIN sees all listings (no filter)
 
     const [
       activeListings,
@@ -46,14 +34,12 @@ export async function GET(req: NextRequest) {
     ] = await prisma.$transaction([
       prisma.property.count({ where: propertyWhere }),
       prisma.propertySubmission.count({ where: { status: 'PENDING' } }),
-      // Fresh: verified >= 14 days ago (meaning more recent than 14 days ago)
       prisma.property.count({ 
         where: { 
           ...propertyWhere,
           lastVerifiedAt: { gte: fourteenDaysAgo }
         } 
       }),
-      // Needs Check: verified < 14 days ago
       prisma.property.count({ 
         where: { 
           ...propertyWhere,
@@ -62,17 +48,17 @@ export async function GET(req: NextRequest) {
       })
     ]);
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        activeListings,
-        pendingSubmissions,
-        freshListings,
-        needsCheckListings
-      }
+    logger.info('Dashboard stats fetched', { 
+      agentId: agent.id,
+      activeListings,
+      pendingSubmissions 
     });
-  } catch (error) {
-    console.error('Error fetching dashboard stats:', error);
-    return NextResponse.json({ success: false, error: 'Failed to fetch stats' }, { status: 500 });
-  }
-}
+
+    return successResponse({
+      activeListings,
+      pendingSubmissions,
+      freshListings,
+      needsCheckListings
+    });
+  })
+);

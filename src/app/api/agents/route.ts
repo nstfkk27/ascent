@@ -1,55 +1,104 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/utils/supabase/server';
+import { 
+  withErrorHandler, 
+  withAuth, 
+  successResponse,
+  requireRole,
+  ValidationError
+} from '@/lib/api';
+import { logger } from '@/lib/logger';
+import { agentProfileSchema } from '@/lib/validation/schemas';
 
-export async function GET(req: NextRequest) {
-  try {
+export const GET = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
+    }
+
+    logger.debug('Fetching agents', { requestedBy: agent.id });
+
+    const { searchParams } = req.nextUrl;
+    const includeInactive = searchParams.get('includeInactive') === 'true';
+
+    const where: any = {};
+    if (!includeInactive) {
+      where.isActive = true;
+    }
+
     const agents = await prisma.agentProfile.findMany({
-      where: { isActive: true },
+      where,
       orderBy: { createdAt: 'asc' },
-    });
-    return NextResponse.json({ success: true, data: agents });
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Failed to fetch agents' }, { status: 500 });
-  }
-}
-
-export async function POST(req: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user?.email) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // Only SUPER_ADMIN can create new agents
-    const currentAgent = await prisma.agentProfile.findFirst({
-      where: { email: user.email }
-    });
-
-    if (!currentAgent || currentAgent.role !== 'SUPER_ADMIN') {
-      return NextResponse.json({ success: false, error: 'Only admins can create agents' }, { status: 403 });
-    }
-
-    const body = await req.json();
-    const { name, role, email, phone, lineId, imageUrl, languages } = body;
-
-    const agent = await prisma.agentProfile.create({
-      data: {
-        name,
-        role,
-        email,
-        phone,
-        lineId,
-        imageUrl,
-        languages: languages || [],
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        lineId: true,
+        whatsapp: true,
+        imageUrl: true,
+        languages: true,
+        role: true,
+        companyName: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
-    return NextResponse.json({ success: true, data: agent });
-  } catch (error) {
-    console.error('Error creating agent:', error);
-    return NextResponse.json({ success: false, error: 'Failed to create agent' }, { status: 500 });
-  }
-}
+    logger.info('Agents fetched', { count: agents.length, requestedBy: agent.id });
+
+    return successResponse({ agents });
+  })
+);
+
+export const POST = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
+    }
+
+    const body = await req.json();
+    const validated = agentProfileSchema.parse(body);
+
+    logger.debug('Creating new agent', { 
+      createdBy: agent.id, 
+      newAgentEmail: validated.email,
+      newAgentRole: validated.role 
+    });
+
+    // Check if agent with same email already exists
+    if (validated.email) {
+      const existingAgent = await prisma.agentProfile.findFirst({
+        where: { email: validated.email },
+      });
+
+      if (existingAgent) {
+        throw new ValidationError('An agent with this email already exists');
+      }
+    }
+
+    const newAgent = await prisma.agentProfile.create({
+      data: {
+        name: validated.name,
+        role: validated.role,
+        email: validated.email,
+        phone: validated.phone,
+        lineId: validated.lineId,
+        whatsapp: validated.whatsapp,
+        imageUrl: validated.imageUrl,
+        languages: validated.languages,
+        companyName: validated.companyName,
+        isActive: validated.isActive,
+      },
+    });
+
+    logger.info('Agent created successfully', { 
+      agentId: newAgent.id, 
+      createdBy: agent.id,
+      role: newAgent.role 
+    });
+
+    return successResponse({ agent: newAgent });
+  }, requireRole('SUPER_ADMIN'))
+);

@@ -1,34 +1,50 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { NextRequest } from 'next/server';
 import cloudinary from '@/lib/cloudinary';
+import { 
+  withErrorHandler, 
+  withAuth, 
+  successResponse,
+  ValidationError
+} from '@/lib/api';
+import { logger } from '@/lib/logger';
+import { z } from 'zod';
 
-export async function POST(request: NextRequest) {
-  try {
-    // Check authentication
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+const allowedFolders = ['properties', 'agents', 'projects', 'posts'] as const;
+
+const uploadSchema = z.object({
+  folder: z.enum(allowedFolders).default('properties'),
+});
+
+export const POST = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
     }
 
-    const formData = await request.formData();
+    const formData = await req.formData();
     const file = formData.get('file') as File;
-    const folder = formData.get('folder') as string || 'properties';
+    const folderParam = formData.get('folder') as string;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      throw new ValidationError('No file provided');
     }
 
-    // Convert file to buffer
+    const validated = uploadSchema.parse({ folder: folderParam || 'properties' });
+
+    logger.debug('Uploading file', { 
+      agentId: agent.id, 
+      fileName: file.name,
+      fileSize: file.size,
+      folder: validated.folder 
+    });
+
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload to Cloudinary
-    const result = await new Promise((resolve, reject) => {
+    const result = await new Promise<any>((resolve, reject) => {
       cloudinary.uploader.upload_stream(
         {
-          folder: `ascent/${folder}`,
+          folder: `ascent/${validated.folder}`,
           resource_type: 'auto',
         },
         (error, result) => {
@@ -38,46 +54,46 @@ export async function POST(request: NextRequest) {
       ).end(buffer);
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      url: (result as any).secure_url,
-      publicId: (result as any).public_id 
+    logger.info('File uploaded successfully', { 
+      agentId: agent.id,
+      url: result.secure_url,
+      publicId: result.public_id 
     });
 
-  } catch (error) {
-    console.error('Upload error:', error);
-    return NextResponse.json({ 
-      error: 'Upload failed', 
-      details: String(error) 
-    }, { status: 500 });
-  }
-}
+    return successResponse({ 
+      url: result.secure_url,
+      publicId: result.public_id 
+    });
+  })
+);
 
-// Delete image from Cloudinary
-export async function DELETE(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+const deleteSchema = z.object({
+  publicId: z.string().min(1, 'Public ID is required'),
+});
+
+export const DELETE = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
     }
 
-    const { publicId } = await request.json();
+    const body = await req.json();
+    const validated = deleteSchema.parse(body);
 
-    if (!publicId) {
-      return NextResponse.json({ error: 'No publicId provided' }, { status: 400 });
-    }
+    logger.debug('Deleting file from Cloudinary', { 
+      agentId: agent.id,
+      publicId: validated.publicId 
+    });
 
-    await cloudinary.uploader.destroy(publicId);
+    await cloudinary.uploader.destroy(validated.publicId);
 
-    return NextResponse.json({ success: true });
+    logger.info('File deleted successfully', { 
+      agentId: agent.id,
+      publicId: validated.publicId 
+    });
 
-  } catch (error) {
-    console.error('Delete error:', error);
-    return NextResponse.json({ 
-      error: 'Delete failed', 
-      details: String(error) 
-    }, { status: 500 });
-  }
-}
+    return successResponse({ 
+      message: 'File deleted successfully'
+    });
+  })
+);

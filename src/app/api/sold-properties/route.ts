@@ -1,87 +1,86 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/utils/supabase/server';
+import { 
+  withErrorHandler, 
+  withAuth, 
+  successResponse,
+  ValidationError,
+  NotFoundError
+} from '@/lib/api';
+import { logger } from '@/lib/logger';
+import { serializeDecimal } from '@/lib/utils/serialization';
+import { z } from 'zod';
 
-// GET - Fetch sold properties (for analytics/comps)
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const city = searchParams.get('city');
-    const area = searchParams.get('area');
-    const category = searchParams.get('category');
-    const projectId = searchParams.get('projectId');
-    const limit = parseInt(searchParams.get('limit') || '50');
+const soldPropertySchema = z.object({
+  propertyId: z.string().uuid('Invalid property ID'),
+  soldType: z.enum(['SOLD', 'RENTED', 'WITHDRAWN']),
+  finalPrice: z.number().positive().optional(),
+  notes: z.string().optional(),
+});
 
-    const where: any = {};
-    if (city) where.city = city;
-    if (area) where.area = area;
-    if (category) where.category = category;
-    if (projectId) where.projectId = projectId;
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  const { searchParams } = new URL(req.url);
+  const city = searchParams.get('city');
+  const area = searchParams.get('area');
+  const category = searchParams.get('category');
+  const projectId = searchParams.get('projectId');
+  const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100);
 
-    const soldProperties = await prisma.soldProperty.findMany({
-      where,
-      orderBy: { soldAt: 'desc' },
-      take: limit,
-    });
+  logger.debug('Fetching sold properties', { city, area, category, limit });
 
-    return NextResponse.json({ 
-      success: true, 
-      data: soldProperties.map(p => ({
-        ...p,
-        listingPrice: p.listingPrice ? Number(p.listingPrice) : null,
-        listingRentPrice: p.listingRentPrice ? Number(p.listingRentPrice) : null,
-        finalPrice: p.finalPrice ? Number(p.finalPrice) : null,
-        commissionEarned: p.commissionEarned ? Number(p.commissionEarned) : null,
-        latitude: p.latitude ? Number(p.latitude) : null,
-        longitude: p.longitude ? Number(p.longitude) : null,
-      }))
-    });
-  } catch (error) {
-    console.error('Failed to fetch sold properties:', error);
-    return NextResponse.json({ error: 'Failed to fetch sold properties' }, { status: 500 });
-  }
-}
+  const where: any = {};
+  if (city) where.city = city;
+  if (area) where.area = area;
+  if (category) where.category = category;
+  if (projectId) where.projectId = projectId;
 
-// POST - Archive a property as sold (called when deleting/marking as sold)
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    if (!user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  const soldProperties = await prisma.soldProperty.findMany({
+    where,
+    orderBy: { soldAt: 'desc' },
+    take: limit,
+  });
 
-    const agent = await prisma.agentProfile.findFirst({
-      where: { email: user.email },
-    });
+  const serialized = soldProperties.map(p => ({
+    ...p,
+    listingPrice: p.listingPrice ? serializeDecimal(p.listingPrice) : null,
+    listingRentPrice: p.listingRentPrice ? serializeDecimal(p.listingRentPrice) : null,
+    finalPrice: p.finalPrice ? serializeDecimal(p.finalPrice) : null,
+    commissionEarned: p.commissionEarned ? serializeDecimal(p.commissionEarned) : null,
+    latitude: p.latitude ? serializeDecimal(p.latitude) : null,
+    longitude: p.longitude ? serializeDecimal(p.longitude) : null,
+  }));
 
+  logger.info('Sold properties fetched', { count: soldProperties.length });
+
+  return successResponse({ soldProperties: serialized });
+});
+
+export const POST = withErrorHandler(
+  withAuth(async (req: NextRequest, context, { agent }) => {
     if (!agent) {
-      return NextResponse.json({ error: 'Agent not found' }, { status: 404 });
+      throw new ValidationError('Agent not found');
     }
 
-    const body = await request.json();
-    const { propertyId, soldType, finalPrice, notes } = body;
+    const body = await req.json();
+    const validated = soldPropertySchema.parse(body);
 
-    if (!propertyId || !soldType) {
-      return NextResponse.json({ error: 'propertyId and soldType are required' }, { status: 400 });
-    }
+    logger.debug('Archiving property as sold', { 
+      propertyId: validated.propertyId, 
+      agentId: agent.id 
+    });
 
-    // Fetch the original property
     const property = await prisma.property.findUnique({
-      where: { id: propertyId },
+      where: { id: validated.propertyId },
     });
 
     if (!property) {
-      return NextResponse.json({ error: 'Property not found' }, { status: 404 });
+      throw new NotFoundError('Property not found');
     }
 
-    // Calculate days on market
     const daysOnMarket = Math.floor(
       (new Date().getTime() - property.createdAt.getTime()) / (1000 * 60 * 60 * 24)
     );
 
-    // Create sold property record
     const soldProperty = await prisma.soldProperty.create({
       data: {
         originalId: property.id,
@@ -105,26 +104,28 @@ export async function POST(request: NextRequest) {
         listingPrice: property.price,
         listingRentPrice: property.rentPrice,
         listingType: property.listingType,
-        soldType,
-        finalPrice: finalPrice ? parseFloat(finalPrice) : null,
+        soldType: validated.soldType,
+        finalPrice: validated.finalPrice,
         daysOnMarket,
         agentId: property.agentId || agent.id,
         commissionEarned: property.commissionAmount,
         listedAt: property.createdAt,
-        notes,
+        notes: validated.notes,
       },
     });
 
-    return NextResponse.json({ 
-      success: true, 
-      data: {
-        ...soldProperty,
-        listingPrice: soldProperty.listingPrice ? Number(soldProperty.listingPrice) : null,
-        finalPrice: soldProperty.finalPrice ? Number(soldProperty.finalPrice) : null,
-      }
+    logger.info('Property archived as sold', { 
+      soldPropertyId: soldProperty.id,
+      originalPropertyId: property.id 
     });
-  } catch (error) {
-    console.error('Failed to archive sold property:', error);
-    return NextResponse.json({ error: 'Failed to archive sold property' }, { status: 500 });
-  }
-}
+
+    return successResponse({ 
+      soldProperty: {
+        ...soldProperty,
+        listingPrice: soldProperty.listingPrice ? serializeDecimal(soldProperty.listingPrice) : null,
+        finalPrice: soldProperty.finalPrice ? serializeDecimal(soldProperty.finalPrice) : null,
+        commissionEarned: soldProperty.commissionEarned ? serializeDecimal(soldProperty.commissionEarned) : null,
+      }
+    }, undefined, 201);
+  })
+);

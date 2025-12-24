@@ -1,64 +1,137 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { createClient } from '@/utils/supabase/server';
+import { 
+  withErrorHandler, 
+  withAuth, 
+  successResponse,
+  requireRole,
+  ValidationError,
+  NotFoundError
+} from '@/lib/api';
+import { logger } from '@/lib/logger';
+import { agentUpdateSchema } from '@/lib/validation/schemas';
 
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    // In a real app, you might want to check if the user is SUPER_ADMIN
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+export const GET = withErrorHandler(
+  withAuth(async (req: NextRequest, { params }: { params: { id: string } }, { agent }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
     }
 
-    const body = await req.json();
-    const { name, role, email, phone, lineId, imageUrl, languages, isActive } = body;
+    logger.debug('Fetching agent by ID', { agentId: params.id, requestedBy: agent.id });
 
-    const agent = await prisma.agentProfile.update({
+    const targetAgent = await prisma.agentProfile.findUnique({
       where: { id: params.id },
-      data: {
-        name,
-        role,
-        email,
-        phone,
-        lineId,
-        imageUrl,
-        languages,
-        isActive
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        lineId: true,
+        whatsapp: true,
+        imageUrl: true,
+        languages: true,
+        role: true,
+        companyName: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
-    return NextResponse.json({ success: true, data: agent });
-  } catch (error) {
-    console.error('Error updating agent:', error);
-    return NextResponse.json({ success: false, error: 'Failed to update agent' }, { status: 500 });
-  }
-}
-
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    // Only allow deletion if authenticated
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 });
+    if (!targetAgent) {
+      throw new NotFoundError('Agent not found');
     }
 
-    await prisma.agentProfile.delete({
+    logger.info('Agent fetched', { agentId: params.id, requestedBy: agent.id });
+
+    return successResponse({ agent: targetAgent });
+  })
+);
+
+export const PUT = withErrorHandler(
+  withAuth(async (req: NextRequest, { params }: { params: { id: string } }, { agent }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
+    }
+
+    const body = await req.json();
+    const validated = agentUpdateSchema.parse(body);
+
+    logger.debug('Updating agent', { 
+      agentId: params.id, 
+      updatedBy: agent.id,
+      updates: Object.keys(validated)
+    });
+
+    // Check if agent exists
+    const existingAgent = await prisma.agentProfile.findUnique({
       where: { id: params.id },
     });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('Error deleting agent:', error);
-    return NextResponse.json({ success: false, error: 'Failed to delete agent' }, { status: 500 });
-  }
-}
+    if (!existingAgent) {
+      throw new NotFoundError('Agent not found');
+    }
+
+    // If updating email, check for duplicates
+    if (validated.email && validated.email !== existingAgent.email) {
+      const duplicateEmail = await prisma.agentProfile.findFirst({
+        where: { 
+          email: validated.email,
+          id: { not: params.id }
+        },
+      });
+
+      if (duplicateEmail) {
+        throw new ValidationError('An agent with this email already exists');
+      }
+    }
+
+    const updatedAgent = await prisma.agentProfile.update({
+      where: { id: params.id },
+      data: validated,
+    });
+
+    logger.info('Agent updated successfully', { 
+      agentId: params.id, 
+      updatedBy: agent.id 
+    });
+
+    return successResponse({ agent: updatedAgent });
+  }, requireRole('SUPER_ADMIN', 'PLATFORM_AGENT'))
+);
+
+export const DELETE = withErrorHandler(
+  withAuth(async (req: NextRequest, { params }: { params: { id: string } }, { agent }) => {
+    if (!agent) {
+      throw new ValidationError('Agent not found');
+    }
+
+    logger.debug('Deleting agent', { agentId: params.id, deletedBy: agent.id });
+
+    // Check if agent exists
+    const existingAgent = await prisma.agentProfile.findUnique({
+      where: { id: params.id },
+    });
+
+    if (!existingAgent) {
+      throw new NotFoundError('Agent not found');
+    }
+
+    // Soft delete by setting isActive to false instead of hard delete
+    // This preserves data integrity for properties and deals
+    const deletedAgent = await prisma.agentProfile.update({
+      where: { id: params.id },
+      data: { isActive: false },
+    });
+
+    logger.info('Agent deactivated', { 
+      agentId: params.id, 
+      deletedBy: agent.id 
+    });
+
+    return successResponse({ 
+      message: 'Agent deactivated successfully',
+      agent: deletedAgent 
+    });
+  }, requireRole('SUPER_ADMIN'))
+);

@@ -1,148 +1,146 @@
-import { createClient } from '@/utils/supabase/server';
 import { prisma } from '@/lib/prisma';
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/utils/supabase/server';
+import { 
+  withErrorHandler, 
+  successResponse,
+  ValidationError
+} from '@/lib/api';
+import { logger } from '@/lib/logger';
+import { serializeDecimal } from '@/lib/utils/serialization';
 
 export const dynamic = 'force-dynamic';
 
-// GET - Fetch user's wishlist
-export async function GET(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    
-    // Support both authenticated and guest users
-    const userId = user?.id || request.cookies.get('guest_id')?.value;
-    
-    if (!userId) {
-      return NextResponse.json({ wishlist: [] });
-    }
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  const userId = user?.id || req.cookies.get('guest_id')?.value;
+  
+  if (!userId) {
+    return successResponse({ wishlist: [] });
+  }
 
-    const wishlistItems = await prisma.wishlist.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' }
-    });
+  logger.debug('Fetching wishlist', { userId: user?.id || 'guest' });
 
-    // Fetch full property details
-    const propertyIds = wishlistItems.map(item => item.propertyId);
-    const properties = await prisma.property.findMany({
-      where: { 
-        id: { in: propertyIds },
-        status: 'AVAILABLE'
-      },
-      include: {
-        project: {
-          select: {
-            name: true,
-            type: true,
-            developer: true,
-            facilities: true
-          }
+  const wishlistItems = await prisma.wishlist.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  const propertyIds = wishlistItems.map(item => item.propertyId);
+  const properties = await prisma.property.findMany({
+    where: { 
+      id: { in: propertyIds },
+      status: 'AVAILABLE'
+    },
+    include: {
+      project: {
+        select: {
+          name: true,
+          type: true,
+          developer: true,
+          facilities: true
         }
       }
-    });
+    }
+  });
 
-    // Serialize Decimal fields
-    const serializedProperties = properties.map(prop => ({
-      ...prop,
-      price: prop.price?.toString(),
-      rentPrice: prop.rentPrice?.toString(),
-      latitude: prop.latitude?.toString(),
-      longitude: prop.longitude?.toString(),
-      commissionRate: prop.commissionRate?.toString(),
-      agentCommissionRate: prop.agentCommissionRate?.toString(),
-      commissionAmount: prop.commissionAmount?.toString(),
-      coAgentCommissionRate: prop.coAgentCommissionRate?.toString(),
-      monthlyRevenue: prop.monthlyRevenue?.toString(),
-    }));
+  const serializedProperties = properties.map(prop => ({
+    ...prop,
+    price: prop.price ? serializeDecimal(prop.price) : null,
+    rentPrice: prop.rentPrice ? serializeDecimal(prop.rentPrice) : null,
+    latitude: prop.latitude ? serializeDecimal(prop.latitude) : null,
+    longitude: prop.longitude ? serializeDecimal(prop.longitude) : null,
+    commissionRate: prop.commissionRate ? serializeDecimal(prop.commissionRate) : null,
+    agentCommissionRate: prop.agentCommissionRate ? serializeDecimal(prop.agentCommissionRate) : null,
+    commissionAmount: prop.commissionAmount ? serializeDecimal(prop.commissionAmount) : null,
+    coAgentCommissionRate: prop.coAgentCommissionRate ? serializeDecimal(prop.coAgentCommissionRate) : null,
+    monthlyRevenue: prop.monthlyRevenue ? serializeDecimal(prop.monthlyRevenue) : null,
+  }));
 
-    return NextResponse.json({ wishlist: serializedProperties });
-  } catch (error) {
-    console.error('Error fetching wishlist:', error);
-    return NextResponse.json({ error: 'Failed to fetch wishlist' }, { status: 500 });
+  logger.info('Wishlist fetched', { userId: user?.id || 'guest', count: properties.length });
+
+  return successResponse({ wishlist: serializedProperties });
+});
+
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { propertyId } = await req.json();
+
+  if (!propertyId) {
+    throw new ValidationError('Property ID required');
   }
-}
 
-// POST - Add to wishlist
-export async function POST(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    const { propertyId } = await request.json();
-
-    if (!propertyId) {
-      return NextResponse.json({ error: 'Property ID required' }, { status: 400 });
-    }
-
-    // Get or create guest ID
-    let userId = user?.id;
+  let userId = user?.id;
+  if (!userId) {
+    userId = req.cookies.get('guest_id')?.value;
     if (!userId) {
-      userId = request.cookies.get('guest_id')?.value;
-      if (!userId) {
-        userId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      }
+      userId = `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
-
-    // Add to wishlist (upsert to handle duplicates)
-    await prisma.wishlist.upsert({
-      where: {
-        userId_propertyId: {
-          userId,
-          propertyId
-        }
-      },
-      create: {
-        userId,
-        propertyId
-      },
-      update: {}
-    });
-
-    const response = NextResponse.json({ success: true, message: 'Added to wishlist' });
-    
-    // Set guest cookie if not authenticated
-    if (!user) {
-      response.cookies.set('guest_id', userId, {
-        maxAge: 60 * 60 * 24 * 365, // 1 year
-        httpOnly: true,
-        sameSite: 'lax'
-      });
-    }
-
-    return response;
-  } catch (error) {
-    console.error('Error adding to wishlist:', error);
-    return NextResponse.json({ error: 'Failed to add to wishlist' }, { status: 500 });
   }
-}
 
-// DELETE - Remove from wishlist
-export async function DELETE(request: NextRequest) {
-  try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    const { searchParams } = new URL(request.url);
-    const propertyId = searchParams.get('propertyId');
+  logger.debug('Adding to wishlist', { userId: user?.id || 'guest', propertyId });
 
-    if (!propertyId) {
-      return NextResponse.json({ error: 'Property ID required' }, { status: 400 });
-    }
-
-    const userId = user?.id || request.cookies.get('guest_id')?.value;
-    
-    if (!userId) {
-      return NextResponse.json({ error: 'User not found' }, { status: 401 });
-    }
-
-    await prisma.wishlist.deleteMany({
-      where: {
+  await prisma.wishlist.upsert({
+    where: {
+      userId_propertyId: {
         userId,
         propertyId
       }
-    });
+    },
+    create: {
+      userId,
+      propertyId
+    },
+    update: {}
+  });
 
-    return NextResponse.json({ success: true, message: 'Removed from wishlist' });
-  } catch (error) {
-    console.error('Error removing from wishlist:', error);
-    return NextResponse.json({ error: 'Failed to remove from wishlist' }, { status: 500 });
+  logger.info('Added to wishlist', { userId: user?.id || 'guest', propertyId });
+
+  const response = NextResponse.json(
+    successResponse({ message: 'Added to wishlist' }),
+    { status: 200 }
+  );
+  
+  if (!user) {
+    response.cookies.set('guest_id', userId, {
+      maxAge: 60 * 60 * 24 * 365,
+      httpOnly: true,
+      sameSite: 'lax'
+    });
   }
-}
+
+  return response;
+});
+
+export const DELETE = withErrorHandler(async (req: NextRequest) => {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { searchParams } = new URL(req.url);
+  const propertyId = searchParams.get('propertyId');
+
+  if (!propertyId) {
+    throw new ValidationError('Property ID required');
+  }
+
+  const userId = user?.id || req.cookies.get('guest_id')?.value;
+  
+  if (!userId) {
+    throw new ValidationError('User not found');
+  }
+
+  logger.debug('Removing from wishlist', { userId: user?.id || 'guest', propertyId });
+
+  await prisma.wishlist.deleteMany({
+    where: {
+      userId,
+      propertyId
+    }
+  });
+
+  logger.info('Removed from wishlist', { userId: user?.id || 'guest', propertyId });
+
+  return successResponse({ message: 'Removed from wishlist' });
+});
