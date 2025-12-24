@@ -85,13 +85,13 @@ export const SUBTYPE_FEATURES = {
   CONDO: [...CONDO_ALL_IDS],
   
   // INVESTMENT
-  HOTEL: ['bedrooms', 'bathrooms', 'size', 'floors', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'conferenceRoom', 'pool', 'elevator', 'wifi', 'cctv'],
+  HOTEL: ['bedrooms', 'bathrooms', 'size', 'floors', 'numberOfStaff', 'equipmentIncluded', 'conferenceRoom', 'pool', 'elevator', 'wifi', 'cctv'],
   COMMERCIAL_BUILDING: ['bedrooms', 'bathrooms', 'size', 'floors', 'elevator', 'cctv'],
   LAND: ['size', 'landZoneColor'],
-  CLUB_BAR: ['size', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
-  RESTAURANT: ['size', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
-  WELLNESS: ['size', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
-  MASSAGE: ['size', 'openForYears', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
+  CLUB_BAR: ['size', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
+  RESTAURANT: ['size', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
+  WELLNESS: ['size', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
+  MASSAGE: ['size', 'numberOfStaff', 'equipmentIncluded', 'wifi', 'cctv'],
 } as const;
 
 // ============================================

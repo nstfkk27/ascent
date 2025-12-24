@@ -1,0 +1,10 @@
+# robots.txt for Estate Ascent
+User-agent: *
+Allow: /
+Disallow: /agent/
+Disallow: /api/
+Disallow: /en/agent/
+Disallow: /th/agent/
+
+# Sitemap
+Sitemap: https://www.estateascent.com/sitemap.xml

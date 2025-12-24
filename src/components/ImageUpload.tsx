@@ -52,8 +52,8 @@ export default function ImageUpload({
 
         const data = await res.json();
 
-        if (data.success) {
-          uploadedUrls.push(data.url);
+        if (data.success && data.data?.url) {
+          uploadedUrls.push(data.data.url);
           setUploadProgress(prev => {
             const newProgress = [...prev];
             newProgress[i] = 100;
@@ -73,7 +73,9 @@ export default function ImageUpload({
       }
     }
 
-    onChange([...images, ...uploadedUrls]);
+    const newImages = [...images, ...uploadedUrls];
+    console.log('Calling onChange with images:', newImages);
+    onChange(newImages);
     setUploading(false);
     setUploadProgress([]);
 
@@ -156,28 +158,31 @@ export default function ImageUpload({
       {/* Image Preview Grid */}
       {images.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {images.map((url, index) => (
-            <div key={index} className="relative group aspect-square">
-              <Image
-                src={url}
-                alt={`Upload ${index + 1}`}
-                fill
-                className="object-cover rounded-lg"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemove(index)}
-                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              {index === 0 && (
-                <div className="absolute bottom-2 left-2 px-2 py-1 bg-primary-600 text-white text-xs font-semibold rounded">
-                  Main
-                </div>
-              )}
-            </div>
-          ))}
+          {images.map((url, index) => {
+            if (!url || url.trim() === '') return null;
+            return (
+              <div key={index} className="relative group aspect-square">
+                <Image
+                  src={url}
+                  alt={`Upload ${index + 1}`}
+                  fill
+                  className="object-cover rounded-lg"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemove(index)}
+                  className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                {index === 0 && (
+                  <div className="absolute bottom-2 left-2 px-2 py-1 bg-primary-600 text-white text-xs font-semibold rounded">
+                    Main
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 

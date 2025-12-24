@@ -19,7 +19,8 @@ export const GET = withErrorHandler(
       where: { id: params.id },
     });
     
-    if (!property && params.id.length === 8 && /^[a-z0-9]+$/i.test(params.id)) {
+    // If not found and looks like a UUID fragment (8-12 alphanumeric chars), try startsWith search
+    if (!property && params.id.length >= 8 && params.id.length <= 12 && /^[a-z0-9]+$/i.test(params.id)) {
       const properties = await prisma.property.findMany({
         where: {
           id: { startsWith: params.id },

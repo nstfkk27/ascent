@@ -17,6 +17,19 @@ interface DashboardStats {
   freshListings: number;
   needsCheckListings: number;
   upcomingAvailable: number;
+  totalEnquiries: number;
+  newEnquiries: number;
+  recentEnquiries: RecentEnquiry[];
+}
+
+interface RecentEnquiry {
+  id: string;
+  propertyId: string;
+  name: string | null;
+  channel: string;
+  message: string | null;
+  status: string;
+  createdAt: string;
 }
 
 interface UpcomingProperty {
@@ -44,7 +57,10 @@ export default function AgentDashboard() {
     pendingSubmissions: 0,
     freshListings: 0,
     needsCheckListings: 0,
-    upcomingAvailable: 0
+    upcomingAvailable: 0,
+    totalEnquiries: 0,
+    newEnquiries: 0,
+    recentEnquiries: []
   });
   const [upcomingProperties, setUpcomingProperties] = useState<UpcomingProperty[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,8 +78,8 @@ export default function AgentDashboard() {
       const res = await fetch('/api/agent/me');
       if (res.ok) {
         const data = await res.json();
-        setProfile(data.agent);
-        setEditedProfile(data.agent);
+        setProfile(data.data.agent);
+        setEditedProfile(data.data.agent);
       }
     } catch (err) {
       console.error('Failed to fetch profile', err);
@@ -390,6 +406,46 @@ export default function AgentDashboard() {
           <p className="text-xs text-gray-500 mt-1">Needs verification</p>
         </div>
 
+        {/* Total Enquiries */}
+        <Link href="/agent/enquiries" className="block group">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-white" />
+              </div>
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Enquiries</span>
+            </div>
+            <p className="text-3xl font-bold text-purple-600">{loading ? '-' : stats.totalEnquiries}</p>
+            <p className="text-xs text-gray-500 mt-1">Total leads</p>
+          </div>
+        </Link>
+
+        {/* New Enquiries */}
+        <Link href="/agent/enquiries" className="block group">
+          <div className={`p-5 rounded-2xl shadow-sm border transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+            stats.newEnquiries > 0 
+              ? 'bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200' 
+              : 'bg-white border-gray-100'
+          }`}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                stats.newEnquiries > 0 ? 'bg-blue-500' : 'bg-gray-100'
+              }`}>
+                <TrendingUp className={`w-5 h-5 ${stats.newEnquiries > 0 ? 'text-white' : 'text-gray-500'}`} />
+              </div>
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">New (7d)</span>
+            </div>
+            <p className={`text-3xl font-bold ${stats.newEnquiries > 0 ? 'text-blue-600' : 'text-[#49516f]'}`}>
+              {loading ? '-' : stats.newEnquiries}
+            </p>
+            {stats.newEnquiries > 0 ? (
+              <p className="text-xs text-blue-600 mt-1 font-medium">Follow up now!</p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1">Last 7 days</p>
+            )}
+          </div>
+        </Link>
+
         {/* Pending Submissions - Only for internal agents */}
         {isInternalAgent && (
           <Link href="/agent/submissions" className="block group">
@@ -418,6 +474,68 @@ export default function AgentDashboard() {
           </Link>
         )}
       </div>
+
+      {/* Recent Enquiries */}
+      {stats.recentEnquiries && stats.recentEnquiries.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-purple-500 flex items-center justify-center">
+                <MessageSquare className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-[#49516f]">Recent Enquiries</h3>
+                <p className="text-sm text-gray-600">Latest leads from your properties</p>
+              </div>
+            </div>
+            <Link 
+              href="/agent/enquiries"
+              className="text-sm text-[#496f5d] hover:text-[#3d5c4d] font-medium flex items-center gap-1"
+            >
+              View All
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {stats.recentEnquiries.map((enquiry) => (
+              <div 
+                key={enquiry.id}
+                className="block bg-gray-50 rounded-lg p-3 hover:bg-gray-100 transition-colors border border-gray-100"
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-gray-900">{enquiry.name || 'Anonymous'}</span>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                        {enquiry.channel}
+                      </span>
+                      <span className={`text-xs px-2 py-0.5 rounded-full ${
+                        enquiry.status === 'NEW' ? 'bg-blue-100 text-blue-700' :
+                        enquiry.status === 'CONTACTED' ? 'bg-yellow-100 text-yellow-700' :
+                        enquiry.status === 'CONVERTED' ? 'bg-green-100 text-green-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {enquiry.status}
+                      </span>
+                    </div>
+                    {enquiry.message && (
+                      <p className="text-sm text-gray-600 line-clamp-1">{enquiry.message}</p>
+                    )}
+                    <p className="text-xs text-gray-400 mt-1">
+                      {new Date(enquiry.createdAt).toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Upcoming Rental Availability - Platform Agents Only */}
       {isInternalAgent && stats.upcomingAvailable > 0 && (

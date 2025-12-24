@@ -31,6 +31,7 @@ interface Facility {
 
 interface Project {
   id: string;
+  slug?: string;
   name: string;
   type: string;
   imageUrl: string | null;
@@ -329,7 +330,9 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
           </div>
           
           <Link 
-            href={project.isStandalone ? `/properties/${project.id}` : `/project/${encodeURIComponent(project.name.replace(/ /g, '-'))}`}
+            href={project.isStandalone 
+              ? (project.units[0]?.slug ? `/properties/${createCompoundSlug(project.units[0].slug, project.units[0].id)}` : `/properties/${project.id}`)
+              : `/project/${encodeURIComponent(project.name.replace(/ /g, '-'))}`}
             className="bg-[#496f5d] text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg hover:bg-[#3d5c4d] transition-colors pointer-events-auto flex items-center gap-1"
           >
             Full Page

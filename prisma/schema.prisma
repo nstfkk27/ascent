@@ -95,7 +95,6 @@ model Property {
   projectName           String?
   floor                 Int?
   investmentType        InvestmentType?
-  openForYears          Int?
   equipmentIncluded     EquipmentLevel?
   numberOfStaff         Int?
   monthlyRevenue        Decimal?            @db.Decimal(12, 2)
@@ -104,13 +103,11 @@ model Property {
   bathrooms             Int?
   isStudio              Boolean?            // For condos - if true, bedrooms = 0
   size                  Int
-  petFriendly           Boolean?
+  petFriendly           Boolean?            // For HOUSE/CONDO only
   parking               Int?
-  furnished             Boolean?
-  garden                Boolean?
-  pool                  Boolean?
+  furnished             Boolean?            // For HOUSE/CONDO only
   floors                Int?
-  amenities             Json?
+  amenities             Json?               // Stores pool, garden, and all other amenities
   status                PropertyStatus      @default(AVAILABLE)
   listingType           ListingType         @default(SALE)
   images                String[]

@@ -168,7 +168,7 @@ export const GET = withErrorHandler(
     const knownParams = [
       'category', 'houseType', 'investmentType', 'listingType', 
       'city', 'area', 'minPrice', 'maxPrice', 'bedrooms', 'featured', 'status',
-      'page', 'limit', 'query', 'openForYearsRange', 'staffRange', 'equipmentIncluded',
+      'page', 'limit', 'query', 'staffRange', 'equipmentIncluded',
       'landZoneColor', 'tag', 'minSize', 'maxSize'
     ];
     
@@ -193,16 +193,7 @@ export const GET = withErrorHandler(
       where.landZoneColor = landZoneColor;
     }
 
-    // Handle Investment Ranges
-    const openForYearsRange = searchParams.get('openForYearsRange');
-    if (openForYearsRange) {
-      if (openForYearsRange === '10+') {
-        where.openForYears = { gte: 10 };
-      } else {
-        const [min, max] = openForYearsRange.split('-').map(Number);
-        where.openForYears = { gte: min, lte: max };
-      }
-    }
+    // Handle Investment Ranges (openForYears removed from schema)
 
     const staffRange = searchParams.get('staffRange');
     if (staffRange) {
@@ -312,6 +303,25 @@ export const POST = withErrorHandler(
         throw new Error(`Missing required field: ${field}`);
       }
     }
+    
+    // Validate category-specific fields
+    if (body.category === 'LAND') {
+      const invalidFields = ['bedrooms', 'bathrooms', 'petFriendly', 'furnished', 'floors'];
+      for (const field of invalidFields) {
+        if (body[field]) {
+          throw new Error(`${field} is not applicable to LAND category`);
+        }
+      }
+    }
+    
+    if (body.category === 'INVESTMENT') {
+      const invalidFields = ['petFriendly', 'furnished'];
+      for (const field of invalidFields) {
+        if (body[field]) {
+          throw new Error(`${field} is not applicable to INVESTMENT category`);
+        }
+      }
+    }
 
     if (body.listingType === 'SALE' || body.listingType === 'BOTH') {
       if (!body.price) {
@@ -354,14 +364,16 @@ export const POST = withErrorHandler(
         petFriendly: body.petFriendly || null,
         parking: body.parking || null,
         furnished: body.furnished || null,
-        garden: body.garden || null,
-        pool: body.pool || null,
         floors: body.floors || null,
         amenities: body.amenities || null,
         
         // Project/Village Name
         projectName: body.projectName || null,
-        projectId: body.projectId || null,
+        ...(body.projectId && {
+          project: {
+            connect: { id: body.projectId }
+          }
+        }),
         
         // Commission (Restricted)
         commissionRate: isInternal ? (body.commissionRate || null) : null,
@@ -374,7 +386,6 @@ export const POST = withErrorHandler(
         
         // Investment-specific
         investmentType: body.investmentType || null,
-        openForYears: body.openForYears || null,
         equipmentIncluded: body.equipmentIncluded || null,
         numberOfStaff: body.numberOfStaff || null,
         monthlyRevenue: body.monthlyRevenue || null,

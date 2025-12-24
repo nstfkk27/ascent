@@ -3,8 +3,34 @@ export function sanitizePropertyData(data: any) {
   const cleanData = { ...data };
   const category = cleanData.category;
 
+  // Filter out null/empty/invalid image URLs
+  if (cleanData.images && Array.isArray(cleanData.images)) {
+    cleanData.images = cleanData.images.filter((url: any) => url && typeof url === 'string' && url.trim() !== '');
+  }
+  
+  // Remove category-inappropriate fields
+  if (category === 'LAND') {
+    // LAND cannot have these fields
+    delete cleanData.petFriendly;
+    delete cleanData.furnished;
+    delete cleanData.bedrooms;
+    delete cleanData.bathrooms;
+    delete cleanData.floors;
+  }
+  
+  if (category === 'INVESTMENT') {
+    // INVESTMENT doesn't use these residential fields
+    delete cleanData.petFriendly;
+    delete cleanData.furnished;
+  }
+
   // Common fields that shouldn't be touched unless necessary
   // ...
+
+  // Delete fields that don't exist in schema anymore
+  delete cleanData.garden;
+  delete cleanData.pool;
+  delete cleanData.openForYears;
 
   if (category === 'HOUSE') {
     // Clear Condo specific fields
@@ -13,7 +39,6 @@ export function sanitizePropertyData(data: any) {
 
     // Clear Investment specific fields
     cleanData.investmentType = null;
-    cleanData.openForYears = null;
     cleanData.equipmentIncluded = null;
     cleanData.numberOfStaff = null;
     cleanData.monthlyRevenue = null;
@@ -23,13 +48,10 @@ export function sanitizePropertyData(data: any) {
   } else if (category === 'CONDO') {
     // Clear House specific fields
     cleanData.houseType = null;
-    cleanData.garden = null;
-    cleanData.pool = null; 
     cleanData.floors = null; // Number of floors (usually for house)
 
     // Clear Investment specific fields
     cleanData.investmentType = null;
-    cleanData.openForYears = null;
     cleanData.equipmentIncluded = null;
     cleanData.numberOfStaff = null;
     cleanData.monthlyRevenue = null;
@@ -39,8 +61,6 @@ export function sanitizePropertyData(data: any) {
   } else if (category === 'INVESTMENT') {
     // Clear House specific fields
     cleanData.houseType = null;
-    cleanData.garden = null;
-    cleanData.pool = null;
     cleanData.floors = null;
 
     // Clear Condo specific fields

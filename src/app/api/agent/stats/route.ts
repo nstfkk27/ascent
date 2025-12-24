@@ -26,11 +26,20 @@ export const GET = withErrorHandler(
       propertyWhere.agentId = agent.id;
     }
 
+    // Build enquiry where clause
+    const enquiryWhere: any = {};
+    if (agent.role === 'AGENT' || agent.role === 'PLATFORM_AGENT') {
+      enquiryWhere.agentId = agent.id;
+    }
+
     const [
       activeListings,
       pendingSubmissions,
       freshListings,
-      needsCheckListings
+      needsCheckListings,
+      totalEnquiries,
+      newEnquiries,
+      recentEnquiries
     ] = await prisma.$transaction([
       prisma.property.count({ where: propertyWhere }),
       prisma.propertySubmission.count({ where: { status: 'PENDING' } }),
@@ -45,6 +54,26 @@ export const GET = withErrorHandler(
           ...propertyWhere,
           lastVerifiedAt: { lt: fourteenDaysAgo }
         } 
+      }),
+      // Total enquiries
+      prisma.enquiry.count({ where: enquiryWhere }),
+      // New enquiries (last 7 days)
+      prisma.enquiry.count({ 
+        where: { 
+          ...enquiryWhere,
+          createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+        } 
+      }),
+      // Recent enquiries for display
+      prisma.enquiry.findMany({
+        where: enquiryWhere,
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          agent: {
+            select: { name: true }
+          }
+        }
       })
     ]);
 
@@ -58,7 +87,18 @@ export const GET = withErrorHandler(
       activeListings,
       pendingSubmissions,
       freshListings,
-      needsCheckListings
+      needsCheckListings,
+      totalEnquiries,
+      newEnquiries,
+      recentEnquiries: recentEnquiries.map(e => ({
+        id: e.id,
+        propertyId: e.propertyId,
+        name: e.name,
+        channel: e.channel,
+        message: e.message,
+        status: e.status,
+        createdAt: e.createdAt.toISOString(),
+      }))
     });
   })
 );

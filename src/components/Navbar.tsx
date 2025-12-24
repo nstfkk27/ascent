@@ -35,7 +35,7 @@ export default function Navbar() {
           const res = await fetch('/api/agent/me');
           if (res.ok) {
             const data = await res.json();
-            setAgentProfile({ name: data.name, companyName: data.companyName, role: data.role });
+            setAgentProfile({ name: data.data.agent.name, companyName: data.data.agent.companyName, role: data.data.agent.role });
           }
         } catch (e) {
           console.error('Failed to fetch agent profile', e);

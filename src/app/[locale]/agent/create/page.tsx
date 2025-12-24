@@ -74,13 +74,10 @@ export default function QuickDropPage() {
     floors: 0,
     parking: 0,
     furnished: false,
-    pool: false,
-    garden: false,
     projectName: '',
     projectId: '',
     
     // Investment Specific
-    openForYears: 0,
     numberOfStaff: 0,
     equipmentIncluded: 'FULLY',
     landZoneColor: '',
@@ -231,7 +228,53 @@ export default function QuickDropPage() {
     });
   };
 
+  const validateForm = () => {
+    const errors: string[] = [];
+
+    // Required fields
+    if (!formData.title.trim()) errors.push('Property title is required');
+    if (!formData.description.trim()) errors.push('Description is required');
+    if (!formData.address.trim()) errors.push('Address/Location is required');
+    if (!formData.city.trim()) errors.push('City is required');
+    if (!formData.state.trim()) errors.push('State/Province is required');
+    if (!formData.zipCode.trim()) errors.push('Zip/Postal code is required');
+    if (!formData.size || formData.size <= 0) errors.push('Property size is required');
+
+    // Price validation based on listing type
+    if (formData.listingType === 'SALE' || formData.listingType === 'BOTH') {
+      if (!formData.price || formData.price <= 0) errors.push('Sale price is required');
+    }
+    if (formData.listingType === 'RENT' || formData.listingType === 'BOTH') {
+      if (!formData.rentPrice || formData.rentPrice <= 0) errors.push('Rental price is required');
+    }
+
+    // Image validation
+    if (uploadedImages.length === 0) {
+      errors.push('At least one property photo is required');
+    }
+
+    // Category-specific validation
+    if (formData.category === 'HOUSE' || formData.category === 'CONDO') {
+      if (!formData.bedrooms && !formData.isStudio) {
+        errors.push('Number of bedrooms is required (or mark as Studio)');
+      }
+      if (!formData.bathrooms || formData.bathrooms <= 0) {
+        errors.push('Number of bathrooms is required');
+      }
+    }
+
+    return errors;
+  };
+
   const handleSave = async () => {
+    // Validate form before submitting
+    const errors = validateForm();
+    if (errors.length > 0) {
+      alert('Please fix the following errors:\n\n' + errors.map((e, i) => `${i + 1}. ${e}`).join('\n'));
+      setIsSaving(false);
+      return;
+    }
+
     setIsSaving(true);
     try {
       // Prepare payload based on category
@@ -250,23 +293,27 @@ export default function QuickDropPage() {
         payload.amenities[id] = true;
       });
 
-      // Map specific boolean columns from amenities if needed
+      // Set category-specific fields
       if (formData.category === 'HOUSE') {
         payload.houseType = formData.subtype;
-        if (formData.selectedAmenities.includes('privatePool')) payload.pool = true;
-        if (formData.selectedAmenities.includes('privateGarden')) payload.garden = true;
+        // pool and garden are now in amenities JSON only
       } else if (formData.category === 'CONDO') {
-        if (formData.selectedAmenities.includes('swimmingPool')) payload.pool = true; // Common pool
-        if (formData.selectedAmenities.includes('garden')) payload.garden = true; // Common garden
+        // pool and garden should be in project facilities, not property amenities
       } else if (formData.category === 'INVESTMENT') {
         payload.investmentType = formData.subtype;
         payload.conferenceRoom = formData.conferenceRoom;
-        payload.pool = formData.pool;
+        // pool is now in amenities JSON only
         
         // Handle Land specific fields
         if (formData.subtype === 'LAND') {
           payload.landZoneColor = formData.landZoneColor;
         }
+      }
+      
+      // Remove petFriendly and furnished for LAND and INVESTMENT
+      if (formData.category === 'LAND' || formData.category === 'INVESTMENT') {
+        delete payload.petFriendly;
+        delete payload.furnished;
       }
 
       const res = await fetch(`${window.location.origin}/api/properties`, {
@@ -278,15 +325,22 @@ export default function QuickDropPage() {
       const result = await res.json();
 
       if (res.ok && result.success) {
-        alert('Property saved successfully!');
-        router.push('/agent');
+        // Redirect to success page with property ID
+        const propertyId = result.data?.id;
+        if (propertyId) {
+          router.push(`/agent/create/success?id=${propertyId}`);
+        } else {
+          alert('✅ Property created successfully!');
+          router.push('/agent/listings');
+        }
       } else {
-        const errorMsg = result.error || result.details || 'An unexpected error occurred';
-        alert('Error saving property: ' + errorMsg);
+        // Show specific error message from API
+        const errorMsg = result.error || result.message || 'Failed to create property';
+        alert('❌ Error: ' + errorMsg);
       }
     } catch (err) {
       console.error('Save error:', err);
-      alert('Failed to save property: ' + (err instanceof Error ? err.message : 'Network error'));
+      alert('❌ Network error: Unable to create property. Please check your connection and try again.');
     } finally {
       setIsSaving(false);
     }
@@ -627,19 +681,6 @@ export default function QuickDropPage() {
               )}
 
               {/* Investment Specific Fields */}
-              {shouldShowField('openForYears') && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Open For (Years)</label>
-                  <input 
-                    type="number" 
-                    name="openForYears"
-                    value={formData.openForYears}
-                    onChange={handleChange}
-                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                  />
-                </div>
-              )}
-
               {shouldShowField('numberOfStaff') && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Number of Staff</label>
@@ -746,31 +787,7 @@ export default function QuickDropPage() {
                 )}
                 
                 {/* Only show these if NOT covered by the new amenities section above */}
-                {shouldShowField('pool') && formData.category === 'INVESTMENT' && (
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      name="pool"
-                      checked={formData.pool}
-                      onChange={handleChange}
-                      className="rounded text-blue-600 focus:ring-blue-500" 
-                    />
-                    <span className="text-sm text-gray-700">Swimming Pool</span>
-                  </label>
-                )}
-
-                {shouldShowField('garden') && formData.category === 'INVESTMENT' && (
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      name="garden"
-                      checked={formData.garden}
-                      onChange={handleChange}
-                      className="rounded text-blue-600 focus:ring-blue-500" 
-                    />
-                    <span className="text-sm text-gray-700">Garden</span>
-                  </label>
-                )}
+                {/* Pool and Garden are now in amenities JSON only */}
 
                 {shouldShowField('conferenceRoom') && (
                   <label className="flex items-center space-x-2 cursor-pointer">

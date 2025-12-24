@@ -99,7 +99,7 @@ export function extractIdFromSlug(slug: string): string | null {
  * Example: "luxury-villa-jomtien-a1b2c3d4"
  */
 export function createCompoundSlug(slug: string, uuid: string): string {
-  // Take first 8 characters of UUID for URL
-  const uuidFragment = uuid.substring(0, 8);
+  // Remove hyphens from UUID and take first 8 characters for URL
+  const uuidFragment = uuid.replace(/-/g, '').substring(0, 8);
   return `${slug}-${uuidFragment}`;
 }

@@ -258,9 +258,11 @@ export async function POST(request: NextRequest) {
             floor: row.floor ? parseInt(row.floor) : null,
             petFriendly: row.pet_friendly?.toUpperCase() === 'TRUE',
             furnished: row.furnished?.toUpperCase() === 'TRUE',
-            pool: row.pool?.toUpperCase() === 'TRUE',
-            garden: row.garden?.toUpperCase() === 'TRUE',
             parking: row.parking ? parseInt(row.parking) : null,
+            amenities: {
+              ...(row.pool?.toUpperCase() === 'TRUE' && { privatePool: true }),
+              ...(row.garden?.toUpperCase() === 'TRUE' && { privateGarden: true }),
+            },
             latitude: row.latitude ? parseFloat(row.latitude) : null,
             longitude: row.longitude ? parseFloat(row.longitude) : null,
             ownerContactDetails: row.owner_contact || null,
