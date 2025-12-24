@@ -62,8 +62,8 @@ export default function AgentDashboard() {
       const res = await fetch('/api/agent/me');
       if (res.ok) {
         const data = await res.json();
-        setProfile(data);
-        setEditedProfile(data);
+        setProfile(data.agent);
+        setEditedProfile(data.agent);
       }
     } catch (err) {
       console.error('Failed to fetch profile', err);
