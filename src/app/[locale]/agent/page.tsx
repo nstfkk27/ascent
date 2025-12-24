@@ -185,7 +185,7 @@ export default function AgentDashboard() {
   }, [fetchStats, profile]);
 
   const isInternalAgent = profile?.role === 'SUPER_ADMIN' || profile?.role === 'PLATFORM_AGENT';
-  const avatarSrc = imagePreview || editedProfile.imageUrl || profile?.imageUrl;
+  const avatarSrc = imagePreview || editedProfile?.imageUrl || profile?.imageUrl;
 
   return (
     <div className="space-y-6">
