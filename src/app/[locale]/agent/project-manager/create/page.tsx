@@ -239,22 +239,29 @@ export default function CreateProjectPage() {
 
               <div className="col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Find Location</label>
-                <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+                <div className="flex gap-2 mb-4">
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search place..."
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleSearch(e as any);
+                      }
+                    }}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
                   />
                   <button 
-                    type="submit"
+                    type="button"
+                    onClick={handleSearch}
                     disabled={isSearching}
                     className="bg-gray-100 px-3 py-2 rounded-lg hover:bg-gray-200 text-gray-600"
                   >
                     🔍
                   </button>
-                </form>
+                </div>
                 
                 <div className="h-64 w-full rounded-lg overflow-hidden relative">
                   <Map

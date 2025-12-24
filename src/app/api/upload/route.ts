@@ -9,7 +9,7 @@ import {
 import { logger } from '@/lib/logger';
 import { z } from 'zod';
 
-const allowedFolders = ['properties', 'agents', 'projects', 'posts'] as const;
+const allowedFolders = ['properties', 'agents', 'projects', 'posts', 'facilities'] as const;
 
 const uploadSchema = z.object({
   folder: z.enum(allowedFolders).default('properties'),

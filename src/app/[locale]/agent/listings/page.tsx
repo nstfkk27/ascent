@@ -8,7 +8,12 @@ interface Property {
   id: string;
   title: string;
   price: number;
+  rentPrice?: number;
   status: string;
+  listingType: string;
+  bedrooms?: number;
+  size?: number;
+  city?: string;
   lastVerifiedAt: string;
 }
 
@@ -18,7 +23,7 @@ export default function MyListingsPage() {
   
   // Pagination State
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(25);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
 
@@ -127,7 +132,25 @@ export default function MyListingsPage() {
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-[#49516f] truncate">{property.title || 'Untitled'}</h3>
-                    <p className="text-sm font-bold text-[#496f5d]">฿{property.price?.toLocaleString() ?? 'N/A'}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                        property.listingType === 'SALE' ? 'bg-blue-100 text-blue-700' : 
+                        property.listingType === 'RENT' ? 'bg-purple-100 text-purple-700' : 
+                        'bg-orange-100 text-orange-700'
+                      }`}>
+                        {property.listingType}
+                      </span>
+                      <span className="text-xs text-gray-500">{property.bedrooms ? `${property.bedrooms} beds` : ''} {property.size ? `• ${property.size}m²` : ''}</span>
+                    </div>
+                    {property.listingType === 'BOTH' ? (
+                      <div className="flex flex-col gap-0.5 mt-1">
+                        <p className="text-sm font-bold text-[#496f5d]">฿{property.price?.toLocaleString() ?? 'N/A'} <span className="text-xs text-gray-500 font-normal">Sale</span></p>
+                        <p className="text-sm font-bold text-[#496f5d]">฿{property.rentPrice?.toLocaleString() ?? 'N/A'}/mo <span className="text-xs text-gray-500 font-normal">Rent</span></p>
+                      </div>
+                    ) : (
+                      <p className="text-sm font-bold text-[#496f5d] mt-1">฿{(property.listingType === 'RENT' ? property.rentPrice : property.price)?.toLocaleString() ?? 'N/A'}</p>
+                    )}
+                    {property.city && <p className="text-xs text-gray-500 mt-0.5">{property.city}</p>}
                   </div>
                   <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${freshness.color}`}>
                     {freshness.label}
@@ -164,7 +187,11 @@ export default function MyListingsPage() {
             <thead className="text-xs text-gray-500 uppercase bg-gray-50/50">
               <tr>
                 <th className="px-6 py-4 text-left font-medium">Property</th>
+                <th className="px-6 py-4 text-left font-medium">Type</th>
                 <th className="px-6 py-4 text-left font-medium">Price</th>
+                <th className="px-6 py-4 text-left font-medium">Beds</th>
+                <th className="px-6 py-4 text-left font-medium">Size</th>
+                <th className="px-6 py-4 text-left font-medium">Location</th>
                 <th className="px-6 py-4 text-left font-medium">Status</th>
                 <th className="px-6 py-4 text-left font-medium">Freshness</th>
                 <th className="px-6 py-4 text-right font-medium">Actions</th>
@@ -172,7 +199,7 @@ export default function MyListingsPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={5} className="text-center py-8 text-gray-400">Loading...</td></tr>
+                <tr><td colSpan={9} className="text-center py-8 text-gray-400">Loading...</td></tr>
               ) : (Array.isArray(properties) ? properties : []).map((property) => {
                 const freshness = getFreshnessStatus(property.lastVerifiedAt);
                 return (
@@ -181,7 +208,32 @@ export default function MyListingsPage() {
                       <span className="font-semibold text-[#49516f]">{property.title || 'Untitled'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-bold text-[#496f5d]">฿{property.price?.toLocaleString() ?? 'N/A'}</span>
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                        property.listingType === 'SALE' ? 'bg-blue-100 text-blue-700' : 
+                        property.listingType === 'RENT' ? 'bg-purple-100 text-purple-700' : 
+                        'bg-orange-100 text-orange-700'
+                      }`}>
+                        {property.listingType}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {property.listingType === 'BOTH' ? (
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-bold text-[#496f5d] text-xs">฿{property.price?.toLocaleString() ?? 'N/A'} <span className="text-gray-500 font-normal">Sale</span></span>
+                          <span className="font-bold text-[#496f5d] text-xs">฿{property.rentPrice?.toLocaleString() ?? 'N/A'}/mo <span className="text-gray-500 font-normal">Rent</span></span>
+                        </div>
+                      ) : (
+                        <span className="font-bold text-[#496f5d]">฿{(property.listingType === 'RENT' ? property.rentPrice : property.price)?.toLocaleString() ?? 'N/A'}</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-gray-700">{property.bedrooms ?? '-'}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-gray-700">{property.size ? `${property.size.toLocaleString()} m²` : '-'}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-gray-600 text-sm">{property.city || '-'}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${

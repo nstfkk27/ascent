@@ -123,7 +123,7 @@ export default function Navbar() {
                 className="w-9 h-9 rounded-full bg-gray-100 overflow-hidden border border-gray-200 relative"
               >
                 {user.user_metadata?.avatar_url ? (
-                  <Image src={user.user_metadata.avatar_url} alt="Profile" fill className="object-cover" unoptimized />
+                  <Image src={user.user_metadata.avatar_url} alt="Profile" fill sizes="36px" className="object-cover" unoptimized />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-[#496f5d] text-white text-sm font-bold">
                     {user.email?.[0]?.toUpperCase() || 'U'}
@@ -279,6 +279,7 @@ export default function Navbar() {
                         src={user.user_metadata.avatar_url} 
                         alt="Profile" 
                         fill
+                        sizes="32px"
                         className="object-cover" 
                         unoptimized
                       />

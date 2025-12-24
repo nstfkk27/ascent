@@ -49,7 +49,7 @@ export default function FileUpload({
         throw new Error(data.error || 'Upload failed');
       }
 
-      onUploadComplete(data.url);
+      onUploadComplete(data.data.url);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (error: any) {
