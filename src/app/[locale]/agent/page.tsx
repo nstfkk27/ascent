@@ -33,6 +33,7 @@ interface AgentProfile {
   email: string;
   phone: string;
   lineId?: string;
+  whatsapp?: string;
   imageUrl?: string;
   role?: string;
 }
@@ -255,13 +256,23 @@ export default function AgentDashboard() {
                       />
                     </div>
                     <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">WhatsApp</label>
+                      <input
+                        type="text"
+                        value={editedProfile.whatsapp || ''}
+                        onChange={(e) => setEditedProfile({ ...editedProfile, whatsapp: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#496f5d] focus:border-transparent text-sm"
+                        placeholder="+66812345678"
+                      />
+                    </div>
+                    <div>
                       <label className="block text-xs font-medium text-gray-500 mb-1">Line ID</label>
                       <input
                         type="text"
                         value={editedProfile.lineId || ''}
                         onChange={(e) => setEditedProfile({ ...editedProfile, lineId: e.target.value })}
                         className="w-full px-3 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#496f5d] focus:border-transparent text-sm"
-                        placeholder="Line ID"
+                        placeholder="@lineid"
                       />
                     </div>
                     <div>
