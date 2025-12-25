@@ -280,12 +280,10 @@ export const GET = withErrorHandler(
         latitude: p.latitude ? p.latitude.toNumber() : null,
         longitude: p.longitude ? p.longitude.toNumber() : null,
         agentCommissionRate: p.agentCommissionRate ? p.agentCommissionRate.toNumber() : null,
-        coAgentCommissionRate: p.coAgentCommissionRate ? p.coAgentCommissionRate.toNumber() : null,
       };
 
       // INTELLIGENCE DATA - Only for internal agents
       if (isInternal) {
-        serialized.commissionRate = p.commissionRate ? p.commissionRate.toNumber() : null;
         serialized.commissionAmount = p.commissionAmount ? p.commissionAmount.toNumber() : null;
         serialized.pricePerSqm = p.pricePerSqm ? p.pricePerSqm.toNumber() : null;
         serialized.estimatedRentalYield = p.estimatedRentalYield ? p.estimatedRentalYield.toNumber() : null;
@@ -299,7 +297,6 @@ export const GET = withErrorHandler(
         serialized.lastIntelligenceUpdate = p.lastIntelligenceUpdate?.toISOString();
       } else {
         // Remove intelligence fields from public response
-        delete serialized.commissionRate;
         delete serialized.commissionAmount;
         delete serialized.pricePerSqm;
         delete serialized.estimatedRentalYield;
@@ -410,11 +407,9 @@ export const POST = withErrorHandler(
           }
         }),
         
-        // Commission (Restricted)
-        commissionRate: isInternal ? (body.commissionRate || null) : null,
-        commissionAmount: isInternal ? (body.commissionAmount || null) : null,
-        agentCommissionRate: body.agentCommissionRate || null, // All agents can set this
-        coAgentCommissionRate: body.coAgentCommissionRate || null, // All agents can set this
+        // Commission (Simple)
+        agentCommissionRate: body.agentCommissionRate || null, // Commission % offered to other agents
+        commissionAmount: body.commissionAmount || null, // OR fixed commission amount
         
         // Condo-specific
         floor: body.floor || null,

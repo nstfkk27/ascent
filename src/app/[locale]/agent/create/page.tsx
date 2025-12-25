@@ -71,7 +71,8 @@ export default function QuickDropPage() {
     // Dynamic Fields
     subtype: '', // houseType or investmentType
     condition: '', // Added condition
-    floors: 0,
+    floor: 0, // Condo: which floor the unit is on
+    floors: 0, // House: number of floors in the building
     parking: 0,
     furnished: false,
     projectName: '',
@@ -113,7 +114,7 @@ export default function QuickDropPage() {
   const shouldShowField = (fieldName: string) => {
     // If no subtype selected, show basic fields for category
     if (!formData.subtype) {
-      if (formData.category === 'CONDO') return ['bedrooms', 'bathrooms', 'size', 'floors', 'parking', 'furnished', 'projectName'].includes(fieldName);
+      if (formData.category === 'CONDO') return ['bedrooms', 'bathrooms', 'size', 'floor', 'parking', 'furnished', 'projectName'].includes(fieldName);
       if (formData.category === 'HOUSE') return ['bedrooms', 'bathrooms', 'size', 'floors', 'parking', 'furnished', 'projectName'].includes(fieldName);
       return ['size'].includes(fieldName); // Minimal for investment until subtype selected
     }
@@ -648,6 +649,20 @@ export default function QuickDropPage() {
                 </div>
               )}
 
+              {shouldShowField('floor') && (
+                <div className="col-span-1 md:col-span-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+                  <input 
+                    type="number" 
+                    name="floor"
+                    value={formData.floor}
+                    onChange={handleChange}
+                    placeholder="e.g., 12"
+                    className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                  />
+                </div>
+              )}
+
               {shouldShowField('floors') && (
                 <div className="col-span-1 md:col-span-1">
                   <label className="block text-sm font-medium text-gray-700 mb-1">Floors</label>
@@ -656,6 +671,7 @@ export default function QuickDropPage() {
                     name="floors"
                     value={formData.floors}
                     onChange={handleChange}
+                    placeholder="Number of floors"
                     className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   />
                 </div>
