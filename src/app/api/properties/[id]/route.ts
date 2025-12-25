@@ -14,7 +14,7 @@ import { sanitizePropertyData } from '@/lib/property-utils';
 import { generateUniqueSlug } from '@/utils/propertyHelpers';
 
 export const GET = withErrorHandler(
-  withAuth(async (req: NextRequest, { params }, { agent }) => {
+  async (req: NextRequest, { params }) => {
     let property = await prisma.property.findUnique({
       where: { id: params.id },
     });
@@ -34,10 +34,28 @@ export const GET = withErrorHandler(
       throw new NotFoundError('Property not found');
     }
 
+    // Check if user is authenticated (optional)
+    const supabase = (await import('@/utils/supabase/server')).createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let agent = null;
+    if (user?.email) {
+      agent = await prisma.agentProfile.findFirst({
+        where: {
+          email: {
+            equals: user.email,
+            mode: 'insensitive',
+          },
+        },
+      });
+    }
+
     const isInternal = agent ? isInternalAgent(agent.role) : false;
     const isAgent = agent?.role === 'AGENT';
 
+    // Hide sensitive commission data from non-authenticated or non-authorized users
     if (!isInternal) {
+      (property as any).commissionRate = null;
       (property as any).commissionAmount = null;
       
       if (!isAgent) {
@@ -49,10 +67,11 @@ export const GET = withErrorHandler(
       propertyId: property.id,
       agentId: agent?.id,
       role: agent?.role,
+      authenticated: !!user,
     });
     
     return successResponse(property);
-  }, { requireAgent: false })
+  }
 );
 
 export const PUT = withErrorHandler(
