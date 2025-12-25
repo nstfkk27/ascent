@@ -131,9 +131,34 @@ model Property {
   agentCommissionRate   Decimal?            @db.Decimal(5, 2) // Shared commission (visible to all agents)
   agentId               String?             // Listing agent
   
-  // Internal rental tracking (platform agents only)
+  // ============================================
+  // INTELLIGENCE DATA - Internal only (SUPER_ADMIN, PLATFORM_AGENT)
+  // ============================================
+  
+  // Calculated metrics (auto-computed)
+  pricePerSqm           Decimal?            @db.Decimal(12, 2)
+  estimatedRentalYield  Decimal?            @db.Decimal(5, 2)
+  
+  // Market intelligence
+  fairValueEstimate     Decimal?            @db.Decimal(12, 2)
+  priceDeviation        Decimal?            @db.Decimal(5, 2)
+  dealQuality           DealQuality?
+  
+  // Lead intelligence
+  viewCount             Int                 @default(0)
+  enquiryCount          Int                 @default(0)
+  leadScore             Int?
+  
+  // Internal operations
+  internalNotes         String?
+  lastIntelligenceUpdate DateTime?
   rentedUntil           DateTime?           // Lease end date
   availableFrom         DateTime?           // When property becomes available again
+  
+  // ============================================
+  // AI SEARCH (Future - Phase 2)
+  // ============================================
+  searchSummary         String?             // AI-generated keyword-rich summary
   
   deals                 Deal[]
   project               Project?            @relation(fields: [projectId], references: [id])
@@ -151,6 +176,9 @@ model Property {
   @@index([listingType])
   @@index([rentedUntil])
   @@index([availableFrom])
+  @@index([dealQuality])
+  @@index([leadScore])
+  @@index([pricePerSqm])
 }
 
 model Contact {
@@ -467,6 +495,14 @@ enum PostCategory {
   INVESTMENT
   LEGAL
   NEWS
+}
+
+enum DealQuality {
+  SUPER_DEAL      // >15% below fair value
+  GOOD_VALUE      // 5-15% below fair value
+  FAIR            // Within ±5% of fair value
+  OVERPRICED      // >5% above fair value
+  HIGH_YIELD      // Rental yield > 6%
 }
 
 // ============================================

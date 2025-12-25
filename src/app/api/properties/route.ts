@@ -12,6 +12,7 @@ import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
 import { generateReferenceId, generateUniqueSlug } from '@/utils/propertyHelpers';
+import { calculatePropertyIntelligence } from '@/lib/intelligence';
 
 export const dynamic = 'force-dynamic';
 
@@ -265,21 +266,55 @@ export const GET = withErrorHandler(
       })
     ]);
 
-    const serializedProperties = properties.map((p) => ({
-      ...p,
-      createdAt: p.createdAt.toISOString(),
-      updatedAt: p.updatedAt.toISOString(),
-      lastVerifiedAt: p.lastVerifiedAt.toISOString(),
-      price: p.price ? p.price.toNumber() : null,
-      rentPrice: p.rentPrice ? p.rentPrice.toNumber() : null,
-      monthlyRevenue: p.monthlyRevenue ? p.monthlyRevenue.toNumber() : null,
-      latitude: p.latitude ? p.latitude.toNumber() : null,
-      longitude: p.longitude ? p.longitude.toNumber() : null,
-      commissionRate: p.commissionRate ? p.commissionRate.toNumber() : null,
-      commissionAmount: p.commissionAmount ? p.commissionAmount.toNumber() : null,
-      agentCommissionRate: p.agentCommissionRate ? p.agentCommissionRate.toNumber() : null,
-      coAgentCommissionRate: p.coAgentCommissionRate ? p.coAgentCommissionRate.toNumber() : null,
-    }));
+    const isInternal = agent ? isInternalAgent(agent.role) : false;
+
+    const serializedProperties = properties.map((p) => {
+      const serialized: any = {
+        ...p,
+        createdAt: p.createdAt.toISOString(),
+        updatedAt: p.updatedAt.toISOString(),
+        lastVerifiedAt: p.lastVerifiedAt.toISOString(),
+        price: p.price ? p.price.toNumber() : null,
+        rentPrice: p.rentPrice ? p.rentPrice.toNumber() : null,
+        monthlyRevenue: p.monthlyRevenue ? p.monthlyRevenue.toNumber() : null,
+        latitude: p.latitude ? p.latitude.toNumber() : null,
+        longitude: p.longitude ? p.longitude.toNumber() : null,
+        agentCommissionRate: p.agentCommissionRate ? p.agentCommissionRate.toNumber() : null,
+        coAgentCommissionRate: p.coAgentCommissionRate ? p.coAgentCommissionRate.toNumber() : null,
+      };
+
+      // INTELLIGENCE DATA - Only for internal agents
+      if (isInternal) {
+        serialized.commissionRate = p.commissionRate ? p.commissionRate.toNumber() : null;
+        serialized.commissionAmount = p.commissionAmount ? p.commissionAmount.toNumber() : null;
+        serialized.pricePerSqm = p.pricePerSqm ? p.pricePerSqm.toNumber() : null;
+        serialized.estimatedRentalYield = p.estimatedRentalYield ? p.estimatedRentalYield.toNumber() : null;
+        serialized.fairValueEstimate = p.fairValueEstimate ? p.fairValueEstimate.toNumber() : null;
+        serialized.priceDeviation = p.priceDeviation ? p.priceDeviation.toNumber() : null;
+        serialized.dealQuality = p.dealQuality;
+        serialized.viewCount = p.viewCount;
+        serialized.enquiryCount = p.enquiryCount;
+        serialized.leadScore = p.leadScore;
+        serialized.internalNotes = p.internalNotes;
+        serialized.lastIntelligenceUpdate = p.lastIntelligenceUpdate?.toISOString();
+      } else {
+        // Remove intelligence fields from public response
+        delete serialized.commissionRate;
+        delete serialized.commissionAmount;
+        delete serialized.pricePerSqm;
+        delete serialized.estimatedRentalYield;
+        delete serialized.fairValueEstimate;
+        delete serialized.priceDeviation;
+        delete serialized.dealQuality;
+        delete serialized.viewCount;
+        delete serialized.enquiryCount;
+        delete serialized.leadScore;
+        delete serialized.internalNotes;
+        delete serialized.lastIntelligenceUpdate;
+      }
+
+      return serialized;
+    });
     
     return paginatedResponse(serializedProperties, page, limit, total);
   }, { requireAgent: false })
@@ -408,14 +443,35 @@ export const POST = withErrorHandler(
 
     const cleanData = sanitizePropertyData(rawData);
 
+    // Calculate intelligence data
+    const intelligence = await calculatePropertyIntelligence({
+      price: cleanData.price,
+      rentPrice: cleanData.rentPrice,
+      size: cleanData.size,
+      category: cleanData.category,
+      city: cleanData.city,
+      area: cleanData.area,
+      bedrooms: cleanData.bedrooms,
+    });
+
     const property = await prisma.property.create({
-      data: cleanData,
+      data: {
+        ...cleanData,
+        pricePerSqm: intelligence.pricePerSqm,
+        estimatedRentalYield: intelligence.estimatedRentalYield,
+        fairValueEstimate: intelligence.fairValueEstimate,
+        priceDeviation: intelligence.priceDeviation,
+        dealQuality: intelligence.dealQuality,
+        leadScore: intelligence.leadScore,
+        lastIntelligenceUpdate: new Date(),
+      },
     });
 
     logger.info('Property created', {
       propertyId: property.id,
       agentId: agent?.id,
       referenceId: property.referenceId,
+      dealQuality: property.dealQuality,
     });
 
     return successResponse(property, undefined, 201);
