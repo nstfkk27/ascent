@@ -125,6 +125,7 @@ model Property {
   area                  String?
   projectId             String?
   landZoneColor         LandZoneColor?
+  highlights            String[]            // Property & Area highlights (e.g., NEAR_BEACH, SEA_VIEW)
   
   // Commission Structure (Simple)
   agentCommissionRate   Decimal?            @db.Decimal(5, 2) // Commission % offered to other agents

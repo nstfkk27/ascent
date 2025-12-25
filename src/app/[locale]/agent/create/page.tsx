@@ -17,6 +17,7 @@ import {
   PROPERTY_CONDITIONS,
   PATTAYA_AREAS
 } from '@/lib/constants';
+import { PROPERTY_HIGHLIGHTS, HIGHLIGHT_CATEGORIES, getHighlightsByCategory } from '@/lib/highlights';
 
 const formatNumber = (num: number) => {
   if (!num) return '';
@@ -89,14 +90,15 @@ export default function QuickDropPage() {
     rentedUntil: '',
     availableFrom: '',
     
-    // Commission (SuperAdmin/Platform Agent)
-    commissionRate: 0,
+    // Commission (Simple structure)
     commissionAmount: 0,
     agentCommissionRate: 0,
-    coAgentCommissionRate: 0,
     
     // Amenities
     selectedAmenities: [] as string[],
+    
+    // Property & Area Highlights
+    selectedHighlights: [] as string[],
   });
 
   // Map View State (Separate from Pin Location to allow panning)
@@ -229,6 +231,17 @@ export default function QuickDropPage() {
     });
   };
 
+  const toggleHighlight = (highlightKey: string) => {
+    setFormData(prev => {
+      const current = prev.selectedHighlights;
+      if (current.includes(highlightKey)) {
+        return { ...prev, selectedHighlights: current.filter(key => key !== highlightKey) };
+      } else {
+        return { ...prev, selectedHighlights: [...current, highlightKey] };
+      }
+    });
+  };
+
   const validateForm = () => {
     const errors: string[] = [];
 
@@ -280,13 +293,14 @@ export default function QuickDropPage() {
     try {
       // Prepare payload based on category
       // Create a clean payload object, explicitly excluding UI-only fields
-      const { selectedAmenities, ...cleanFormData } = formData;
+      const { selectedAmenities, selectedHighlights, ...cleanFormData } = formData;
 
       const payload: any = {
         ...cleanFormData,
         projectId: formData.projectId || null,
         images: uploadedImages,
         amenities: {}, // Initialize amenities
+        highlights: formData.selectedHighlights, // Add highlights array
       };
 
       // Map amenities to JSON
@@ -750,19 +764,33 @@ export default function QuickDropPage() {
               {formData.category === 'HOUSE' && (
                 <div className="col-span-2 mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Unit Features</label>
-                  <p className="text-xs text-gray-500 mb-2">Features specific to this unit (not shared project facilities)</p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    {HOUSE_UNIT_FEATURES.map((item: { id: string; label: string }) => (
-                      <label key={item.id} className="flex items-center space-x-2 cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          checked={formData.selectedAmenities.includes(item.id)}
-                          onChange={() => toggleAmenity(item.id)}
-                          className="rounded text-blue-600 focus:ring-blue-500" 
-                        />
-                        <span className="text-sm text-gray-700">{item.label}</span>
-                      </label>
-                    ))}
+                  <p className="text-xs text-gray-500 mb-3">Features specific to this unit (not shared project facilities)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {HOUSE_UNIT_FEATURES.map((item: { id: string; label: string }) => {
+                      const isSelected = formData.selectedAmenities.includes(item.id);
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => toggleAmenity(item.id)}
+                          className={`
+                            inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                            transition-all duration-200 ease-in-out
+                            ${isSelected 
+                              ? 'bg-[#496f5d] text-white shadow-md hover:bg-[#3d5a4a]' 
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                            }
+                          `}
+                        >
+                          <span>{item.label}</span>
+                          {isSelected && (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -770,42 +798,40 @@ export default function QuickDropPage() {
               {formData.category === 'CONDO' && (
                 <div className="col-span-2 mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">Unit Features</label>
-                  <p className="text-xs text-gray-500 mb-2">Features specific to this unit (project facilities are inherited automatically)</p>
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    {CONDO_UNIT_FEATURES.map((item: { id: string; label: string }) => (
-                      <label key={item.id} className="flex items-center space-x-2 cursor-pointer">
-                        <input 
-                          type="checkbox" 
-                          checked={formData.selectedAmenities.includes(item.id)}
-                          onChange={() => toggleAmenity(item.id)}
-                          className="rounded text-blue-600 focus:ring-blue-500" 
-                        />
-                        <span className="text-sm text-gray-700">{item.label}</span>
-                      </label>
-                    ))}
+                  <p className="text-xs text-gray-500 mb-3">Features specific to this unit (project facilities are inherited automatically)</p>
+                  <div className="flex flex-wrap gap-2">
+                    {CONDO_UNIT_FEATURES.map((item: { id: string; label: string }) => {
+                      const isSelected = formData.selectedAmenities.includes(item.id);
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => toggleAmenity(item.id)}
+                          className={`
+                            inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                            transition-all duration-200 ease-in-out
+                            ${isSelected 
+                              ? 'bg-[#496f5d] text-white shadow-md hover:bg-[#3d5a4a]' 
+                              : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                            }
+                          `}
+                        >
+                          <span>{item.label}</span>
+                          {isSelected && (
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              {/* Boolean Features (Legacy / Investment) */}
-              <div className="col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
-                {shouldShowField('furnished') && (
-                  <label className="flex items-center space-x-2 cursor-pointer">
-                    <input 
-                      type="checkbox" 
-                      name="furnished"
-                      checked={formData.furnished}
-                      onChange={handleChange}
-                      className="rounded text-blue-600 focus:ring-blue-500" 
-                    />
-                    <span className="text-sm text-gray-700">Furnished</span>
-                  </label>
-                )}
-                
-                {/* Only show these if NOT covered by the new amenities section above */}
-                {/* Pool and Garden are now in amenities JSON only */}
-
-                {shouldShowField('conferenceRoom') && (
+              {/* Boolean Features (Investment only) */}
+              {formData.category === 'INVESTMENT' && shouldShowField('conferenceRoom') && (
+                <div className="col-span-2 mt-2">
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <input 
                       type="checkbox" 
@@ -816,8 +842,8 @@ export default function QuickDropPage() {
                     />
                     <span className="text-sm text-gray-700">Conference Room</span>
                   </label>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Description */}
               <div className="col-span-2">
@@ -830,6 +856,41 @@ export default function QuickDropPage() {
                   className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                   placeholder="Property description..."
                 ></textarea>
+              </div>
+
+              {/* Property & Area Highlights */}
+              <div className="col-span-2 pt-4 border-t">
+                <h3 className="text-md font-semibold text-gray-800 mb-3">Property & Area Highlights</h3>
+                <p className="text-xs text-gray-500 mb-4">Select highlights that make this property stand out</p>
+                
+                <div className="flex flex-wrap gap-2">
+                  {Object.entries(PROPERTY_HIGHLIGHTS).map(([key, highlight]) => {
+                    const isSelected = formData.selectedHighlights.includes(key);
+                    return (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleHighlight(key)}
+                        className={`
+                          inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
+                          transition-all duration-200 ease-in-out
+                          ${isSelected 
+                            ? 'bg-[#496f5d] text-white shadow-md hover:bg-[#3d5a4a]' 
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'
+                          }
+                        `}
+                      >
+                        <span className="text-base">{highlight.icon}</span>
+                        <span>{highlight.label}</span>
+                        {isSelected && (
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Photo Upload */}
@@ -923,94 +984,48 @@ export default function QuickDropPage() {
                 </div>
               </div>
 
-              {/* Commission Section - Different fields based on role */}
+              {/* Commission Section - Simplified */}
               <div className="col-span-2 pt-4 border-t">
                 <h3 className="text-md font-semibold text-gray-800 mb-3">Commission Details</h3>
                 
-                {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') ? (
-                  // Internal agents see both platform and agent commission
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Agent Commission Rate (%)
+                      {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') && (
+                        <span className="text-xs text-green-600 ml-2">- Visible to All Agents</span>
+                      )}
+                    </label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      name="agentCommissionRate"
+                      value={formData.agentCommissionRate}
+                      onChange={handleChange}
+                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                      placeholder="e.g. 3.0"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Commission % offered to agents</p>
+                  </div>
+                  
+                  {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Platform Commission Rate (%) <span className="text-xs text-gray-500">- Internal Only</span></label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="commissionRate"
-                        value={formData.commissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 3.0"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission from property owner</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Agent Commission Rate (%) <span className="text-xs text-green-600">- Visible to Agents</span></label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="agentCommissionRate"
-                        value={formData.agentCommissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 2.0"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission shared with agents</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Fixed Amount (THB)</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Fixed Commission Amount (THB)
+                        <span className="text-xs text-gray-500 ml-2">- Internal Only</span>
+                      </label>
                       <input 
                         type="number" 
                         name="commissionAmount"
                         value={formData.commissionAmount}
                         onChange={handleChange}
                         className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="Optional fixed amount"
+                        placeholder="Optional: Use fixed amount instead"
                       />
+                      <p className="text-xs text-gray-500 mt-1">Alternative to percentage</p>
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Share (%)</label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="coAgentCommissionRate"
-                        value={formData.coAgentCommissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 1.5"
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  // External agents only see agent commission rate
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Commission Rate (%) <span className="text-xs text-green-600">- Shared with Other Agents</span></label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="agentCommissionRate"
-                        value={formData.agentCommissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 2.0"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission you offer to other agents who help sell</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Share (%)</label>
-                      <input 
-                        type="number" 
-                        step="0.1"
-                        name="coAgentCommissionRate"
-                        value={formData.coAgentCommissionRate}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="e.g. 1.5"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Optional: Split with co-listing agent</p>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
                   <div className="col-span-2 mt-8 pt-6 border-t flex flex-col sm:flex-row gap-4 justify-center">
                 <button 

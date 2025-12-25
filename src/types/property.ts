@@ -76,6 +76,9 @@ export interface Property {
     [key: string]: any; // Allow other dynamic amenities
   } | null;
   
+  // Property & Area Highlights
+  highlights?: string[];
+  
   status: PropertyStatus;
   listingType: ListingType;
   images: string[];

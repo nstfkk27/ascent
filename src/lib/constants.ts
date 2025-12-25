@@ -101,6 +101,7 @@ export const SUBTYPE_FEATURES = {
 
 // --- HOUSE UNIT FEATURES ---
 export const HOUSE_UNIT_FEATURES = [
+  { id: 'furnished', label: 'Furnished' },
   { id: 'westernKitchen', label: 'Western Kitchen' },
   { id: 'thaiKitchen', label: 'Thai Kitchen' },
   { id: 'maidsRoom', label: "Maid's Room" },
@@ -114,6 +115,7 @@ export const HOUSE_UNIT_FEATURES = [
 
 // --- CONDO UNIT FEATURES ---
 export const CONDO_UNIT_FEATURES = [
+  { id: 'furnished', label: 'Furnished' },
   { id: 'seaView', label: 'Sea View' },
   { id: 'cityView', label: 'City View' },
   { id: 'poolView', label: 'Pool View' },

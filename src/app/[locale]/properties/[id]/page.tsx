@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Property } from '@/types/property';
 import PropertyActions from '@/components/property/PropertyActions';
 import { extractIdFromSlug } from '@/utils/propertyHelpers';
+import { PROPERTY_HIGHLIGHTS } from '@/lib/highlights';
 
 export default function PropertyDetailPage({ params }: { params: { id: string } }) {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -48,27 +49,45 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   useEffect(() => {
     async function fetchAgent() {
       if (!property?.agentId) {
-        console.log('No agentId found on property');
         return;
       }
       
-      console.log('Fetching agent:', property.agentId);
-      
       try {
         const response = await fetch(`/api/agents/${property.agentId}`);
+        
+        if (!response.ok) {
+          // Agent not found or deleted - use fallback
+          setAgent({
+            name: 'Ascent Property',
+            phone: null,
+            email: null,
+            lineId: null,
+          });
+          return;
+        }
+        
         const result = await response.json();
-        console.log('Agent API response:', result);
         
         if (result?.success && result.data) {
           const agentData = result.data.agent || result.data;
-          console.log('Setting agent data:', agentData);
           setAgent(agentData);
         } else {
-          console.log('Agent fetch failed:', result);
+          // Fallback to default
+          setAgent({
+            name: 'Ascent Property',
+            phone: null,
+            email: null,
+            lineId: null,
+          });
         }
       } catch (err) {
-        console.error('Error fetching agent:', err);
-        setAgent(null);
+        // Fallback to default on error
+        setAgent({
+          name: 'Ascent Property',
+          phone: null,
+          email: null,
+          lineId: null,
+        });
       }
     }
 
@@ -76,6 +95,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
       fetchAgent();
     }
   }, [property]);
+
   
   if (loading) {
     return (
@@ -191,12 +211,27 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
 
               <div className="mb-8 flex items-center justify-between">
                 <div>
-                  <span className="text-5xl font-bold text-[#496f5d]">
-                    ฿{Number(property.price).toLocaleString()}
-                  </span>
-                  <span className="text-xl text-gray-600 ml-2">
-                    {property.listingType === 'RENT' ? '/ month' : ''}
-                  </span>
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-5xl font-bold text-[#496f5d]">
+                      ฿{Number(property.price).toLocaleString()}
+                    </span>
+                    <span className="text-xl text-gray-600">
+                      {property.listingType === 'RENT' ? '/ month' : ''}
+                    </span>
+                  </div>
+                  {property.size && property.price && Number(property.size) > 0 && (
+                    <div className="mt-2 text-gray-600">
+                      <span className="text-lg font-semibold">
+                        ฿{(Number(property.price) / Number(property.size)).toLocaleString(undefined, { maximumFractionDigits: 0 })}/m²
+                      </span>
+                      <span className="text-sm text-gray-500 ml-2">per sqm</span>
+                    </div>
+                  )}
+                  {(!property.size || Number(property.size) === 0) && (
+                    <div className="mt-2 text-xs text-gray-400">
+                      (Size not specified)
+                    </div>
+                  )}
                 </div>
                 <PropertyActions propertyId={property.id} variant="default" showLabels={true} />
               </div>
@@ -597,14 +632,61 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               )}
             </div>
 
-            {/* Similar Listings */}
+            {/* Property & Area Highlights */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-[#49516f] mb-4">Similar Listings</h3>
-              <div className="space-y-4">
-                <p className="text-sm text-gray-500 text-center py-8">
-                  Similar properties will be displayed here
-                </p>
-              </div>
+              <h3 className="text-xl font-bold text-[#49516f] mb-4">Property & Area Highlights:</h3>
+              {property.highlights && property.highlights.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {property.highlights.map((highlightKey: string) => {
+                    const highlight = PROPERTY_HIGHLIGHTS[highlightKey as keyof typeof PROPERTY_HIGHLIGHTS];
+                    if (!highlight) return null;
+                    return (
+                      <div
+                        key={highlightKey}
+                        className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium border border-gray-300"
+                      >
+                        <span className="text-base">{highlight.icon}</span>
+                        <span>{highlight.label}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Fallback: Show location info if no highlights */}
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-[#496f5d] mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-700">Location</p>
+                      <p className="text-sm text-gray-600">
+                        {property.area && `${property.area}, `}{property.city}, {property.state}
+                      </p>
+                    </div>
+                  </div>
+
+                  {property.latitude && property.longitude && (
+                    <div className="flex items-start gap-3">
+                      <svg className="w-5 h-5 text-[#496f5d] mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                      </svg>
+                      <div>
+                        <p className="text-sm font-semibold text-gray-700">View on Map</p>
+                        <a 
+                          href={`https://www.google.com/maps?q=${property.latitude},${property.longitude}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-[#496f5d] hover:text-[#3d5a4a] font-semibold inline-block"
+                        >
+                          Open Google Maps →
+                        </a>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
