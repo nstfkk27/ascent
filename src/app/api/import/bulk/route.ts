@@ -266,8 +266,8 @@ export async function POST(request: NextRequest) {
             latitude: row.latitude ? parseFloat(row.latitude) : null,
             longitude: row.longitude ? parseFloat(row.longitude) : null,
             ownerContactDetails: row.owner_contact || null,
-            commissionRate: row.commission_rate ? parseFloat(row.commission_rate) : null,
             agentCommissionRate: row.agent_commission_rate ? parseFloat(row.agent_commission_rate) : null,
+            commissionAmount: row.commission_amount ? parseFloat(row.commission_amount) : null,
             images: images,
             projectId: projectId,
           }

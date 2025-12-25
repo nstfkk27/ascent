@@ -61,10 +61,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     rentPrice: prop.rentPrice ? serializeDecimal(prop.rentPrice) : null,
     latitude: prop.latitude ? serializeDecimal(prop.latitude) : null,
     longitude: prop.longitude ? serializeDecimal(prop.longitude) : null,
-    commissionRate: prop.commissionRate ? serializeDecimal(prop.commissionRate) : null,
     agentCommissionRate: prop.agentCommissionRate ? serializeDecimal(prop.agentCommissionRate) : null,
     commissionAmount: prop.commissionAmount ? serializeDecimal(prop.commissionAmount) : null,
-    coAgentCommissionRate: prop.coAgentCommissionRate ? serializeDecimal(prop.coAgentCommissionRate) : null,
     monthlyRevenue: prop.monthlyRevenue ? serializeDecimal(prop.monthlyRevenue) : null,
   }));
 

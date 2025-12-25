@@ -47,10 +47,8 @@ export const GET = withErrorHandler(
         ...deal.property,
         price: deal.property.price ? serializeDecimal(deal.property.price) : null,
         rentPrice: deal.property.rentPrice ? serializeDecimal(deal.property.rentPrice) : null,
-        commissionRate: deal.property.commissionRate ? serializeDecimal(deal.property.commissionRate) : null,
         agentCommissionRate: deal.property.agentCommissionRate ? serializeDecimal(deal.property.agentCommissionRate) : null,
         commissionAmount: deal.property.commissionAmount ? serializeDecimal(deal.property.commissionAmount) : null,
-        coAgentCommissionRate: deal.property.coAgentCommissionRate ? serializeDecimal(deal.property.coAgentCommissionRate) : null,
       },
     };
 

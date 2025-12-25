@@ -38,11 +38,9 @@ export const GET = withErrorHandler(
     const isAgent = agent?.role === 'AGENT';
 
     if (!isInternal) {
-      (property as any).commissionRate = null;
       (property as any).commissionAmount = null;
       
       if (!isAgent) {
-        (property as any).coAgentCommissionRate = null;
         (property as any).agentCommissionRate = null;
       }
     }
@@ -89,7 +87,6 @@ export const PUT = withErrorHandler(
     let updateData = { ...body };
 
     if (!isInternal) {
-      delete updateData.commissionRate;
       delete updateData.commissionAmount;
     }
 
