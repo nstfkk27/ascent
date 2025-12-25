@@ -17,11 +17,27 @@ import { calculatePropertyIntelligence } from '@/lib/intelligence';
 export const dynamic = 'force-dynamic';
 
 export const GET = withErrorHandler(
-  withAuth(async (req: NextRequest, context, { agent }) => {
+  async (req: NextRequest) => {
     const searchParams = req.nextUrl.searchParams;
     const { page, limit } = validatePagination(searchParams);
 
     const where: any = {};
+
+    // Check if user is authenticated (optional)
+    const supabase = (await import('@/utils/supabase/server')).createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    let agent = null;
+    if (user?.email) {
+      agent = await prisma.agentProfile.findFirst({
+        where: {
+          email: {
+            equals: user.email,
+            mode: 'insensitive',
+          },
+        },
+      });
+    }
 
     if (agent) {
       if (agent.role === 'AGENT' || agent.role === 'PLATFORM_AGENT') {
@@ -314,7 +330,7 @@ export const GET = withErrorHandler(
     });
     
     return paginatedResponse(serializedProperties, page, limit, total);
-  }, { requireAgent: false })
+  }
 );
 
 export const POST = withErrorHandler(

@@ -25,12 +25,17 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
         const response = await fetch(`/api/properties/${propertyId}`);
         const result = await response.json();
         
+        console.log('Property API response:', result);
+        
         if (result.success) {
+          console.log('Property data:', result.data);
+          console.log('Property agentId:', result.data?.agentId);
           setProperty(result.data);
         } else {
           setError('Property not found');
         }
       } catch (err) {
+        console.error('Error fetching property:', err);
         setError('Failed to load property');
       } finally {
         setLoading(false);
@@ -42,15 +47,27 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
 
   useEffect(() => {
     async function fetchAgent() {
-      if (!property?.agentId) return;
+      if (!property?.agentId) {
+        console.log('No agentId found on property');
+        return;
+      }
+      
+      console.log('Fetching agent:', property.agentId);
       
       try {
         const response = await fetch(`/api/agents/${property.agentId}`);
         const result = await response.json();
+        console.log('Agent API response:', result);
+        
         if (result?.success && result.data) {
-          setAgent(result.data);
+          const agentData = result.data.agent || result.data;
+          console.log('Setting agent data:', agentData);
+          setAgent(agentData);
+        } else {
+          console.log('Agent fetch failed:', result);
         }
       } catch (err) {
+        console.error('Error fetching agent:', err);
         setAgent(null);
       }
     }
@@ -166,28 +183,10 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
 
             {/* Property Details */}
             <div className="bg-white rounded-xl shadow-lg p-8">
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h1 className="text-4xl font-bold text-[#49516f] mb-2">{property.title}</h1>
-                  {property.referenceId && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-gray-500">Listing ID:</span>
-                      <span className="text-sm font-mono font-bold text-[#496f5d] bg-gray-100 px-3 py-1 rounded-full">
-                        {property.referenceId}
-                      </span>
-                    </div>
-                  )}
+                  <h1 className="text-4xl font-bold text-[#49516f]">{property.title}</h1>
                 </div>
-              </div>
-              
-              <div className="flex items-center gap-4 mb-6 text-gray-600">
-                <span className="flex items-center gap-2">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  {property.address}, {property.area ? `${property.area}, ` : ''}{property.city}, {property.state}
-                </span>
               </div>
 
               <div className="mb-8 flex items-center justify-between">

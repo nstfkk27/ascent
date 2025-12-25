@@ -12,12 +12,8 @@ import { logger } from '@/lib/logger';
 import { agentUpdateSchema } from '@/lib/validation/schemas';
 
 export const GET = withErrorHandler(
-  withAuth(async (req: NextRequest, { params }: { params: { id: string } }, { agent }) => {
-    if (!agent) {
-      throw new ValidationError('Agent not found');
-    }
-
-    logger.debug('Fetching agent by ID', { agentId: params.id, requestedBy: agent.id });
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
+    logger.debug('Fetching agent by ID', { agentId: params.id });
 
     const targetAgent = await prisma.agentProfile.findUnique({
       where: { id: params.id },
@@ -42,10 +38,10 @@ export const GET = withErrorHandler(
       throw new NotFoundError('Agent not found');
     }
 
-    logger.info('Agent fetched', { agentId: params.id, requestedBy: agent.id });
+    logger.info('Agent fetched', { agentId: params.id });
 
     return successResponse({ agent: targetAgent });
-  })
+  }
 );
 
 export const PUT = withErrorHandler(
