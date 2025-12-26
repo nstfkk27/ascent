@@ -46,7 +46,7 @@ export default function ContactPage() {
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">Email</h3>
-              <p className="text-gray-600">info@ascentrealestate.com</p>
+              <p className="text-gray-600">info@estateascent.com</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">Hours</h3>

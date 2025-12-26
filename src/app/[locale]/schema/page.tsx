@@ -8,7 +8,7 @@ export default function SchemaMap() {
       <div className="max-w-7xl mx-auto">
         
         <header className="mb-12 text-center">
-          <h1 className="text-4xl font-bold text-slate-800 mb-4">AscentWeb Database Schema Map</h1>
+          <h1 className="text-4xl font-bold text-slate-800 mb-4">Ascent Database Schema Map</h1>
           <p className="text-slate-600 max-w-2xl mx-auto">
             Visualizing the structure of the Property table and how different categories (House, Condo, Investment) 
             branch out with their specific fields and types.

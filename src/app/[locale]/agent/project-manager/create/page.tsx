@@ -287,22 +287,14 @@ export default function CreateProjectPage() {
                 <h3 className="text-lg font-medium text-gray-800 mb-4">Assets & Facilities</h3>
                 
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Project Cover Image</label>
-                  <div className="space-y-2">
-                    <input 
-                      name="imageUrl" 
-                      value={imageUrl}
-                      onChange={(e) => setImageUrl(e.target.value)}
-                      placeholder="https://.../image.jpg"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm text-gray-900"
-                    />
-                    <FileUpload 
-                      bucket="facilities" 
-                      accept="image/*" 
-                      label="Upload Cover Image" 
-                      onUploadComplete={(url) => setImageUrl(url)} 
-                    />
-                  </div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Project Cover Image</label>
+                  <FileUpload 
+                    bucket="facilities" 
+                    accept="image/*" 
+                    label="Upload Cover Image" 
+                    onUploadComplete={(url) => setImageUrl(url)} 
+                  />
+                  <input type="hidden" name="imageUrl" value={imageUrl} />
                   {imageUrl && (
                     <div className="mt-2 relative h-40 w-full rounded-lg overflow-hidden border border-gray-200">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -312,23 +304,15 @@ export default function CreateProjectPage() {
                 </div>
 
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">3D Model URL (.glb)</label>
-                  <div className="space-y-2">
-                    <input 
-                      name="glbUrl" 
-                      value={glbUrl}
-                      onChange={(e) => setGlbUrl(e.target.value)}
-                      placeholder="https://.../model.glb"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm text-gray-900"
-                    />
-                    <FileUpload 
-                      bucket="models" 
-                      accept=".glb" 
-                      label="Or upload .glb file" 
-                      onUploadComplete={(url) => setGlbUrl(url)} 
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500 mt-1">Optional. You can add this later.</p>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">3D Model (.glb)</label>
+                  <FileUpload 
+                    bucket="models" 
+                    accept=".glb" 
+                    label="Upload .glb file" 
+                    onUploadComplete={(url) => setGlbUrl(url)} 
+                  />
+                  <input type="hidden" name="glbUrl" value={glbUrl} />
+                  <p className="text-xs text-gray-500 mt-2">Optional. You can add this later.</p>
                 </div>
 
                 <div className="mt-6">
@@ -375,23 +359,18 @@ export default function CreateProjectPage() {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Facility Image URL (Optional)</label>
-                        <input
-                          type="text"
-                          id="facilityImageUrl"
-                          placeholder="https://.../facility.jpg"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-sm font-mono"
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Facility Image (Optional)</label>
+                        <input type="hidden" id="facilityImageUrl" />
+                        <FileUpload
+                          bucket="facilities"
+                          accept="image/*"
+                          label="Upload Facility Image"
+                          onUploadComplete={(url) => {
+                            const input = document.getElementById('facilityImageUrl') as HTMLInputElement;
+                            if (input) input.value = url;
+                          }}
                         />
                       </div>
-                      <FileUpload
-                        bucket="facilities"
-                        accept="image/*"
-                        label="Or Upload Facility Image"
-                        onUploadComplete={(url) => {
-                          const input = document.getElementById('facilityImageUrl') as HTMLInputElement;
-                          if (input) input.value = url;
-                        }}
-                      />
                       <button
                         type="button"
                         onClick={() => {

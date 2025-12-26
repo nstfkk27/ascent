@@ -2,7 +2,7 @@ import { MetadataRoute } from 'next';
 import { prisma } from '@/lib/prisma';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.estateascent.com';
+  const baseUrl = 'https://estateascent.com';
 
   try {
     // Fetch all available properties

@@ -58,7 +58,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
         if (!response.ok) {
           // Agent not found or deleted - use fallback
           setAgent({
-            name: 'Ascent Property',
+            name: 'Ascent',
             phone: null,
             email: null,
             lineId: null,
@@ -74,7 +74,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
         } else {
           // Fallback to default
           setAgent({
-            name: 'Ascent Property',
+            name: 'Ascent',
             phone: null,
             email: null,
             lineId: null,
@@ -83,7 +83,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
       } catch (err) {
         // Fallback to default on error
         setAgent({
-          name: 'Ascent Property',
+          name: 'Ascent',
           phone: null,
           email: null,
           lineId: null,
@@ -571,7 +571,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               
               {agent && (
                 <div className="mb-6">
-                  <p className="text-base font-bold text-[#49516f] mb-1">{agent.name || 'Ascent Property'}</p>
+                  <p className="text-base font-bold text-[#49516f] mb-1">{agent.name || 'Ascent'}</p>
                   {agent.phone && (
                     <p className="text-sm text-gray-600">{agent.phone}</p>
                   )}

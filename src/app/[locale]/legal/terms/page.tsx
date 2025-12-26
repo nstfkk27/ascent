@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Terms of Service | Ascent Real Estate',
-  description: 'Terms and Conditions for using Ascent Real Estate services.',
+  title: 'Terms of Service | Ascent',
+  description: 'Terms and Conditions for using Ascent services.',
 };
 
 export default function TermsOfService() {
@@ -14,7 +14,7 @@ export default function TermsOfService() {
       <section className="mb-8">
         <h2>1. Agreement to Terms</h2>
         <p>
-          These Terms of Service constitute a legally binding agreement made between you, whether personally or on behalf of an entity (&quot;you&quot;) and Ascent Real Estate (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), concerning your access to and use of the ascent-realestate.com website as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto (collectively, the &quot;Site&quot;).
+          These Terms of Service constitute a legally binding agreement made between you, whether personally or on behalf of an entity (&quot;you&quot;) and Ascent (&quot;we,&quot; &quot;us,&quot; or &quot;our&quot;), concerning your access to and use of the estateascent.com website as well as any other media form, media channel, mobile website or mobile application related, linked, or otherwise connected thereto (collectively, the &quot;Site&quot;).
         </p>
       </section>
 
@@ -46,7 +46,7 @@ export default function TermsOfService() {
       <section className="mb-8">
         <h2>5. Contact Us</h2>
         <p>
-          In order to resolve a complaint regarding the Site or to receive further information regarding use of the Site, please contact us at info@ascent-realestate.com.
+          In order to resolve a complaint regarding the Site or to receive further information regarding use of the Site, please contact us at info@estateascent.com.
         </p>
       </section>
     </article>

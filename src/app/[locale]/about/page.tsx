@@ -1,10 +1,10 @@
 export default function AboutPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-4xl font-bold mb-6">About Ascent Real Estate</h1>
+      <h1 className="text-4xl font-bold mb-6">About Ascent</h1>
       <div className="prose max-w-none">
         <p className="text-lg text-gray-700 mb-4">
-          Welcome to Ascent Real Estate, your trusted partner in finding the perfect property.
+          Welcome to Ascent, your trusted partner in finding the perfect property.
           With years of experience in the real estate industry, we are committed to helping
           you discover your dream home or investment property.
         </p>

@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy | Ascent Real Estate',
-  description: 'Privacy Policy for Ascent Real Estate - How we handle your data.',
+  title: 'Privacy Policy | Ascent',
+  description: 'Privacy Policy for Ascent - How we handle your data.',
 };
 
 export default function PrivacyPolicy() {
@@ -14,7 +14,7 @@ export default function PrivacyPolicy() {
       <section className="mb-8">
         <h2>1. Introduction</h2>
         <p>
-          Welcome to Ascent Real Estate (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website ascent-realestate.com.
+          Welcome to Ascent (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website estateascent.com.
         </p>
       </section>
 
@@ -47,10 +47,10 @@ export default function PrivacyPolicy() {
       <section className="mb-8">
         <h2>4. Contact Us</h2>
         <p>
-          If you have questions or comments about this policy, you may email us at info@ascent-realestate.com or by post to:
+          If you have questions or comments about this policy, you may email us at info@estateascent.com or by post to:
         </p>
         <address className="not-italic mt-4 bg-gray-50 p-4 rounded-lg">
-          Ascent Real Estate<br />
+          Ascent<br />
           Pattaya City, Bang Lamung District<br />
           Chon Buri 20150, Thailand
         </address>

@@ -12,19 +12,13 @@ export default function ImageUrlInput({ defaultValue = '' }: ImageUrlInputProps)
 
   return (
     <div className="space-y-2">
-      <input 
-        name="imageUrl" 
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://.../image.jpg"
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm text-gray-900"
-      />
       <FileUpload 
         bucket="facilities" 
         accept="image/*" 
-        label="Or upload image" 
+        label="Upload image" 
         onUploadComplete={(newUrl) => setUrl(newUrl)} 
       />
+      <input type="hidden" name="imageUrl" value={url} />
       {url && (
         <div className="mt-2 relative h-40 w-full rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
           {/* eslint-disable-next-line @next/next/no-img-element */}

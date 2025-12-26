@@ -5,22 +5,22 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Estate Ascent - Pattaya Real Estate | Property for Sale & Rent in Thailand",
+  title: "Ascent - Pattaya Real Estate | Property for Sale & Rent in Thailand",
   description: "Find your dream property in Pattaya, Jomtien & Thailand. Browse condos, houses, land & investment properties. Expert agents, best prices, virtual tours. Start your property search today!",
-  metadataBase: new URL('https://www.estateascent.com'),
+  metadataBase: new URL('https://estateascent.com'),
   keywords: ['Pattaya property', 'Pattaya real estate', 'Jomtien condo', 'Thailand property for sale', 'Pattaya condo for rent', 'property investment Thailand', 'expat property Pattaya'],
-  authors: [{ name: 'Estate Ascent' }],
+  authors: [{ name: 'Ascent' }],
   openGraph: {
-    title: 'Estate Ascent - Pattaya Real Estate',
+    title: 'Ascent - Pattaya Real Estate',
     description: 'Find your dream property in Pattaya & Thailand. Condos, houses, land & investment properties.',
-    url: 'https://www.estateascent.com',
-    siteName: 'Estate Ascent',
+    url: 'https://estateascent.com',
+    siteName: 'Ascent',
     locale: 'en_US',
     type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Estate Ascent - Pattaya Real Estate',
+    title: 'Ascent - Pattaya Real Estate',
     description: 'Find your dream property in Pattaya & Thailand',
   },
   robots: {

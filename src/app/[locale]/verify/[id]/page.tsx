@@ -55,7 +55,7 @@ export default async function VerifyPage({ params }: { params: { id: string } })
         </div>
 
         <p className="text-xs text-gray-400 mt-8">
-          This link was sent to verify the status of your listing on AscentWeb.
+          This link was sent to verify the status of your listing on Ascent.
         </p>
       </div>
     </div>

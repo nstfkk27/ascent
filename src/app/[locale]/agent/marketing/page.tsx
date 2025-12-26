@@ -96,7 +96,7 @@ ${p.description.substring(0, 200)}...
 
 📞 Contact us for viewing!
 Tel: 0xx-xxx-xxxx
-Line: @ascentweb
+Line: @ascent
 
 #PattayaRealEstate #PattayaProperty #ThailandRealEstate #${p.category}Pattaya`;
   }, []);
