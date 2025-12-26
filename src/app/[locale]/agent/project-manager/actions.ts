@@ -77,6 +77,12 @@ export async function updateProject(id: string, formData: FormData) {
   const totalFloors = formData.get('totalFloors') ? parseInt(formData.get('totalFloors') as string) : null;
   const totalBuildings = formData.get('totalBuildings') ? parseInt(formData.get('totalBuildings') as string) : null;
   const imageUrl = formData.get('imageUrl') as string;
+  const address = formData.get('address') as string;
+  const city = formData.get('city') as string;
+  const latStr = formData.get('lat') as string;
+  const lngStr = formData.get('lng') as string;
+  const lat = latStr ? parseFloat(latStr) : undefined;
+  const lng = lngStr ? parseFloat(lngStr) : undefined;
 
   // Update basic info
   await prisma.project.update({
@@ -90,6 +96,10 @@ export async function updateProject(id: string, formData: FormData) {
       totalFloors,
       totalBuildings,
       imageUrl: imageUrl || null,
+      ...(address && { address }),
+      ...(city && { city }),
+      ...(lat !== undefined && { lat }),
+      ...(lng !== undefined && { lng }),
     }
   });
 
