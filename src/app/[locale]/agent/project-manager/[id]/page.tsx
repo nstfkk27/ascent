@@ -7,6 +7,7 @@ import ModelUrlInput from '@/components/agent/ModelUrlInput';
 import AddFacilityForm from '@/components/agent/AddFacilityForm';
 import ImageUrlInput from '@/components/agent/ImageUrlInput';
 import DeleteProjectButton from '@/components/agent/DeleteProjectButton';
+import ProjectLocationEditor from '@/components/agent/ProjectLocationEditor';
 
 export const dynamic = 'force-dynamic';
 
@@ -114,6 +115,16 @@ export default async function EditProjectPage({ params }: { params: { id: string
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                 />
               </div>
+            </div>
+
+            <div className="pt-4 border-t border-gray-100">
+              <h3 className="text-lg font-medium text-gray-800 mb-4">Location</h3>
+              <ProjectLocationEditor 
+                defaultLat={Number(project.lat)}
+                defaultLng={Number(project.lng)}
+                defaultAddress={project.address}
+                defaultCity={project.city}
+              />
             </div>
 
             <div className="pt-4 border-t border-gray-100">
