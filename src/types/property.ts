@@ -42,9 +42,8 @@ export interface Property {
   conferenceRoom?: boolean | null;
   
   // Commission Info
-  commissionRate?: number | null;
   commissionAmount?: number | null;
-  coAgentCommissionRate?: number | null;
+  agentCommissionRate?: number | null;
   
   // Common features (House & Condo)
   bedrooms?: number | null;

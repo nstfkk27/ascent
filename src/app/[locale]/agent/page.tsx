@@ -827,6 +827,22 @@ export default function AgentDashboard() {
               </div>
               <ChevronRight className="w-5 h-5 text-gray-400" />
             </Link>
+
+            <Link 
+              href="/agent/pois"
+              className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-2xl shadow-sm border border-teal-200 p-5 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex items-center justify-between"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-teal-500 flex items-center justify-center">
+                  <Wrench className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-[#49516f]">POI Management</h4>
+                  <p className="text-sm text-gray-600">Points of Interest</p>
+                </div>
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </Link>
           </div>
         </div>
       )}

@@ -1,8 +1,12 @@
 import { prisma } from '@/lib/prisma';
 import HomeClient from '@/components/HomeClient';
 import { PropertyCategory, ListingType, PropertyStatus, HouseType, InvestmentType } from '@prisma/client';
+import { Metadata } from 'next';
+import { generateSearchMetadata } from '@/utils/seo/generateMetadata';
 
 export const dynamic = 'force-dynamic'; // Ensure fresh data
+
+export const metadata: Metadata = generateSearchMetadata();
 
 interface HomeProps {
   searchParams: {
@@ -217,7 +221,38 @@ export default async function Home({ searchParams }: HomeProps) {
     }
 
     const standaloneProperties = await prisma.property.findMany({
-      where: safeStandaloneWhere
+      where: safeStandaloneWhere,
+      select: {
+        id: true,
+        slug: true,
+        referenceId: true,
+        title: true,
+        description: true,
+        price: true,
+        rentPrice: true,
+        address: true,
+        city: true,
+        state: true,
+        category: true,
+        listingType: true,
+        status: true,
+        images: true,
+        bedrooms: true,
+        bathrooms: true,
+        size: true,
+        floor: true,
+        houseType: true,
+        investmentType: true,
+        projectName: true,
+        latitude: true,
+        longitude: true,
+        createdAt: true,
+        updatedAt: true,
+        lastVerifiedAt: true,
+        monthlyRevenue: true,
+        commissionAmount: true,
+        agentCommissionRate: true,
+      }
     });
 
     // --- 3. Serialize Projects ---

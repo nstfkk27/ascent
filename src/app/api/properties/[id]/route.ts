@@ -12,6 +12,8 @@ import { logger } from '@/lib/logger';
 import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
 import { generateUniqueSlug } from '@/utils/propertyHelpers';
+import { updatePropertyPOIDistances } from '@/lib/poi-distance';
+import { updatePropertyIntelligence } from '@/lib/property-scoring';
 
 export const GET = withErrorHandler(
   async (req: NextRequest, { params }) => {
@@ -177,6 +179,35 @@ export const PUT = withErrorHandler(
       propertyId: params.id,
       agentId: agent.id,
     });
+
+    // Recalculate POI distances if coordinates were updated
+    if (body.latitude !== undefined || body.longitude !== undefined) {
+      if (property.latitude && property.longitude) {
+        try {
+          await updatePropertyPOIDistances(
+            property.id,
+            Number(property.latitude),
+            Number(property.longitude)
+          );
+          logger.info('POI distances recalculated', { propertyId: property.id });
+        } catch (error) {
+          logger.warn('Failed to recalculate POI distances', { propertyId: property.id, error });
+        }
+      }
+    }
+
+    // Recalculate scores if price, size, rent, or location changed
+    const scoreRelevantFields = ['price', 'rentPrice', 'size', 'latitude', 'longitude', 'area', 'projectId'];
+    const shouldRecalculateScores = scoreRelevantFields.some(field => body[field] !== undefined);
+    
+    if (shouldRecalculateScores) {
+      try {
+        await updatePropertyIntelligence(property.id);
+        logger.info('Property scores recalculated', { propertyId: property.id });
+      } catch (error) {
+        logger.warn('Failed to recalculate property scores', { propertyId: property.id, error });
+      }
+    }
     
     return successResponse(property);
   })

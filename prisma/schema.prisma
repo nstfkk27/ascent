@@ -157,9 +157,36 @@ model Property {
   availableFrom         DateTime?           // When property becomes available again
   
   // ============================================
-  // AI SEARCH (Future - Phase 2)
+  // AI SEARCH & LOCATION INTELLIGENCE
   // ============================================
   searchSummary         String?             // AI-generated keyword-rich summary
+  
+  // Nearest POI distances (auto-calculated from PropertyPOIDistance)
+  subArea               String?             // "Jomtien Beach", "Walking Street Area"
+  nearestBeachKm        Decimal?            @db.Decimal(5, 2)
+  nearestBeachName      String?
+  nearestMallKm         Decimal?            @db.Decimal(5, 2)
+  nearestMallName       String?
+  nearestHospitalKm     Decimal?            @db.Decimal(5, 2)
+  nearestHospitalName   String?
+  nearestSchoolKm       Decimal?            @db.Decimal(5, 2)
+  nearestSchoolName     String?
+  
+  // Market comparison context
+  projectAvgPricePerSqm Decimal?            @db.Decimal(12, 2)
+  areaAvgPricePerSqm    Decimal?            @db.Decimal(12, 2)
+  priceVsProjectAvg     Decimal?            @db.Decimal(5, 2)  // -15 = 15% below project avg
+  priceVsAreaAvg        Decimal?            @db.Decimal(5, 2)  // -10 = 10% below area avg
+  
+  // Quality scoring (0-100)
+  locationScore         Int?
+  valueScore            Int?
+  investmentScore       Int?
+  overallScore          Int?
+  
+  // AI-generated tags
+  keyFeatures           String[]            // ["Sea view", "Below market", "High yield"]
+  targetBuyer           String[]            // ["Investor", "Retiree", "Family"]
   
   deals                 Deal[]
   project               Project?            @relation(fields: [projectId], references: [id])
@@ -180,6 +207,12 @@ model Property {
   @@index([dealQuality])
   @@index([leadScore])
   @@index([pricePerSqm])
+  @@index([subArea])
+  @@index([nearestBeachKm])
+  @@index([nearestMallKm])
+  @@index([priceVsAreaAvg])
+  @@index([overallScore])
+  @@index([investmentScore])
 }
 
 model Contact {
@@ -600,4 +633,150 @@ enum NotificationType {
   PROPERTY_UPDATE
   SYSTEM
   MARKETING
+}
+
+// ============================================
+// POINTS OF INTEREST - For AI distance-based queries
+// ============================================
+model PointOfInterest {
+  id          String      @id @default(uuid())
+  name        String
+  nameTh      String?
+  type        POIType
+  tier        POITier     @default(PRIMARY)
+  latitude    Decimal     @db.Decimal(10, 8)
+  longitude   Decimal     @db.Decimal(11, 8)
+  city        String
+  area        String?
+  metadata    Json?
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  
+  distances   PropertyPOIDistance[]
+  
+  @@index([type])
+  @@index([tier])
+  @@index([city])
+  @@index([latitude, longitude])
+}
+
+enum POIType {
+  BEACH
+  HOSPITAL
+  INTERNATIONAL_SCHOOL
+  THAI_SCHOOL
+  SHOPPING_MALL
+  SUPERMARKET
+  CONVENIENCE_STORE
+  BTS_STATION
+  MRT_STATION
+  AIRPORT
+  GOLF_COURSE
+  PARK
+  RESTAURANT_AREA
+  NIGHTLIFE
+  GYM
+  TEMPLE
+  IMMIGRATION
+  EMBASSY
+}
+
+enum POITier {
+  PRIMARY    // Major landmarks for search filters
+  SECONDARY  // Convenience info only
+}
+
+// ============================================
+// PRE-CALCULATED DISTANCES - For fast filtering
+// ============================================
+model PropertyPOIDistance {
+  id          String           @id @default(uuid())
+  propertyId  String
+  poiId       String
+  poiType     POIType
+  distanceKm  Decimal          @db.Decimal(6, 3)
+  walkingMins Int?
+  drivingMins Int?
+  
+  poi         PointOfInterest  @relation(fields: [poiId], references: [id], onDelete: Cascade)
+  
+  @@unique([propertyId, poiId])
+  @@index([propertyId])
+  @@index([poiType])
+  @@index([distanceKm])
+}
+
+// ============================================
+// USER ACTIVITY TRACKING - For AI personalization
+// ============================================
+model UserActivity {
+  id          String         @id @default(uuid())
+  userId      String?
+  sessionId   String
+  eventType   UserEventType
+  propertyId  String?
+  searchQuery String?
+  metadata    Json?
+  createdAt   DateTime       @default(now())
+  
+  @@index([userId])
+  @@index([sessionId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+enum UserEventType {
+  SEARCH
+  VIEW_LISTING
+  VIEW_GALLERY
+  CLICK_CONTACT
+  ADD_WISHLIST
+  COMPARE
+  SHARE
+  ENQUIRY_SUBMIT
+  FILTER_APPLY
+  SORT_CHANGE
+}
+
+// ============================================
+// USER PREFERENCES - Inferred from behavior
+// ============================================
+model UserPreference {
+  id                   String            @id @default(uuid())
+  userId               String            @unique
+  preferredCategory    PropertyCategory?
+  preferredCities      String[]
+  preferredPriceMin    Decimal?          @db.Decimal(12, 2)
+  preferredPriceMax    Decimal?          @db.Decimal(12, 2)
+  preferredBedrooms    Int?
+  preferredAmenities   String[]
+  buyerType            BuyerType?
+  alertsEnabled        Boolean           @default(false)
+  updatedAt            DateTime          @updatedAt
+}
+
+enum BuyerType {
+  INVESTOR
+  END_USER
+  RETIREE
+  FAMILY
+  DIGITAL_NOMAD
+}
+
+// ============================================
+// SEARCH LOGS - For ML training
+// ============================================
+model SearchLog {
+  id            String    @id @default(uuid())
+  query         String
+  userId        String?
+  sessionId     String
+  resultsCount  Int
+  clickedIds    String[]
+  convertedId   String?
+  filters       Json?
+  createdAt     DateTime  @default(now())
+  
+  @@index([createdAt])
+  @@index([userId])
 }

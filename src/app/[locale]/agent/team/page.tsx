@@ -14,6 +14,8 @@ export default function TeamManagementPage() {
     email: '',
     imageUrl: '',
     phone: '',
+    whatsapp: '',
+    lineId: '',
   });
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function TeamManagementPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setFormData({ name: '', role: '', email: '', imageUrl: '', phone: '' });
+        setFormData({ name: '', role: '', email: '', imageUrl: '', phone: '', whatsapp: '', lineId: '' });
         setEditingId(null);
         fetchAgents();
       }
@@ -64,6 +66,8 @@ export default function TeamManagementPage() {
       email: agent.email || '',
       imageUrl: agent.imageUrl || '',
       phone: agent.phone || '',
+      whatsapp: agent.whatsapp || '',
+      lineId: agent.lineId || '',
     });
   };
 
@@ -129,6 +133,27 @@ export default function TeamManagementPage() {
                 value={formData.phone}
                 onChange={e => setFormData({...formData, phone: e.target.value})}
                 className="w-full p-2 border rounded text-gray-900 placeholder-gray-600"
+                placeholder="+66812345678"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+              <input
+                type="text"
+                value={formData.whatsapp}
+                onChange={e => setFormData({...formData, whatsapp: e.target.value})}
+                className="w-full p-2 border rounded text-gray-900 placeholder-gray-600"
+                placeholder="+66812345678"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Line ID</label>
+              <input
+                type="text"
+                value={formData.lineId}
+                onChange={e => setFormData({...formData, lineId: e.target.value})}
+                className="w-full p-2 border rounded text-gray-900 placeholder-gray-600"
+                placeholder="@lineid"
               />
             </div>
             <div>

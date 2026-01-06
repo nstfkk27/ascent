@@ -7,6 +7,7 @@ import { Property } from '@/types/property';
 import PropertyActions from '@/components/property/PropertyActions';
 import { extractIdFromSlug } from '@/utils/propertyHelpers';
 import { PROPERTY_HIGHLIGHTS } from '@/lib/highlights';
+import NearbyPOIs from '@/components/property/NearbyPOIs';
 
 export default function PropertyDetailPage({ params }: { params: { id: string } }) {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -14,6 +15,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [agent, setAgent] = useState<any>(null);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   
   useEffect(() => {
     async function fetchProperty() {
@@ -43,7 +45,21 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
       }
     }
     
+    // Fetch current user profile
+    async function fetchCurrentUser() {
+      try {
+        const res = await fetch('/api/agent/me');
+        if (res.ok) {
+          const data = await res.json();
+          setCurrentUser(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch current user', error);
+      }
+    }
+    
     fetchProperty();
+    fetchCurrentUser();
   }, [params.id]);
 
   useEffect(() => {
@@ -236,33 +252,34 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                 <PropertyActions propertyId={property.id} variant="default" showLabels={true} />
               </div>
 
-              {/* Commission Section (Visible only to authorized agents) */}
-              {(property.commissionRate || property.commissionAmount || property.coAgentCommissionRate) && (
+              {/* Commission Section - Role-based visibility */}
+              {currentUser && (property.agentCommissionRate || property.commissionAmount) && (
                 <div className="mb-8 bg-blue-50 border border-blue-100 rounded-xl p-5">
                   <div className="flex items-center gap-2 mb-3">
-                    <span className="text-xl">🛡️</span>
-                    <h3 className="text-lg font-bold text-blue-900">Agent Commission</h3>
+                    <span className="text-xl">💰</span>
+                    <h3 className="text-lg font-bold text-blue-900">
+                      {currentUser.id === property.agentId ? 'Your Commission Sharing' : 'Commission Available'}
+                    </h3>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {property.commissionRate && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {property.agentCommissionRate && property.agentCommissionRate > 0 && (
                       <div className="bg-white p-3 rounded-lg shadow-sm border border-blue-100">
-                        <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider mb-1">Full Rate</p>
-                        <p className="text-2xl font-bold text-blue-900">{property.commissionRate}%</p>
+                        <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider mb-1">Share Rate</p>
+                        <p className="text-2xl font-bold text-blue-900">{property.agentCommissionRate}%</p>
                       </div>
                     )}
-                    {property.commissionAmount && (
+                    {property.commissionAmount && property.commissionAmount > 0 && (
                       <div className="bg-white p-3 rounded-lg shadow-sm border border-blue-100">
                         <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider mb-1">Fixed Amount</p>
                         <p className="text-2xl font-bold text-blue-900">฿{Number(property.commissionAmount).toLocaleString()}</p>
                       </div>
                     )}
-                    {property.coAgentCommissionRate && (
-                      <div className="bg-white p-3 rounded-lg shadow-sm border border-blue-100">
-                        <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider mb-1">Co-Agent Share</p>
-                        <p className="text-2xl font-bold text-blue-900">{property.coAgentCommissionRate}%</p>
-                      </div>
-                    )}
                   </div>
+                  {currentUser.id !== property.agentId && (
+                    <p className="text-xs text-blue-700 mt-3">
+                      💡 This listing offers commission sharing. Contact the listing agent to collaborate.
+                    </p>
+                  )}
                 </div>
               )}
 
@@ -634,9 +651,11 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
 
             {/* Property & Area Highlights */}
             <div className="bg-white rounded-xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-[#49516f] mb-4">Property & Area Highlights:</h3>
-              {property.highlights && property.highlights.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
+              <h3 className="text-xl font-bold text-[#49516f] mb-4">Property & Area Highlights</h3>
+              
+              {/* Highlights Tags */}
+              {property.highlights && property.highlights.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
                   {property.highlights.map((highlightKey: string) => {
                     const highlight = PROPERTY_HIGHLIGHTS[highlightKey as keyof typeof PROPERTY_HIGHLIGHTS];
                     if (!highlight) return null;
@@ -651,42 +670,50 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                     );
                   })}
                 </div>
-              ) : (
-                <div className="space-y-4">
-                  {/* Fallback: Show location info if no highlights */}
-                  <div className="flex items-start gap-3">
-                    <svg className="w-5 h-5 text-[#496f5d] mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <div>
-                      <p className="text-sm font-semibold text-gray-700">Location</p>
-                      <p className="text-sm text-gray-600">
-                        {property.area && `${property.area}, `}{property.city}, {property.state}
-                      </p>
-                    </div>
-                  </div>
+              )}
 
-                  {property.latitude && property.longitude && (
-                    <div className="flex items-start gap-3">
-                      <svg className="w-5 h-5 text-[#496f5d] mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                      </svg>
-                      <div>
-                        <p className="text-sm font-semibold text-gray-700">View on Map</p>
-                        <a 
-                          href={`https://www.google.com/maps?q=${property.latitude},${property.longitude}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-[#496f5d] hover:text-[#3d5a4a] font-semibold inline-block"
-                        >
-                          Open Google Maps →
-                        </a>
-                      </div>
-                    </div>
-                  )}
+              {/* Nearby POIs */}
+              {property.id && (
+                <div className="mb-6">
+                  <h4 className="text-lg font-semibold text-[#49516f] mb-3">📍 Nearby Places</h4>
+                  <NearbyPOIs propertyId={property.id} />
                 </div>
               )}
+
+              {/* Location Info */}
+              <div className="space-y-4 pt-4 border-t border-gray-100">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-[#496f5d] mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700">Location</p>
+                    <p className="text-sm text-gray-600">
+                      {property.area && `${property.area}, `}{property.city}, {property.state}
+                    </p>
+                  </div>
+                </div>
+
+                {property.latitude && property.longitude && (
+                  <div className="flex items-start gap-3">
+                    <svg className="w-5 h-5 text-[#496f5d] mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                    </svg>
+                    <div>
+                      <p className="text-sm font-semibold text-gray-700">View on Map</p>
+                      <a 
+                        href={`https://www.google.com/maps?q=${property.latitude},${property.longitude}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-[#496f5d] hover:text-[#3d5a4a] font-semibold inline-block"
+                      >
+                        Open Google Maps →
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

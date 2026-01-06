@@ -33,6 +33,7 @@ export interface SearchFilters {
   area: string;
   minSize: string;
   maxSize: string;
+  tag?: string;
   // Special filters
   newProject: boolean;
   // Features
@@ -169,6 +170,7 @@ export default function SearchFilters({ onSearch, initialFilters }: SearchFilter
     if (filters.seaView) count++;
     return count;
   };
+
 
   // Clear all filters
   const clearFilters = () => {
@@ -560,6 +562,7 @@ export default function SearchFilters({ onSearch, initialFilters }: SearchFilter
               </div>
             </>
           )}
+
         </div>
       )}
     </div>

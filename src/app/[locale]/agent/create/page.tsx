@@ -90,9 +90,9 @@ export default function QuickDropPage() {
     rentedUntil: '',
     availableFrom: '',
     
-    // Commission (Simple structure)
-    commissionAmount: 0,
-    agentCommissionRate: 0,
+    // Commission Sharing (Optional - for co-agents)
+    agentCommissionRate: 0, // Share % to co-agents
+    commissionAmount: 0, // OR fixed amount to share
     
     // Amenities
     selectedAmenities: [] as string[],
@@ -392,22 +392,15 @@ export default function QuickDropPage() {
     <div className="max-w-4xl mx-auto px-6">
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">Quick-Drop Listing Engine</h1>
-          <p className="text-gray-600">Paste details or enter manually. AI parsing is optional.</p>
-        </div>
-        <button 
-          onClick={handleExportExcel}
-          className="flex items-center gap-2 px-6 py-3 bg-[#496f5d] text-white rounded-lg font-semibold hover:bg-[#3d5a4a] transition-colors"
-        >
-          Download CSV
-        </button>
+          <h1 className="text-3xl font-bold text-gray-800">Create Listing</h1>
+        </div>    
       </div>
 
       <div>
         {/* Form Section */}      
         <div>
           <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">Listing Details</h2>
+            <h2 className="text-xl font-semibold text-gray-800 mb-6 border-b pb-2">Details</h2>
             
             <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
               <div className="col-span-2">
@@ -984,17 +977,17 @@ export default function QuickDropPage() {
                 </div>
               </div>
 
-              {/* Commission Section - Simplified */}
+              {/* Commission Sharing - Optional */}
               <div className="col-span-2 pt-4 border-t">
-                <h3 className="text-md font-semibold text-gray-800 mb-3">Commission Details</h3>
+                <h3 className="text-md font-semibold text-gray-800 mb-3">
+                  Commission Sharing
+                  <span className="text-xs text-gray-500 font-normal ml-2">(Optional - visible to agents only)</span>
+                </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Agent Commission Rate (%)
-                      {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') && (
-                        <span className="text-xs text-green-600 ml-2">- Visible to All Agents</span>
-                      )}
+                      Share Commission (%)
                     </label>
                     <input 
                       type="number" 
@@ -1005,26 +998,23 @@ export default function QuickDropPage() {
                       className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
                       placeholder="e.g. 3.0"
                     />
-                    <p className="text-xs text-gray-500 mt-1">Commission % offered to agents</p>
+                    <p className="text-xs text-gray-500 mt-1">% you&apos;re willing to share with co-agents</p>
                   </div>
                   
-                  {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Fixed Commission Amount (THB)
-                        <span className="text-xs text-gray-500 ml-2">- Internal Only</span>
-                      </label>
-                      <input 
-                        type="number" 
-                        name="commissionAmount"
-                        value={formData.commissionAmount}
-                        onChange={handleChange}
-                        className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
-                        placeholder="Optional: Use fixed amount instead"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Alternative to percentage</p>
-                    </div>
-                  )}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Fixed Amount (THB)
+                    </label>
+                    <input 
+                      type="number" 
+                      name="commissionAmount"
+                      value={formData.commissionAmount}
+                      onChange={handleChange}
+                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                      placeholder="e.g. 50000"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Share fix amount to co-agents</p>
+                  </div>
                 </div>
               </div>
                   <div className="col-span-2 mt-8 pt-6 border-t flex flex-col sm:flex-row gap-4 justify-center">

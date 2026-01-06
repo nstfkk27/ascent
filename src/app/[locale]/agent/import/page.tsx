@@ -19,8 +19,8 @@ export default function ImportPage() {
   };
 
   const handleImport = async () => {
-    if (!files.projects) {
-      alert('Please upload at least the Projects CSV file');
+    if (!files.projects && !files.facilities && !files.units) {
+      alert('Please upload at least one CSV file');
       return;
     }
 
@@ -28,7 +28,7 @@ export default function ImportPage() {
     setResult(null);
 
     const formData = new FormData();
-    formData.append('projects', files.projects);
+    if (files.projects) formData.append('projects', files.projects);
     if (files.facilities) formData.append('facilities', files.facilities);
     if (files.units) formData.append('units', files.units);
 

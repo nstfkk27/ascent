@@ -13,6 +13,8 @@ import { prisma } from '@/lib/prisma';
 import { sanitizePropertyData } from '@/lib/property-utils';
 import { generateReferenceId, generateUniqueSlug } from '@/utils/propertyHelpers';
 import { calculatePropertyIntelligence } from '@/lib/intelligence';
+import { updatePropertyPOIDistances } from '@/lib/poi-distance';
+import { updatePropertyIntelligence } from '@/lib/property-scoring';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,10 +41,31 @@ export const GET = withErrorHandler(
       });
     }
 
+    // Role-based filtering for agent listings
     if (agent) {
-      if (agent.role === 'AGENT' || agent.role === 'PLATFORM_AGENT') {
-        where.agentId = agent.id;
+      if (agent.role === 'AGENT') {
+        // Regular agents can only see:
+        // 1. Their own listings
+        // 2. Other agents' listings that have commission sharing (coAgentCommissionRate > 0 OR commissionAmount > 0)
+        where.OR = [
+          { agentId: agent.id }, // Own listings
+          { 
+            AND: [
+              { agentId: { not: agent.id } }, // Not their own
+              {
+                OR: [
+                  { agentCommissionRate: { gt: 0 } }, // Has % sharing
+                  { commissionAmount: { gt: 0 } } // Has fixed amount sharing
+                ]
+              }
+            ]
+          }
+        ];
+      } else if (agent.role === 'PLATFORM_AGENT') {
+        // Platform agents see all listings (no filter)
+        // They can manage everything
       }
+      // SUPER_ADMIN also sees all listings (no filter)
     }
     
     const category = searchParams.get('category');
@@ -181,12 +204,29 @@ export const GET = withErrorHandler(
       }
     }
 
+    // Distance-based filters (using pre-calculated fields on Property)
+    const nearBeach = searchParams.get('nearBeach');
+    if (nearBeach) {
+      where.nearestBeachKm = { lte: parseFloat(nearBeach) };
+    }
+
+    const nearMall = searchParams.get('nearMall');
+    if (nearMall) {
+      where.nearestMallKm = { lte: parseFloat(nearMall) };
+    }
+
+    const nearHospital = searchParams.get('nearHospital');
+    if (nearHospital) {
+      where.nearestHospitalKm = { lte: parseFloat(nearHospital) };
+    }
+
     // Dynamic Feature filters
     const knownParams = [
       'category', 'houseType', 'investmentType', 'listingType', 
       'city', 'area', 'minPrice', 'maxPrice', 'bedrooms', 'featured', 'status',
       'page', 'limit', 'query', 'staffRange', 'equipmentIncluded',
-      'landZoneColor', 'tag', 'minSize', 'maxSize'
+      'landZoneColor', 'tag', 'minSize', 'maxSize',
+      'nearBeach', 'nearMall', 'nearHospital'
     ];
     
     const skip = (page - 1) * limit;
@@ -484,6 +524,28 @@ export const POST = withErrorHandler(
       referenceId: property.referenceId,
       dealQuality: property.dealQuality,
     });
+
+    // Calculate POI distances if property has coordinates
+    if (property.latitude && property.longitude) {
+      try {
+        await updatePropertyPOIDistances(
+          property.id,
+          Number(property.latitude),
+          Number(property.longitude)
+        );
+        logger.info('POI distances calculated', { propertyId: property.id });
+      } catch (error) {
+        logger.warn('Failed to calculate POI distances', { propertyId: property.id, error });
+      }
+    }
+
+    // Calculate property scores (location, value, investment)
+    try {
+      await updatePropertyIntelligence(property.id);
+      logger.info('Property scores calculated', { propertyId: property.id });
+    } catch (error) {
+      logger.warn('Failed to calculate property scores', { propertyId: property.id, error });
+    }
 
     return successResponse(property, undefined, 201);
   })

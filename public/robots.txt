@@ -7,4 +7,5 @@ Disallow: /en/agent/
 Disallow: /th/agent/
 
 # Sitemap
+Sitemap: https://estateascent.com/sitemap.xml
 Sitemap: https://www.estateascent.com/sitemap.xml

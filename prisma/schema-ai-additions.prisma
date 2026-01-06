@@ -1,0 +1,190 @@
+// ============================================
+// AI-READINESS SCHEMA ADDITIONS
+// Copy these to your main schema.prisma when ready
+// ============================================
+
+// ============================================
+// POINTS OF INTEREST - For distance-based queries
+// ============================================
+model PointOfInterest {
+  id          String      @id @default(uuid())
+  name        String
+  nameTh      String?
+  type        POIType
+  tier        POITier     @default(PRIMARY)  // PRIMARY = major landmarks, SECONDARY = convenience
+  latitude    Decimal     @db.Decimal(10, 8)
+  longitude   Decimal     @db.Decimal(11, 8)
+  city        String
+  area        String?
+  metadata    Json?       // { "rating": 4.5, "googlePlaceId": "xxx" }
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  
+  distances   PropertyPOIDistance[]
+  
+  @@index([type])
+  @@index([tier])
+  @@index([city])
+  @@index([latitude, longitude])
+}
+
+// POI Importance Tier
+enum POITier {
+  PRIMARY    // Major landmarks: main beaches, major hospitals, int'l schools
+  SECONDARY  // Convenience: 7-Eleven, small clinics, local restaurants
+}
+
+enum POIType {
+  BEACH
+  HOSPITAL
+  INTERNATIONAL_SCHOOL
+  THAI_SCHOOL
+  SHOPPING_MALL
+  SUPERMARKET
+  CONVENIENCE_STORE
+  BTS_STATION
+  MRT_STATION
+  AIRPORT
+  GOLF_COURSE
+  PARK
+  RESTAURANT_AREA
+  NIGHTLIFE
+  GYM
+  TEMPLE
+  IMMIGRATION
+  EMBASSY
+}
+
+// ============================================
+// PRE-CALCULATED DISTANCES - For fast filtering
+// ============================================
+model PropertyPOIDistance {
+  id          String           @id @default(uuid())
+  propertyId  String
+  poiId       String
+  poiType     POIType
+  distanceKm  Decimal          @db.Decimal(6, 3)
+  walkingMins Int?
+  drivingMins Int?
+  
+  poi         PointOfInterest  @relation(fields: [poiId], references: [id], onDelete: Cascade)
+  
+  @@unique([propertyId, poiId])
+  @@index([propertyId])
+  @@index([poiType])
+  @@index([distanceKm])
+}
+
+// ============================================
+// USER ACTIVITY TRACKING - For personalization
+// ============================================
+model UserActivity {
+  id          String         @id @default(uuid())
+  userId      String?
+  sessionId   String
+  eventType   UserEventType
+  propertyId  String?
+  searchQuery String?
+  metadata    Json?
+  createdAt   DateTime       @default(now())
+  
+  @@index([userId])
+  @@index([sessionId])
+  @@index([eventType])
+  @@index([createdAt])
+}
+
+enum UserEventType {
+  SEARCH
+  VIEW_LISTING
+  VIEW_GALLERY
+  CLICK_CONTACT
+  ADD_WISHLIST
+  COMPARE
+  SHARE
+  ENQUIRY_SUBMIT
+  FILTER_APPLY
+  SORT_CHANGE
+}
+
+// ============================================
+// USER PREFERENCES - Inferred from behavior
+// ============================================
+model UserPreference {
+  id                   String            @id @default(uuid())
+  userId               String            @unique
+  preferredCategory    PropertyCategory?
+  preferredCities      String[]
+  preferredPriceMin    Decimal?          @db.Decimal(12, 2)
+  preferredPriceMax    Decimal?          @db.Decimal(12, 2)
+  preferredBedrooms    Int?
+  preferredAmenities   String[]
+  buyerType            BuyerType?
+  alertsEnabled        Boolean           @default(false)
+  updatedAt            DateTime          @updatedAt
+}
+
+enum BuyerType {
+  INVESTOR
+  END_USER
+  RETIREE
+  FAMILY
+  DIGITAL_NOMAD
+}
+
+// ============================================
+// SEARCH LOGS - For ML training
+// ============================================
+model SearchLog {
+  id            String    @id @default(uuid())
+  query         String
+  userId        String?
+  sessionId     String
+  resultsCount  Int
+  clickedIds    String[]
+  convertedId   String?
+  filters       Json?
+  createdAt     DateTime  @default(now())
+  
+  @@index([createdAt])
+  @@index([userId])
+}
+
+// ============================================
+// ADD THESE FIELDS TO EXISTING Property MODEL
+// ============================================
+// 
+// // AI-Ready Location Data (stores NEAREST of each type)
+// subArea               String?             // "Jomtien Beach", "Walking Street Area"
+// nearestBeachKm        Decimal?            @db.Decimal(5, 2)  // Min distance to any PRIMARY beach
+// nearestBeachName      String?             // "Jomtien Beach" - which beach is nearest
+// nearestMallKm         Decimal?            @db.Decimal(5, 2)
+// nearestMallName       String?
+// nearestHospitalKm     Decimal?            @db.Decimal(5, 2)
+// nearestHospitalName   String?
+// nearestSchoolKm       Decimal?            @db.Decimal(5, 2)
+// nearestSchoolName     String?
+// 
+// // Market Context
+// projectAvgPricePerSqm Decimal?            @db.Decimal(12, 2)
+// areaAvgPricePerSqm    Decimal?            @db.Decimal(12, 2)
+// priceVsProjectAvg     Decimal?            @db.Decimal(5, 2)
+// priceVsAreaAvg        Decimal?            @db.Decimal(5, 2)
+// 
+// // Quality Scoring (0-100)
+// locationScore         Int?
+// valueScore            Int?
+// investmentScore       Int?
+// overallScore          Int?
+// 
+// // AI-Generated
+// keyFeatures           String[]
+// targetBuyer           String[]
+//
+// // Add indexes
+// @@index([nearestBeachKm])
+// @@index([nearestBtsKm])
+// @@index([priceVsAreaAvg])
+// @@index([overallScore])
+// @@index([investmentScore])
+// @@index([subArea])

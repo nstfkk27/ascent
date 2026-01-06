@@ -26,10 +26,22 @@ interface PropertyCardProps {
     projectName?: string | null;
     updatedAt?: string;
     lastVerifiedAt?: string;
+    // Scoring fields
+    dealQuality?: string | null;
+    overallScore?: number | null;
+    locationScore?: number | null;
+    valueScore?: number | null;
+    investmentScore?: number | null;
+    estimatedRentalYield?: number | null;
+    keyFeatures?: string[];
+    // Commission fields
+    agentCommissionRate?: number | null;
+    commissionAmount?: number | null;
   };
+  showScores?: boolean;
 }
 
-export default function PropertyCard({ property }: PropertyCardProps) {
+export default function PropertyCard({ property, showScores = true }: PropertyCardProps) {
   const getUpdatedLabel = () => {
     const ts = property.updatedAt || property.lastVerifiedAt;
     if (!ts) return null;
@@ -77,10 +89,28 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
           
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 flex flex-col gap-1 items-end">
             <span className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-premium backdrop-blur-sm ${getCategoryColor(property.category)}`}>
               {property.category}
             </span>
+            {showScores && property.dealQuality && property.dealQuality !== 'FAIR' && (
+              <span className={`px-2 py-1 rounded-full text-xs font-bold shadow-sm ${
+                property.dealQuality === 'SUPER_DEAL' ? 'bg-green-500 text-white' :
+                property.dealQuality === 'GOOD_VALUE' ? 'bg-emerald-400 text-white' :
+                property.dealQuality === 'HIGH_YIELD' ? 'bg-amber-500 text-white' :
+                'bg-red-400 text-white'
+              }`}>
+                {property.dealQuality === 'SUPER_DEAL' ? '🔥 Super Deal' :
+                 property.dealQuality === 'GOOD_VALUE' ? '✓ Good Value' :
+                 property.dealQuality === 'HIGH_YIELD' ? '📈 High Yield' :
+                 '⚠️ Overpriced'}
+              </span>
+            )}
+            {(property.agentCommissionRate && property.agentCommissionRate > 0) || (property.commissionAmount && property.commissionAmount > 0) ? (
+              <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-blue-500 text-white backdrop-blur-sm">
+                💰 Commission
+              </span>
+            ) : null}
           </div>
           <div className="absolute top-4 left-4">
             <span className="glass px-3 py-1.5 rounded-full text-xs font-bold text-gray-700 shadow-soft">
@@ -124,6 +154,24 @@ export default function PropertyCard({ property }: PropertyCardProps) {
           </p>
 
           <div className="mb-4 pb-4 border-b border-gray-100">
+            {/* Score badges */}
+            {showScores && property.overallScore && property.overallScore > 0 && (
+              <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-1" title={`Overall Score: ${property.overallScore}/100`}>
+                  <div className={`w-2 h-2 rounded-full ${
+                    property.overallScore >= 75 ? 'bg-green-500' :
+                    property.overallScore >= 50 ? 'bg-yellow-500' :
+                    'bg-red-500'
+                  }`}></div>
+                  <span className="text-xs font-medium text-gray-500">{property.overallScore}</span>
+                </div>
+                {property.estimatedRentalYield && property.estimatedRentalYield > 0 && (
+                  <span className="text-xs text-gray-500" title="Estimated Rental Yield">
+                    {property.estimatedRentalYield.toFixed(1)}% yield
+                  </span>
+                )}
+              </div>
+            )}
             {property.listingType === 'BOTH' ? (
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
