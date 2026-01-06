@@ -25,10 +25,6 @@ export interface MapFilters {
   furnished: boolean;
   pool: boolean;
   seaView: boolean;
-  // Distance-based filters
-  nearBeach: string; // max km from beach
-  nearMall: string;  // max km from mall
-  nearHospital: string; // max km from hospital
 }
 
 interface MapSearchProps {
@@ -101,9 +97,6 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
     if (filters.furnished) count++;
     if (filters.pool) count++;
     if (filters.seaView) count++;
-    if (filters.nearBeach) count++;
-    if (filters.nearMall) count++;
-    if (filters.nearHospital) count++;
     return count;
   };
 
@@ -468,48 +461,6 @@ export default function MapSearch({ filters, onFilterChange, onSearchSubmit, isC
                 </>
               )}
 
-              {/* Distance Filters - Always show when advanced is open */}
-              <div className="pt-2 border-t border-gray-100">
-                <p className="text-xs font-medium text-gray-500 mb-2">📍 Distance from POI</p>
-                <div className="grid grid-cols-3 gap-2">
-                  <div>
-                    <label className="text-xs text-gray-500 mb-1 block">🏖️ Beach</label>
-                    <select
-                      value={filters.nearBeach || ''}
-                      onChange={(e) => handleChange('nearBeach', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      {distanceOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500 mb-1 block">🛒 Mall</label>
-                    <select
-                      value={filters.nearMall || ''}
-                      onChange={(e) => handleChange('nearMall', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      {distanceOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-xs text-gray-500 mb-1 block">🏥 Hospital</label>
-                    <select
-                      value={filters.nearHospital || ''}
-                      onChange={(e) => handleChange('nearHospital', e.target.value)}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-2 py-2 text-xs text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    >
-                      {distanceOptions.map((opt) => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-              </div>
             </div>
           )}
       </div>

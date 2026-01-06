@@ -38,9 +38,6 @@ export default function HomeClient({ projects }: HomeClientProps) {
     furnished: searchParams.get('furnished') === 'true',
     pool: searchParams.get('pool') === 'true',
     seaView: searchParams.get('seaView') === 'true',
-    nearBeach: searchParams.get('nearBeach') || '',
-    nearMall: searchParams.get('nearMall') || '',
-    nearHospital: searchParams.get('nearHospital') || '',
   });
 
   // Debounce URL updates to avoid excessive history entries
