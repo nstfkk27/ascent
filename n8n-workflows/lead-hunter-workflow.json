@@ -1,0 +1,261 @@
+{
+  "name": "Lead Hunter - Facebook to Platform",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 */2 9-21 * * *"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Every 2 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "actorId": "apify/facebook-groups-scraper",
+        "waitForFinish": true,
+        "options": {
+          "build": "latest"
+        }
+      },
+      "name": "Apify - Facebook Scraper",
+      "type": "n8n-nodes-base.apify",
+      "typeVersion": 1,
+      "position": [450, 300],
+      "credentials": {
+        "apifyApi": {
+          "id": "1",
+          "name": "Apify API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.text}}",
+              "operation": "contains",
+              "value2": "@"
+            }
+          ]
+        },
+        "combineOperation": "any"
+      },
+      "name": "Filter - Has Contact Info",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "model": "gpt-4-turbo-preview",
+        "messages": {
+          "values": [
+            {
+              "role": "system",
+              "content": "You are a real estate lead extraction AI. Extract structured data from Facebook posts about property inquiries in Thailand.\n\nExtract the following information:\n1. Name (if mentioned)\n2. Email (if mentioned)\n3. Phone number (Thai format: +66 or 0)\n4. Budget (in THB, convert millions to numbers)\n5. Property category (CONDO, HOUSE, LAND, or INVESTMENT)\n6. Number of bedrooms (if mentioned)\n7. Preferred area (Pattaya, Jomtien, Naklua, etc.)\n8. Listing type (SALE or RENT)\n\nIf information is not mentioned, use null.\n\nFor budget:\n- \"5 million\" = 5000000\n- \"5M\" = 5000000\n- \"5-8 million\" = budgetMin: 5000000, budgetMax: 8000000\n\nOutput ONLY valid JSON in this exact format:\n{\n  \"name\": \"string or null\",\n  \"email\": \"string or null\",\n  \"phone\": \"string or null\",\n  \"budgetMin\": number or null,\n  \"budgetMax\": number or null,\n  \"category\": \"CONDO|HOUSE|LAND|INVESTMENT or null\",\n  \"bedrooms\": number or null,\n  \"area\": \"string or null\",\n  \"listingType\": \"SALE|RENT or null\",\n  \"confidence\": 0.0-1.0\n}"
+            },
+            {
+              "role": "user",
+              "content": "Extract lead data from this Facebook post:\n\n={{$json.text}}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "name": "OpenAI - Extract Lead Data",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1,
+      "position": [850, 200],
+      "credentials": {
+        "openAiApi": {
+          "id": "2",
+          "name": "OpenAI API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "const aiResponse = $input.item.json.choices[0].message.content;\nconst lead = JSON.parse(aiResponse);\n\n// Skip low confidence leads\nif (lead.confidence < 0.6) {\n  return null;\n}\n\n// Must have contact info\nif (!lead.phone && !lead.email) {\n  return null;\n}\n\nreturn {\n  json: {\n    ...lead,\n    source: $('Apify - Facebook Scraper').item.json.url,\n    originalPost: $('Apify - Facebook Scraper').item.json.text,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "name": "Parse & Validate Lead",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "sheetId": "YOUR_SHEET_ID",
+        "range": "A:O",
+        "options": {
+          "valueInputMode": "USER_ENTERED"
+        },
+        "columns": {
+          "mappings": [
+            {"from": "timestamp", "to": "A"},
+            {"from": "source", "to": "B"},
+            {"from": "originalPost", "to": "C"},
+            {"from": "name", "to": "D"},
+            {"from": "email", "to": "E"},
+            {"from": "phone", "to": "F"},
+            {"from": "budgetMin", "to": "G"},
+            {"from": "category", "to": "H"},
+            {"from": "bedrooms", "to": "I"},
+            {"from": "area", "to": "J"},
+            {"from": "listingType", "to": "K"},
+            {"from": "NEW", "to": "L"}
+          ]
+        }
+      },
+      "name": "Google Sheets - Store Lead",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 2,
+      "position": [1250, 200],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "3",
+          "name": "Google Sheets"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "https://estateascent.com/api/n8n/properties/match",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "minBudget", "value": "={{$json.budgetMin}}"},
+            {"name": "maxBudget", "value": "={{$json.budgetMax}}"},
+            {"name": "category", "value": "={{$json.category}}"},
+            {"name": "bedrooms", "value": "={{$json.bedrooms}}"},
+            {"name": "area", "value": "={{$json.area}}"},
+            {"name": "listingType", "value": "={{$json.listingType}}"},
+            {"name": "limit", "value": "5"}
+          ]
+        },
+        "options": {}
+      },
+      "name": "API - Match Properties",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1450, 200],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4",
+          "name": "Platform API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{$json.count}}",
+              "operation": "larger",
+              "value2": 0
+            }
+          ]
+        }
+      },
+      "name": "IF - Has Matches",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1650, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://estateascent.com/api/n8n/enquiries",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {"name": "name", "value": "={{$('Parse & Validate Lead').item.json.name}}"},
+            {"name": "email", "value": "={{$('Parse & Validate Lead').item.json.email}}"},
+            {"name": "phone", "value": "={{$('Parse & Validate Lead').item.json.phone}}"},
+            {"name": "message", "value": "Lead from Facebook: {{$('Parse & Validate Lead').item.json.originalPost.substring(0, 200)}}"},
+            {"name": "channel", "value": "FACEBOOK"}
+          ]
+        },
+        "options": {}
+      },
+      "name": "API - Create Enquiry",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1850, 100],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "4",
+          "name": "Platform API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "phoneNumber": "={{$env.AGENT_PHONE}}",
+        "message": "🎯 New Lead from Facebook!\n\n👤 Name: {{$('Parse & Validate Lead').item.json.name}}\n📧 Email: {{$('Parse & Validate Lead').item.json.email}}\n📱 Phone: {{$('Parse & Validate Lead').item.json.phone}}\n💰 Budget: ฿{{$('Parse & Validate Lead').item.json.budgetMin?.toLocaleString()}} - ฿{{$('Parse & Validate Lead').item.json.budgetMax?.toLocaleString()}}\n🏠 Looking for: {{$('Parse & Validate Lead').item.json.category}} in {{$('Parse & Validate Lead').item.json.area}}\n\n✅ {{$('API - Match Properties').item.json.count}} properties matched!\n\nTop matches:\n{{$('API - Match Properties').item.json.properties.slice(0,3).map(p => `• ${p.title} - ฿${p.price.toLocaleString()}`).join('\\n')}}\n\n📋 Enquiry: {{$('API - Create Enquiry').item.json.enquiry.enquiryNumber}}\n🔗 View: https://estateascent.com/agent/enquiries"
+      },
+      "name": "WhatsApp - Notify Agent",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [2050, 100],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "5",
+          "name": "WhatsApp Business"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Every 2 Hours": {
+      "main": [[{"node": "Apify - Facebook Scraper", "type": "main", "index": 0}]]
+    },
+    "Apify - Facebook Scraper": {
+      "main": [[{"node": "Filter - Has Contact Info", "type": "main", "index": 0}]]
+    },
+    "Filter - Has Contact Info": {
+      "main": [[{"node": "OpenAI - Extract Lead Data", "type": "main", "index": 0}]]
+    },
+    "OpenAI - Extract Lead Data": {
+      "main": [[{"node": "Parse & Validate Lead", "type": "main", "index": 0}]]
+    },
+    "Parse & Validate Lead": {
+      "main": [[{"node": "Google Sheets - Store Lead", "type": "main", "index": 0}]]
+    },
+    "Google Sheets - Store Lead": {
+      "main": [[{"node": "API - Match Properties", "type": "main", "index": 0}]]
+    },
+    "API - Match Properties": {
+      "main": [[{"node": "IF - Has Matches", "type": "main", "index": 0}]]
+    },
+    "IF - Has Matches": {
+      "main": [
+        [{"node": "API - Create Enquiry", "type": "main", "index": 0}],
+        []
+      ]
+    },
+    "API - Create Enquiry": {
+      "main": [[{"node": "WhatsApp - Notify Agent", "type": "main", "index": 0}]]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
