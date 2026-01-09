@@ -15,6 +15,7 @@ interface Property {
   size?: number;
   city?: string;
   lastVerifiedAt: string;
+  ownerContactDetails?: string;
 }
 
 export default function MyListingsPage() {
@@ -192,6 +193,7 @@ export default function MyListingsPage() {
                 <th className="px-6 py-4 text-left font-medium">Beds</th>
                 <th className="px-6 py-4 text-left font-medium">Size</th>
                 <th className="px-6 py-4 text-left font-medium">Location</th>
+                <th className="px-6 py-4 text-left font-medium">Owner Contact</th>
                 <th className="px-6 py-4 text-left font-medium">Status</th>
                 <th className="px-6 py-4 text-left font-medium">Freshness</th>
                 <th className="px-6 py-4 text-right font-medium">Actions</th>
@@ -199,7 +201,7 @@ export default function MyListingsPage() {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {loading ? (
-                <tr><td colSpan={9} className="text-center py-8 text-gray-400">Loading...</td></tr>
+                <tr><td colSpan={10} className="text-center py-8 text-gray-400">Loading...</td></tr>
               ) : (Array.isArray(properties) ? properties : []).map((property) => {
                 const freshness = getFreshnessStatus(property.lastVerifiedAt);
                 return (
@@ -234,6 +236,9 @@ export default function MyListingsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-gray-600 text-sm">{property.city || '-'}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-gray-700 text-sm">{property.ownerContactDetails || '-'}</span>
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${

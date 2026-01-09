@@ -351,6 +351,7 @@ export const GET = withErrorHandler(
         serialized.leadScore = p.leadScore;
         serialized.internalNotes = p.internalNotes;
         serialized.lastIntelligenceUpdate = p.lastIntelligenceUpdate?.toISOString();
+        serialized.ownerContactDetails = p.ownerContactDetails; // Internal only
       } else {
         // Remove intelligence fields from public response
         delete serialized.commissionAmount;
@@ -364,6 +365,7 @@ export const GET = withErrorHandler(
         delete serialized.leadScore;
         delete serialized.internalNotes;
         delete serialized.lastIntelligenceUpdate;
+        delete serialized.ownerContactDetails; // Hide from public
       }
 
       return serialized;

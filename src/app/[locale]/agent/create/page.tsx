@@ -93,6 +93,7 @@ export default function QuickDropPage() {
     // Commission Sharing (Optional - for co-agents)
     agentCommissionRate: 0, // Share % to co-agents
     commissionAmount: 0, // OR fixed amount to share
+    ownerContactDetails: '', // Owner contact info (internal only)
     
     // Amenities
     selectedAmenities: [] as string[],
@@ -977,11 +978,11 @@ export default function QuickDropPage() {
                 </div>
               </div>
 
-              {/* Commission Sharing - Optional */}
+              {/* Commission Sharing & Owner Contact - Optional */}
               <div className="col-span-2 pt-4 border-t">
                 <h3 className="text-md font-semibold text-gray-800 mb-3">
-                  Commission Sharing
-                  <span className="text-xs text-gray-500 font-normal ml-2">(Optional - visible to agents only)</span>
+                  Commission & Owner Info
+                  <span className="text-xs text-gray-500 font-normal ml-2">(Optional - internal only)</span>
                 </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1014,6 +1015,21 @@ export default function QuickDropPage() {
                       placeholder="e.g. 50000"
                     />
                     <p className="text-xs text-gray-500 mt-1">Share fix amount to co-agents</p>
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Owner Contact
+                    </label>
+                    <input 
+                      type="text" 
+                      name="ownerContactDetails"
+                      value={formData.ownerContactDetails}
+                      onChange={handleChange}
+                      className="w-full p-2 md:p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 text-gray-900 placeholder-gray-500 text-sm md:text-base" 
+                      placeholder="Phone, LINE ID, or email"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Owner&apos;s contact info for internal use only (not shown publicly)</p>
                   </div>
                 </div>
               </div>
