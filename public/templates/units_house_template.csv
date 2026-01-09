@@ -1,0 +1,3 @@
+project_name,unit_title,description,price,rent_price,listing_type,status,house_type,bedrooms,bathrooms,size,floors,pet_friendly,furnished,parking,pool,garden,agent_commission_rate,commission_amount,images,area,latitude,longitude,owner_contact
+Palm Gardens Village,3BR Pool Villa,"Modern pool villa with private garden",12500000,,SALE,AVAILABLE,VILLA,3,3,250,2,TRUE,FALSE,2,TRUE,TRUE,2.5,,"https://example.com/villa1.jpg,https://example.com/villa2.jpg,https://example.com/villa3.jpg",East Pattaya,12.9123456,100.9012345,089-876-5432
+,Standalone Beach House,"Luxury beachfront house - no project",18000000,80000,BOTH,AVAILABLE,DETACHED,4,4,320,2,TRUE,TRUE,3,TRUE,TRUE,2.0,,"https://example.com/house1.jpg,https://example.com/house2.jpg",Jomtien,12.8876543,100.8912345,092-333-4444

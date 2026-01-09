@@ -52,6 +52,12 @@ export default function ImportPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Bulk Import Projects</h1>
         <p className="text-gray-600">Import projects, facilities, and units from CSV files</p>
+        <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+          <p className="text-sm text-amber-800">
+            <strong>Note:</strong> Project name is optional for standalone properties (villas, land, etc.). 
+            You can import units without a project and add them to a project later through the property edit page.
+          </p>
+        </div>
       </div>
 
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
@@ -59,19 +65,41 @@ export default function ImportPage() {
           <Download className="w-5 h-5" />
           Download CSV Templates
         </h2>
-        <div className="grid grid-cols-3 gap-4">
-          <a href="/templates/projects_template.csv" download className="flex items-center gap-2 px-4 py-3 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
-            <Download className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-medium text-blue-900">Projects</span>
-          </a>
-          <a href="/templates/facilities_template.csv" download className="flex items-center gap-2 px-4 py-3 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
-            <Download className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-medium text-blue-900">Facilities</span>
-          </a>
-          <a href="/templates/units_template.csv" download className="flex items-center gap-2 px-4 py-3 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
-            <Download className="w-4 h-4 text-blue-600" />
-            <span className="text-sm font-medium text-blue-900">Units</span>
-          </a>
+        
+        <div className="mb-4">
+          <h3 className="text-sm font-semibold text-blue-800 mb-2">Project & Facilities</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <a href="/api/import/templates?type=projects" download="projects_template.csv" className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
+              <Download className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">Projects</span>
+            </a>
+            <a href="/api/import/templates?type=facilities" download="facilities_template.csv" className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
+              <Download className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">Facilities</span>
+            </a>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold text-blue-800 mb-2">Units by Category</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <a href="/api/import/templates?type=units_condo" download="units_condo_template.csv" className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
+              <Download className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">Condo Units</span>
+            </a>
+            <a href="/api/import/templates?type=units_house" download="units_house_template.csv" className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
+              <Download className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">House/Villa</span>
+            </a>
+            <a href="/api/import/templates?type=units_land" download="units_land_template.csv" className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
+              <Download className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">Land</span>
+            </a>
+            <a href="/api/import/templates?type=units_business" download="units_business_template.csv" className="flex items-center gap-2 px-4 py-2 bg-white border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors">
+              <Download className="w-4 h-4 text-blue-600" />
+              <span className="text-sm font-medium text-blue-900">Business/Investment</span>
+            </a>
+          </div>
         </div>
       </div>
 

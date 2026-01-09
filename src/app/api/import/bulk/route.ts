@@ -209,20 +209,24 @@ export async function POST(request: NextRequest) {
     // Step 3: Create Units (if provided)
     for (const row of unitsData) {
       try {
-        // First check projectMap (if projects were uploaded in same batch)
-        let projectId = projectMap.get(row.project_name);
+        // Project is OPTIONAL - only link if project_name is provided
+        let projectId: string | undefined = undefined;
         
-        // If not in map, look up existing project in database
-        if (!projectId) {
-          const existingProject = await prisma.project.findFirst({
-            where: { name: row.project_name }
-          });
+        if (row.project_name && row.project_name.trim()) {
+          // First check projectMap (if projects were uploaded in same batch)
+          projectId = projectMap.get(row.project_name);
           
-          if (existingProject) {
-            projectId = existingProject.id;
-          } else {
-            errors.push(`Unit "${row.unit_title}": Project "${row.project_name}" not found in database`);
-            continue;
+          // If not in map, look up existing project in database
+          if (!projectId) {
+            const existingProject = await prisma.project.findFirst({
+              where: { name: row.project_name }
+            });
+            
+            if (existingProject) {
+              projectId = existingProject.id;
+            } else {
+              errors.push(`Unit "${row.unit_title}": Project "${row.project_name}" not found - creating as standalone property`);
+            }
           }
         }
 
@@ -232,6 +236,15 @@ export async function POST(request: NextRequest) {
           // Split by comma and trim whitespace
           const imageUrls = row.images.split(',').map(url => url.trim()).filter(url => url.length > 0);
           images.push(...imageUrls);
+        }
+
+        // Determine category (auto-detect if not provided)
+        let category = row.category;
+        if (!category) {
+          if (row.house_type) category = 'HOUSE';
+          else if (row.investment_type) category = 'INVESTMENT';
+          else if (row.land_zone_color) category = 'LAND';
+          else category = 'CONDO'; // Default
         }
 
         await prisma.property.create({
@@ -246,18 +259,26 @@ export async function POST(request: NextRequest) {
             city: 'Pattaya', // Default
             state: 'Chonburi',
             zipCode: '20150',
-            category: row.category as any,
+            category: category as any,
             houseType: row.house_type as any || null,
             investmentType: row.investment_type as any || null,
+            landZoneColor: row.land_zone_color as any || null,
+            equipmentIncluded: row.equipment_included as any || null,
+            numberOfStaff: row.number_of_staff ? parseInt(row.number_of_staff) : null,
+            monthlyRevenue: row.monthly_revenue ? parseFloat(row.monthly_revenue) : null,
+            license: row.license?.toUpperCase() === 'TRUE' || null,
+            conferenceRoom: row.conference_room?.toUpperCase() === 'TRUE' || null,
             area: row.area || null,
             listingType: row.listing_type as any,
             status: row.status as any,
             bedrooms: row.bedrooms ? parseInt(row.bedrooms) : null,
             bathrooms: row.bathrooms ? parseInt(row.bathrooms) : null,
+            isStudio: row.bedrooms === '0' || null,
             size: parseInt(row.size),
             floor: row.floor ? parseInt(row.floor) : null,
-            petFriendly: row.pet_friendly?.toUpperCase() === 'TRUE',
-            furnished: row.furnished?.toUpperCase() === 'TRUE',
+            floors: row.floors ? parseInt(row.floors) : null,
+            petFriendly: row.pet_friendly?.toUpperCase() === 'TRUE' || null,
+            furnished: row.furnished?.toUpperCase() === 'TRUE' || null,
             parking: row.parking ? parseInt(row.parking) : null,
             amenities: {
               ...(row.pool?.toUpperCase() === 'TRUE' && { privatePool: true }),
@@ -269,7 +290,7 @@ export async function POST(request: NextRequest) {
             agentCommissionRate: row.agent_commission_rate ? parseFloat(row.agent_commission_rate) : null,
             commissionAmount: row.commission_amount ? parseFloat(row.commission_amount) : null,
             images: images,
-            projectId: projectId,
+            projectId: projectId || null,
           }
         });
         

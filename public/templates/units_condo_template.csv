@@ -1,0 +1,3 @@
+project_name,unit_title,description,price,rent_price,listing_type,status,bedrooms,bathrooms,size,floor,pet_friendly,furnished,parking,agent_commission_rate,commission_amount,images,area,latitude,longitude,owner_contact
+The Riviera Jomtien,1BR Sea View Unit,"Beautiful 1-bedroom unit with panoramic ocean views",3500000,25000,BOTH,AVAILABLE,1,1,45,15,TRUE,TRUE,1,3.0,,"https://example.com/unit1-1.jpg,https://example.com/unit1-2.jpg,https://example.com/unit1-3.jpg",Jomtien,12.8965432,100.8876543,081-234-5678
+The Riviera Jomtien,Studio Deluxe,"Modern studio with sea view",2200000,18000,SALE,AVAILABLE,0,1,32,10,FALSE,TRUE,1,3.0,,"https://example.com/studio1.jpg,https://example.com/studio2.jpg",Jomtien,12.8965432,100.8876543,@lineowner123
