@@ -54,6 +54,10 @@ interface ListingFormData {
   agentCommissionRate: number;
   coAgentCommissionRate: number;
   selectedAmenities: string[];
+  status: string;
+  rentedUntil: string;
+  availableFrom: string;
+  ownerContactDetails: string;
 }
 
 const formatNumber = (num: number) => {
@@ -119,6 +123,12 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     
     // Amenities
     selectedAmenities: [] as string[],
+    
+    // Status & Owner Contact
+    status: 'AVAILABLE',
+    rentedUntil: '',
+    availableFrom: '',
+    ownerContactDetails: '',
   });
 
   useEffect(() => {
@@ -198,6 +208,11 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
             coAgentCommissionRate: Number(p.coAgentCommissionRate || 0),
             
             selectedAmenities: amenitiesList,
+            
+            status: p.status || 'AVAILABLE',
+            rentedUntil: p.rentedUntil ? new Date(p.rentedUntil).toISOString().split('T')[0] : '',
+            availableFrom: p.availableFrom ? new Date(p.availableFrom).toISOString().split('T')[0] : '',
+            ownerContactDetails: p.ownerContactDetails || '',
           });
           
           setUploadedImages(p.images || []);
@@ -589,6 +604,64 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                     className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
                   />
                 </div>
+              )}
+
+              {/* Status & Rental Tracking - Platform Agents Only */}
+              {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Status <span className="text-xs text-gray-500">- Internal Only</span></label>
+                    <select 
+                      name="status"
+                      value={formData.status}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900"
+                    >
+                      <option value="AVAILABLE">Available</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="RENTED">Rented</option>
+                      <option value="SOLD">Sold</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Owner Contact <span className="text-xs text-gray-500">- Internal Only</span></label>
+                    <input 
+                      type="text" 
+                      name="ownerContactDetails"
+                      value={formData.ownerContactDetails}
+                      onChange={handleChange}
+                      placeholder="Phone, email, or LINE ID"
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                    />
+                  </div>
+
+                  {formData.status === 'RENTED' && (
+                    <>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Lease End Date <span className="text-xs text-gray-500">- Internal Only</span></label>
+                        <input 
+                          type="date" 
+                          name="rentedUntil"
+                          value={formData.rentedUntil}
+                          onChange={handleChange}
+                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Available From <span className="text-xs text-gray-500">- Internal Only</span></label>
+                        <input 
+                          type="date" 
+                          name="availableFrom"
+                          value={formData.availableFrom}
+                          onChange={handleChange}
+                          placeholder="When tenant gives notice"
+                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                        />
+                      </div>
+                    </>
+                  )}
+                </>
               )}
 
               {/* Commission Section - Different fields based on role */}
