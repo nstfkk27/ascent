@@ -60,7 +60,7 @@ export default function MyListingsPage() {
         const res = await fetch('/api/agent/me');
         if (res.ok) {
           const data = await res.json();
-          setRole(data.role);
+          setRole(data.data?.agent?.role || null);
         }
       } catch (err) {
         console.error('Failed to fetch role', err);

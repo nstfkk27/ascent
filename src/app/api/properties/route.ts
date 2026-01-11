@@ -145,8 +145,15 @@ export const GET = withErrorHandler(
       where.featured = true;
     }
     
-    const status = searchParams.get('status') || 'AVAILABLE';
-    where.status = status;
+    // Status filter - only default to AVAILABLE for public/unauthenticated requests
+    const status = searchParams.get('status');
+    if (status) {
+      where.status = status;
+    } else if (!agent) {
+      // Public users only see AVAILABLE properties by default
+      where.status = 'AVAILABLE';
+    }
+    // Authenticated agents see all statuses by default (no filter)
 
     // New Project filter (built within last 2 years)
     const newProject = searchParams.get('newProject');

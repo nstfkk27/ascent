@@ -55,8 +55,10 @@ interface ListingFormData {
   coAgentCommissionRate: number;
   selectedAmenities: string[];
   status: string;
+  rentedOn: string;
   rentedUntil: string;
-  availableFrom: string;
+  soldOn: string;
+  soldPrice: number;
   ownerContactDetails: string;
 }
 
@@ -126,8 +128,10 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     
     // Status & Owner Contact
     status: 'AVAILABLE',
+    rentedOn: '',
     rentedUntil: '',
-    availableFrom: '',
+    soldOn: '',
+    soldPrice: 0,
     ownerContactDetails: '',
   });
 
@@ -137,7 +141,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
         const res = await fetch('/api/agent/me');
         if (res.ok) {
           const data = await res.json();
-          setRole(data.role);
+          setRole(data.data?.agent?.role || null);
         }
       } catch (err) {
         console.error('Failed to fetch role', err);
@@ -210,8 +214,10 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
             selectedAmenities: amenitiesList,
             
             status: p.status || 'AVAILABLE',
+            rentedOn: p.rentedOn ? new Date(p.rentedOn).toISOString().split('T')[0] : '',
             rentedUntil: p.rentedUntil ? new Date(p.rentedUntil).toISOString().split('T')[0] : '',
-            availableFrom: p.availableFrom ? new Date(p.availableFrom).toISOString().split('T')[0] : '',
+            soldOn: p.soldOn ? new Date(p.soldOn).toISOString().split('T')[0] : '',
+            soldPrice: Number(p.soldPrice || 0),
             ownerContactDetails: p.ownerContactDetails || '',
           });
           
@@ -286,7 +292,7 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
       finalValue = (e.target as HTMLInputElement).checked;
     }
 
-    if (name === 'price' || name === 'rentPrice' || name === 'commissionAmount') {
+    if (name === 'price' || name === 'rentPrice' || name === 'commissionAmount' || name === 'soldPrice') {
       finalValue = parseFloat(value.replace(/,/g, '')) || 0;
     }
 
@@ -642,6 +648,16 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                     {formData.status === 'RENTED' && (
                       <>
                         <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Rented On <span className="text-xs text-gray-500">(Lease Start)</span></label>
+                          <input 
+                            type="date" 
+                            name="rentedOn"
+                            value={formData.rentedOn}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                          />
+                        </div>
+                        <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Lease End Date</label>
                           <input 
                             type="date" 
@@ -651,14 +667,29 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
                           />
                         </div>
+                      </>
+                    )}
+
+                    {formData.status === 'SOLD' && (
+                      <>
                         <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">Available From</label>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Sold On <span className="text-xs text-gray-500">(Transaction Date)</span></label>
                           <input 
                             type="date" 
-                            name="availableFrom"
-                            value={formData.availableFrom}
+                            name="soldOn"
+                            value={formData.soldOn}
                             onChange={handleChange}
-                            placeholder="When tenant gives notice"
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Sold Price (THB) <span className="text-xs text-gray-500">(Leave empty to use asking price)</span></label>
+                          <input 
+                            type="text" 
+                            name="soldPrice"
+                            value={formatNumber(formData.soldPrice)}
+                            onChange={handleChange}
+                            placeholder={`Asking: ฿${formatNumber(formData.price)}`}
                             className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
                           />
                         </div>

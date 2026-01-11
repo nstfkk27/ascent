@@ -153,8 +153,14 @@ model Property {
   // Internal operations
   internalNotes         String?
   lastIntelligenceUpdate DateTime?
+  
+  // Rental tracking
+  rentedOn              DateTime?           // Lease start date
   rentedUntil           DateTime?           // Lease end date
-  availableFrom         DateTime?           // When property becomes available again
+  
+  // Sale tracking
+  soldOn                DateTime?           // Transaction date
+  soldPrice             Decimal?            @db.Decimal(12, 2) // Actual sale price (defaults to asking price if empty)
   
   // ============================================
   // AI SEARCH & LOCATION INTELLIGENCE
@@ -202,8 +208,9 @@ model Property {
   @@index([investmentType])
   @@index([landZoneColor])
   @@index([listingType])
+  @@index([rentedOn])
   @@index([rentedUntil])
-  @@index([availableFrom])
+  @@index([soldOn])
   @@index([dealQuality])
   @@index([leadScore])
   @@index([pricePerSqm])
