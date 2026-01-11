@@ -29,7 +29,7 @@ export async function GET() {
     const upcomingProperties = await prisma.property.findMany({
       where: {
         status: 'RENTED',
-        availableFrom: {
+        rentedUntil: {
           lte: ninetyDaysFromNow,
           gte: new Date() // Only future dates
         }
@@ -39,10 +39,9 @@ export async function GET() {
         title: true,
         area: true,
         rentedUntil: true,
-        availableFrom: true,
       },
       orderBy: {
-        availableFrom: 'asc'
+        rentedUntil: 'asc'
       }
     });
 
