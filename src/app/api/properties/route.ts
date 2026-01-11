@@ -46,7 +46,7 @@ export const GET = withErrorHandler(
       if (agent.role === 'AGENT') {
         // Regular agents can only see:
         // 1. Their own listings
-        // 2. Other agents' listings that have commission sharing (coAgentCommissionRate > 0 OR commissionAmount > 0)
+        // 2. Other agents' listings that have commission sharing (agentCommissionRate > 0)
         where.OR = [
           { agentId: agent.id }, // Own listings
           { 
@@ -62,10 +62,10 @@ export const GET = withErrorHandler(
           }
         ];
       } else if (agent.role === 'PLATFORM_AGENT') {
-        // Platform agents see all listings (no filter)
-        // They can manage everything
+        // Platform agents can only see their own listings
+        where.agentId = agent.id;
       }
-      // SUPER_ADMIN also sees all listings (no filter)
+      // SUPER_ADMIN sees all listings (no filter)
     }
     
     const category = searchParams.get('category');

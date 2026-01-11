@@ -18,9 +18,13 @@ interface Property {
   ownerContactDetails?: string;
 }
 
+type PropertyStatus = 'AVAILABLE' | 'PENDING' | 'RENTED' | 'SOLD';
+
 export default function MyListingsPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const [role, setRole] = useState<string | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   
   // Pagination State
   const [page, setPage] = useState(1);
@@ -49,6 +53,21 @@ export default function MyListingsPage() {
   useEffect(() => {
     fetchProperties();
   }, [fetchProperties]);
+
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const res = await fetch('/api/agent/me');
+        if (res.ok) {
+          const data = await res.json();
+          setRole(data.role);
+        }
+      } catch (err) {
+        console.error('Failed to fetch role', err);
+      }
+    };
+    fetchRole();
+  }, []);
 
   const getFreshnessStatus = (lastVerifiedAt: string) => {
     if (!lastVerifiedAt) return { color: 'bg-gray-100 text-gray-800', label: 'Unknown' };
@@ -86,6 +105,31 @@ export default function MyListingsPage() {
     } catch (error) {
       console.error('Error deleting property:', error);
       alert('Failed to delete property: Network error');
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: PropertyStatus) => {
+    setUpdatingStatus(id);
+    try {
+      const res = await fetch(`/api/properties/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      
+      if (res.ok) {
+        setProperties(prev => prev.map(p => 
+          p.id === id ? { ...p, status: newStatus } : p
+        ));
+      } else {
+        const data = await res.json();
+        alert(`Failed to update status: ${data.error || 'Unknown error'}`);
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Failed to update status: Network error');
+    } finally {
+      setUpdatingStatus(null);
     }
   };
 
@@ -241,11 +285,31 @@ export default function MyListingsPage() {
                       <span className="text-gray-700 text-sm">{property.ownerContactDetails || '-'}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        property.status === 'AVAILABLE' ? 'bg-[#8ea4d2]/20 text-[#49516f]' : 'bg-gray-100 text-gray-600'
-                      }`}>
-                        {property.status}
-                      </span>
+                      {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') ? (
+                        <select
+                          value={property.status}
+                          onChange={(e) => handleStatusChange(property.id, e.target.value as PropertyStatus)}
+                          disabled={updatingStatus === property.id}
+                          className={`px-3 py-1 rounded-full text-xs font-medium border-0 cursor-pointer transition-colors ${
+                            property.status === 'AVAILABLE' ? 'bg-[#8ea4d2]/20 text-[#49516f]' : 
+                            property.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                            property.status === 'RENTED' ? 'bg-purple-100 text-purple-700' :
+                            property.status === 'SOLD' ? 'bg-green-100 text-green-700' :
+                            'bg-gray-100 text-gray-600'
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          <option value="AVAILABLE">AVAILABLE</option>
+                          <option value="PENDING">PENDING</option>
+                          <option value="RENTED">RENTED</option>
+                          <option value="SOLD">SOLD</option>
+                        </select>
+                      ) : (
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          property.status === 'AVAILABLE' ? 'bg-[#8ea4d2]/20 text-[#49516f]' : 'bg-gray-100 text-gray-600'
+                        }`}>
+                          {property.status}
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${freshness.color}`}>

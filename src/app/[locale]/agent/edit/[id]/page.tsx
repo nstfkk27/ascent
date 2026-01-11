@@ -608,60 +608,64 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
 
               {/* Status & Rental Tracking - Platform Agents Only */}
               {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') && (
-                <>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status <span className="text-xs text-gray-500">- Internal Only</span></label>
-                    <select 
-                      name="status"
-                      value={formData.status}
-                      onChange={handleChange}
-                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    >
-                      <option value="AVAILABLE">Available</option>
-                      <option value="PENDING">Pending</option>
-                      <option value="RENTED">Rented</option>
-                      <option value="SOLD">Sold</option>
-                    </select>
-                  </div>
+                <div className="col-span-2 border-t pt-4 mt-2">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Status & Tracking <span className="text-xs text-gray-500 font-normal">- Internal Only</span></h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                      <select 
+                        name="status"
+                        value={formData.status}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900"
+                      >
+                        <option value="AVAILABLE">Available</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="RENTED">Rented</option>
+                        <option value="SOLD">Sold</option>
+                      </select>
+                    </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Owner Contact <span className="text-xs text-gray-500">- Internal Only</span></label>
-                    <input 
-                      type="text" 
-                      name="ownerContactDetails"
-                      value={formData.ownerContactDetails}
-                      onChange={handleChange}
-                      placeholder="Phone, email, or LINE ID"
-                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
-                    />
-                  </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Owner Contact</label>
+                      <input 
+                        type="text" 
+                        name="ownerContactDetails"
+                        value={formData.ownerContactDetails}
+                        onChange={handleChange}
+                        placeholder="Phone, email, or LINE ID"
+                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                      />
+                    </div>
 
-                  {formData.status === 'RENTED' && (
-                    <>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Lease End Date <span className="text-xs text-gray-500">- Internal Only</span></label>
-                        <input 
-                          type="date" 
-                          name="rentedUntil"
-                          value={formData.rentedUntil}
-                          onChange={handleChange}
-                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Available From <span className="text-xs text-gray-500">- Internal Only</span></label>
-                        <input 
-                          type="date" 
-                          name="availableFrom"
-                          value={formData.availableFrom}
-                          onChange={handleChange}
-                          placeholder="When tenant gives notice"
-                          className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
-                        />
-                      </div>
-                    </>
-                  )}
-                </>
+                    {formData.status === 'RENTED' && (
+                      <>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Lease End Date</label>
+                          <input 
+                            type="date" 
+                            name="rentedUntil"
+                            value={formData.rentedUntil}
+                            onChange={handleChange}
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Available From</label>
+                          <input 
+                            type="date" 
+                            name="availableFrom"
+                            value={formData.availableFrom}
+                            onChange={handleChange}
+                            placeholder="When tenant gives notice"
+                            className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 text-gray-900" 
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
               )}
 
               {/* Commission Section - Different fields based on role */}
