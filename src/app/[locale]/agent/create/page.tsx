@@ -319,15 +319,24 @@ export default function QuickDropPage() {
         payload.investmentType = formData.subtype;
         payload.conferenceRoom = formData.conferenceRoom;
         // pool is now in amenities JSON only
-        
-        // Handle Land specific fields
-        if (formData.subtype === 'LAND') {
-          payload.landZoneColor = formData.landZoneColor;
-        }
+      } else if (formData.category === 'LAND') {
+        // LAND is its own category
+        payload.landZoneColor = formData.landZoneColor || null;
       }
       
-      // Remove petFriendly and furnished for LAND and INVESTMENT
-      if (formData.category === 'LAND' || formData.category === 'INVESTMENT') {
+      // Remove category-inappropriate fields
+      if (formData.category === 'LAND') {
+        // LAND cannot have these residential fields
+        delete payload.bedrooms;
+        delete payload.bathrooms;
+        delete payload.floors;
+        delete payload.parking;
+        delete payload.petFriendly;
+        delete payload.furnished;
+        delete payload.isStudio;
+        delete payload.floor;
+      } else if (formData.category === 'INVESTMENT') {
+        // INVESTMENT doesn't use these residential fields
         delete payload.petFriendly;
         delete payload.furnished;
       }
