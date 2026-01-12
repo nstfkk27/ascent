@@ -403,9 +403,9 @@ export const POST = withErrorHandler(
     
     // Validate category-specific fields
     if (body.category === 'LAND') {
-      const invalidFields = ['bedrooms', 'bathrooms', 'petFriendly', 'furnished', 'floors'];
+      const invalidFields = ['bedrooms', 'bathrooms', 'petFriendly', 'furnished', 'floors', 'parking', 'isStudio', 'floor'];
       for (const field of invalidFields) {
-        if (body[field]) {
+        if (field in body && body[field] !== null && body[field] !== undefined) {
           throw new Error(`${field} is not applicable to LAND category`);
         }
       }
@@ -414,7 +414,7 @@ export const POST = withErrorHandler(
     if (body.category === 'INVESTMENT') {
       const invalidFields = ['petFriendly', 'furnished'];
       for (const field of invalidFields) {
-        if (body[field]) {
+        if (field in body && body[field] !== null && body[field] !== undefined) {
           throw new Error(`${field} is not applicable to INVESTMENT category`);
         }
       }
