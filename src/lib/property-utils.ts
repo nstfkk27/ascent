@@ -77,8 +77,6 @@ export function sanitizePropertyData(data: any) {
     cleanData.parking = null;
     cleanData.furnished = null;
     cleanData.petFriendly = null;
-    cleanData.pool = null;
-    cleanData.garden = null;
     
     // Clear Condo specific fields
     cleanData.floor = null;
@@ -86,7 +84,6 @@ export function sanitizePropertyData(data: any) {
 
     // Clear Investment (Business) specific fields
     cleanData.investmentType = null;
-    cleanData.openForYears = null;
     cleanData.equipmentIncluded = null;
     cleanData.numberOfStaff = null;
     cleanData.monthlyRevenue = null;
