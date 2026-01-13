@@ -67,6 +67,7 @@ export function sanitizePropertyData(data: any) {
     cleanData.projectName = null;
     cleanData.floor = null;
     
+    // Clear LAND specific fields
     cleanData.landZoneColor = null;
   } else if (category === 'LAND') {
     // Clear House specific fields
@@ -89,6 +90,8 @@ export function sanitizePropertyData(data: any) {
     cleanData.monthlyRevenue = null;
     cleanData.license = null;
     cleanData.conferenceRoom = null;
+    
+    // Keep landZoneColor for LAND category - this is the correct field for land
   }
 
   return cleanData;

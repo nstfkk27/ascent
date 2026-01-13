@@ -252,6 +252,7 @@ export default async function Home({ searchParams }: HomeProps) {
         monthlyRevenue: true,
         commissionAmount: true,
         agentCommissionRate: true,
+        landZoneColor: true,
       }
     });
 
@@ -297,8 +298,8 @@ export default async function Home({ searchParams }: HomeProps) {
         createdAt: prop.createdAt.toISOString(),
         updatedAt: prop.updatedAt.toISOString(),
         lastVerifiedAt: prop.lastVerifiedAt.toISOString(),
-        price: prop.price ? prop.price.toNumber() : null,
-        rentPrice: prop.rentPrice ? prop.rentPrice.toNumber() : null,
+        price: prop.price && prop.price.toNumber() > 0 ? prop.price.toNumber() : null,
+        rentPrice: prop.rentPrice && prop.rentPrice.toNumber() > 0 ? prop.rentPrice.toNumber() : null,
         monthlyRevenue: prop.monthlyRevenue ? prop.monthlyRevenue.toNumber() : null,
         latitude: prop.latitude ? prop.latitude.toNumber() : null,
         longitude: prop.longitude ? prop.longitude.toNumber() : null,

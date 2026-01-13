@@ -49,10 +49,8 @@ interface ListingFormData {
   equipmentIncluded: string;
   landZoneColor: string;
   conferenceRoom: boolean;
-  commissionRate: number;
   commissionAmount: number;
   agentCommissionRate: number;
-  coAgentCommissionRate: number;
   selectedAmenities: string[];
   status: string;
   rentedOn: string;
@@ -118,10 +116,8 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
     conferenceRoom: false,
 
     // Commission
-    commissionRate: 0,
     commissionAmount: 0,
     agentCommissionRate: 0,
-    coAgentCommissionRate: 0,
     
     // Amenities
     selectedAmenities: [] as string[],
@@ -203,13 +199,11 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
             openForYears: p.openForYears || 0,
             numberOfStaff: p.numberOfStaff || 0,
             equipmentIncluded: p.equipmentIncluded || 'FULLY',
-            landZoneColor: p.amenities?.landZoneColor || '', // Extract landZoneColor from JSON if stored there
+            landZoneColor: p.landZoneColor || '',
             conferenceRoom: p.conferenceRoom || false,
 
-            commissionRate: Number(p.commissionRate || 0),
             commissionAmount: Number(p.commissionAmount || 0),
             agentCommissionRate: Number(p.agentCommissionRate || 0),
-            coAgentCommissionRate: Number(p.coAgentCommissionRate || 0),
             
             selectedAmenities: amenitiesList,
             
@@ -699,88 +693,35 @@ export default function EditListingPage({ params }: { params: { id: string } }) 
                 </div>
               )}
 
-              {/* Commission Section - Different fields based on role */}
+              {/* Commission Section */}
               <div className="col-span-2 border-t pt-4 mt-2">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Commission Details</h3>
                 
-                {(role === 'SUPER_ADMIN' || role === 'PLATFORM_AGENT') ? (
-                  // Internal agents see both platform and agent commission
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Platform Commission Rate (%) <span className="text-xs text-gray-500">- Internal Only</span></label>
-                      <input 
-                        type="number" 
-                        name="commissionRate"
-                        value={formData.commissionRate}
-                        onChange={handleChange}
-                        step="0.1"
-                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission from property owner</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Agent Commission Rate (%) <span className="text-xs text-green-600">- Visible to Agents</span></label>
-                      <input 
-                        type="number" 
-                        name="agentCommissionRate"
-                        value={formData.agentCommissionRate}
-                        onChange={handleChange}
-                        step="0.1"
-                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission shared with agents</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Commission Amount (THB)</label>
-                      <input 
-                        type="text" 
-                        name="commissionAmount"
-                        value={formatNumber(formData.commissionAmount)}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Rate (%)</label>
-                      <input 
-                        type="number" 
-                        name="coAgentCommissionRate"
-                        value={formData.coAgentCommissionRate}
-                        onChange={handleChange}
-                        step="0.1"
-                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                      />
-                    </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Agent Commission Rate (%)</label>
+                    <input 
+                      type="number" 
+                      name="agentCommissionRate"
+                      value={formData.agentCommissionRate}
+                      onChange={handleChange}
+                      step="0.1"
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Commission % offered to agents</p>
                   </div>
-                ) : (
-                  // External agents only see agent commission rate
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Commission Rate (%) <span className="text-xs text-green-600">- Shared with Other Agents</span></label>
-                      <input 
-                        type="number" 
-                        name="agentCommissionRate"
-                        value={formData.agentCommissionRate}
-                        onChange={handleChange}
-                        step="0.1"
-                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Commission you offer to other agents who help sell</p>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Co-Agent Share (%)</label>
-                      <input 
-                        type="number" 
-                        name="coAgentCommissionRate"
-                        value={formData.coAgentCommissionRate}
-                        onChange={handleChange}
-                        step="0.1"
-                        className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Optional: Split with co-listing agent</p>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Commission Amount (THB)</label>
+                    <input 
+                      type="text" 
+                      name="commissionAmount"
+                      value={formatNumber(formData.commissionAmount)}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500" 
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Or fixed commission amount</p>
                   </div>
-                )}
+                </div>
               </div>
 
               {shouldShowField('bedrooms') && (

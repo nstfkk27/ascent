@@ -116,12 +116,38 @@ export const PUT = withErrorHandler(
     delete (updateData as any).condition;
     delete (updateData as any).unitFeatures;
 
+    // Handle projectId separately - Prisma uses relation syntax
+    const projectId = updateData.projectId;
+    delete updateData.projectId;
+
     if (body.title) {
       updateData.slug = await generateUniqueSlug(body.title, params.id);
     }
 
     if (body.category) {
       updateData = sanitizePropertyData(updateData);
+    }
+
+    // Add project relation if projectId is provided
+    if (projectId !== undefined) {
+      if (projectId === null || projectId === '') {
+        (updateData as any).project = { disconnect: true };
+      } else {
+        (updateData as any).project = { connect: { id: projectId } };
+      }
+    }
+
+    // Convert empty string dates to null
+    const dateFields = ['rentedOn', 'rentedUntil', 'soldOn'];
+    dateFields.forEach(field => {
+      if (updateData[field] === '' || updateData[field] === null) {
+        updateData[field] = null;
+      }
+    });
+
+    // Convert 0 or empty soldPrice to null
+    if (updateData.soldPrice === 0 || updateData.soldPrice === '') {
+      updateData.soldPrice = null;
     }
 
     logger.info('Updating property', {

@@ -352,13 +352,20 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
             <div>
               <p className="text-gray-500">Price</p>
               <div className="font-medium text-gray-900">
-                {project.units[0]?.price && (
-                  <span className="text-[#496f5d] block">฿{Number(project.units[0].price).toLocaleString()}</span>
+                {project.units[0]?.price && Number(project.units[0].price) > 0 && (
+                  <>
+                    <span className="text-[#496f5d] block">฿{Number(project.units[0].price).toLocaleString()}</span>
+                    {project.type === 'LAND' && project.units[0]?.size && Number(project.units[0].size) > 0 && (
+                      <span className="text-xs text-gray-500 block mt-1">
+                        ฿{Math.round(Number(project.units[0].price) / Number(project.units[0].size)).toLocaleString()}/m²
+                      </span>
+                    )}
+                  </>
                 )}
-                {project.units[0]?.rentPrice && (
+                {project.units[0]?.rentPrice && Number(project.units[0].rentPrice) > 0 && (
                   <span className="text-orange-600 block">฿{Number(project.units[0].rentPrice).toLocaleString()}/mo</span>
                 )}
-                {!project.units[0]?.price && !project.units[0]?.rentPrice && (
+                {(!project.units[0]?.price || Number(project.units[0].price) === 0) && (!project.units[0]?.rentPrice || Number(project.units[0].rentPrice) === 0) && (
                   <span>Contact for Price</span>
                 )}
               </div>
@@ -367,18 +374,33 @@ export default function Inspector({ project, isOpen, onClose }: InspectorProps) 
               <p className="text-gray-500">Size</p>
               <p className="font-medium text-gray-900">{project.units[0]?.size || '-'} m²</p>
             </div>
-            <div>
-              <p className="text-gray-500">Bedrooms</p>
-              <p className="font-medium text-gray-900">{project.units[0]?.bedrooms || 'Studio'}</p>
-            </div>
-            <div>
-              <p className="text-gray-500">Bathrooms</p>
-              <p className="font-medium text-gray-900">{project.units[0]?.bathrooms || '-'}</p>
-            </div>
-            <div>
-               <p className="text-gray-500">Type</p>
-               <p className="font-medium text-gray-900 capitalize">{project.type.toLowerCase().replace('_', ' ')}</p>
-            </div>
+            {project.type === 'LAND' ? (
+              <>
+                <div>
+                  <p className="text-gray-500">Land Zone</p>
+                  <p className="font-medium text-gray-900">{(project.units[0] as any)?.landZoneColor || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Type</p>
+                  <p className="font-medium text-gray-900 capitalize">{project.type.toLowerCase().replace('_', ' ')}</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <p className="text-gray-500">Bedrooms</p>
+                  <p className="font-medium text-gray-900">{project.units[0]?.bedrooms || 'Studio'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Bathrooms</p>
+                  <p className="font-medium text-gray-900">{project.units[0]?.bathrooms || '-'}</p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Type</p>
+                  <p className="font-medium text-gray-900 capitalize">{project.type.toLowerCase().replace('_', ' ')}</p>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Agent Commission (Standalone) */}
