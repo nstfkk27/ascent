@@ -41,8 +41,10 @@ export const GET = withErrorHandler(
       });
     }
 
-    // Role-based filtering for agent listings
-    if (agent) {
+    // Role-based filtering - only apply when explicitly requested via 'myListings' parameter
+    // This allows agents to browse all public properties, but filter to their own when needed
+    const myListings = searchParams.get('myListings');
+    if (agent && myListings === 'true') {
       if (agent.role === 'AGENT') {
         // Regular agents can only see:
         // 1. Their own listings
@@ -233,7 +235,7 @@ export const GET = withErrorHandler(
       'city', 'area', 'minPrice', 'maxPrice', 'bedrooms', 'featured', 'status',
       'page', 'limit', 'query', 'staffRange', 'equipmentIncluded',
       'landZoneColor', 'tag', 'minSize', 'maxSize',
-      'nearBeach', 'nearMall', 'nearHospital'
+      'nearBeach', 'nearMall', 'nearHospital', 'myListings', 'subtype', 'newProject'
     ];
     
     const skip = (page - 1) * limit;
