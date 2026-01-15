@@ -6,7 +6,7 @@ export type InvestmentType = 'HOTEL' | 'CLUB_BAR' | 'MASSAGE' | 'RESTAURANT' | '
 
 export type EquipmentLevel = 'FULLY' | 'PARTIAL' | 'JUST_STRUCTURE';
 
-export type ListingType = 'SALE' | 'RENT';
+export type ListingType = 'SALE' | 'RENT' | 'BOTH';
 
 export type PropertyStatus = 'AVAILABLE' | 'PENDING' | 'SOLD' | 'RENTED';
 
@@ -17,6 +17,7 @@ export interface Property {
   title: string;
   description: string;
   price: number;
+  rentPrice?: number | null;
   address: string;
   city: string;
   area?: string | null;
