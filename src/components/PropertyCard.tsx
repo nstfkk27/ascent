@@ -18,6 +18,7 @@ interface PropertyCardProps {
     bedrooms?: number | null;
     bathrooms?: number | null;
     size: number;
+    floor?: number | null;
     images: string[];
     category: string;
     houseType?: string | null;
@@ -145,14 +146,6 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
             </div>
           </div>
           
-          <p className="text-sm text-gray-500 mb-4 flex items-center gap-1 line-clamp-1">
-            <svg className="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            {property.address}, {property.city}
-          </p>
-
           <div className="mb-4 pb-4 border-b border-gray-100">
             {/* Score badges */}
             {showScores && property.overallScore && property.overallScore > 0 && (
@@ -194,8 +187,7 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
             )}
           </div>
 
-          <div className="flex items-center justify-between text-gray-600 text-sm">
-            <div className="flex gap-4">
+          <div className="flex items-center gap-4 text-gray-600 text-sm mb-3">
             {property.bedrooms && (
               <span className="flex items-center" title={`${property.bedrooms} Bedrooms`}>
                 <svg className="w-4 h-4 mr-1.5 text-[#8ea4d2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,11 +210,27 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
               </svg>
               {property.size?.toLocaleString() || 0} m²
             </span>
+            {property.floor && (
+              <span className="flex items-center" title={`Floor ${property.floor}`}>
+                <svg className="w-4 h-4 mr-1.5 text-[#8ea4d2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                {property.floor}
+              </span>
+            )}
           </div>
-          
-          <span className="inline-block bg-gray-50 text-gray-600 rounded-lg px-2.5 py-1 text-xs font-medium border border-gray-100">
-            {getSubtypeLabel()}
-          </span>
+
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-gray-500 flex items-center gap-1 line-clamp-1 flex-1">
+              <svg className="w-4 h-4 text-primary-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span className="truncate">{property.address}, {property.city}</span>
+            </p>
+            <span className="inline-block bg-gray-50 text-gray-600 rounded-lg px-2.5 py-1 text-xs font-medium border border-gray-100 ml-2 flex-shrink-0">
+              {getSubtypeLabel()}
+            </span>
           </div>
         </div>
       </div>
