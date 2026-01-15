@@ -40,8 +40,34 @@ export default function PropertiesPage() {
   });
 
   useEffect(() => {
-    const nextFilters: any = { ...filters };
+    // Start with fresh initial state to prevent old filters from persisting
+    const nextFilters: SearchFiltersType = {
+      query: '',
+      category: '',
+      subtype: '',
+      listingType: '',
+      minPrice: '',
+      maxPrice: '',
+      bedrooms: '',
+      city: '',
+      area: '',
+      minSize: '',
+      maxSize: '',
+      tag: '',
+      newProject: false,
+      petFriendly: false,
+      furnished: false,
+      pool: false,
+      garden: false,
+      seaView: false,
+      conferenceRoom: false,
+      openForYearsRange: '',
+      staffRange: '',
+      equipmentIncluded: '',
+      landZoneColor: '',
+    };
 
+    // Apply URL parameters to fresh state
     const urlCategory = searchParams.get('category');
     const urlSubtype = searchParams.get('subtype');
     const urlListingType = searchParams.get('listingType');
@@ -64,12 +90,9 @@ export default function PropertiesPage() {
     if (urlQuery) nextFilters.query = urlQuery;
     if (urlTag) nextFilters.tag = urlTag;
 
-    // Only update if something actually changed
-    const changed = Object.keys(nextFilters).some((k) => nextFilters[k] !== (filters as any)[k]);
-    if (changed) {
-      setFilters(nextFilters);
-      setDisplayCount(20);
-    }
+    // Always update filters when URL changes
+    setFilters(nextFilters);
+    setDisplayCount(20);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
   
