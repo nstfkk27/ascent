@@ -227,20 +227,47 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
 
               <div className="mb-8 flex items-center justify-between">
                 <div>
-                  <div className="flex items-baseline gap-3">
-                    <span className="text-5xl font-bold text-[#496f5d]">
-                      ฿{Number(property.price).toLocaleString()}
-                    </span>
-                    <span className="text-xl text-gray-600">
-                      {property.listingType === 'RENT' ? '/ month' : ''}
-                    </span>
-                  </div>
-                  {property.size && property.price && Number(property.size) > 0 && (
-                    <div className="mt-2 text-gray-600">
-                      <span className="text-lg font-semibold">
-                        ฿{(Number(property.price) / Number(property.size)).toLocaleString(undefined, { maximumFractionDigits: 0 })}/m²
+                  {/* Sale Price */}
+                  {(property.listingType === 'SALE' || property.listingType === 'BOTH') && property.price && (
+                    <div className="flex items-baseline gap-3 mb-3">
+                      <span className="text-5xl font-bold text-[#496f5d]">
+                        ฿{Number(property.price).toLocaleString()}
                       </span>
-                      <span className="text-sm text-gray-500 ml-2">per sqm</span>
+                      {property.listingType === 'BOTH' && (
+                        <span className="text-xl text-gray-600">Sale Price</span>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Rent Price */}
+                  {(property.listingType === 'RENT' || property.listingType === 'BOTH') && (property as any).rentPrice && (
+                    <div className="flex items-baseline gap-3">
+                      <span className={`font-bold text-[#496f5d] ${property.listingType === 'BOTH' ? 'text-3xl' : 'text-5xl'}`}>
+                        ฿{Number((property as any).rentPrice).toLocaleString()}
+                      </span>
+                      <span className="text-xl text-gray-600">/ month</span>
+                    </div>
+                  )}
+                  
+                  {/* Price per sqm */}
+                  {property.size && Number(property.size) > 0 && (
+                    <div className="mt-2 text-gray-600">
+                      {property.price && (property.listingType === 'SALE' || property.listingType === 'BOTH') && (
+                        <div>
+                          <span className="text-lg font-semibold">
+                            ฿{(Number(property.price) / Number(property.size)).toLocaleString(undefined, { maximumFractionDigits: 0 })}/m²
+                          </span>
+                          <span className="text-sm text-gray-500 ml-2">per sqm (sale)</span>
+                        </div>
+                      )}
+                      {(property as any).rentPrice && (property.listingType === 'RENT' || property.listingType === 'BOTH') && (
+                        <div>
+                          <span className="text-lg font-semibold">
+                            ฿{(Number((property as any).rentPrice) / Number(property.size)).toLocaleString(undefined, { maximumFractionDigits: 0 })}/m²
+                          </span>
+                          <span className="text-sm text-gray-500 ml-2">per sqm (rent)</span>
+                        </div>
+                      )}
                     </div>
                   )}
                   {(!property.size || Number(property.size) === 0) && (
