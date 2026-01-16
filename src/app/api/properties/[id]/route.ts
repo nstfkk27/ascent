@@ -88,7 +88,7 @@ export const PUT = withErrorHandler(
 
     const currentProperty = await prisma.property.findUnique({
       where: { id: params.id },
-      select: { price: true, rentPrice: true, agentId: true }
+      select: { price: true, rentPrice: true, agentId: true, category: true, houseType: true, investmentType: true }
     });
 
     if (!currentProperty) {
@@ -121,7 +121,25 @@ export const PUT = withErrorHandler(
     delete updateData.projectId;
 
     if (body.title) {
-      updateData.slug = await generateUniqueSlug(body.title, params.id);
+      // Generate slug with property type for better SEO
+      let slugTitle = body.title;
+      const category = body.category || currentProperty.category;
+      const houseType = body.houseType || currentProperty.houseType;
+      const investmentType = body.investmentType || currentProperty.investmentType;
+      
+      if (category === 'HOUSE' && houseType) {
+        const houseTypeLabel = houseType.toLowerCase().replace('_', '-');
+        slugTitle = `${houseTypeLabel}-${body.title}`;
+      } else if (category === 'INVESTMENT' && investmentType) {
+        const investmentTypeLabel = investmentType.toLowerCase().replace('_', '-');
+        slugTitle = `${investmentTypeLabel}-${body.title}`;
+      } else if (category === 'CONDO') {
+        slugTitle = `condo-${body.title}`;
+      } else if (category === 'LAND') {
+        slugTitle = `land-${body.title}`;
+      }
+      
+      updateData.slug = await generateUniqueSlug(slugTitle, params.id);
     }
 
     if (body.category) {

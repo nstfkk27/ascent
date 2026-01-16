@@ -434,7 +434,22 @@ export const POST = withErrorHandler(
     }
     
     const referenceId = await generateReferenceId();
-    const slug = await generateUniqueSlug(body.title);
+    
+    // Generate slug with property type for better SEO
+    let slugTitle = body.title;
+    if (body.category === 'HOUSE' && body.houseType) {
+      const houseTypeLabel = body.houseType.toLowerCase().replace('_', '-');
+      slugTitle = `${houseTypeLabel}-${body.title}`;
+    } else if (body.category === 'INVESTMENT' && body.investmentType) {
+      const investmentTypeLabel = body.investmentType.toLowerCase().replace('_', '-');
+      slugTitle = `${investmentTypeLabel}-${body.title}`;
+    } else if (body.category === 'CONDO') {
+      slugTitle = `condo-${body.title}`;
+    } else if (body.category === 'LAND') {
+      slugTitle = `land-${body.title}`;
+    }
+    
+    const slug = await generateUniqueSlug(slugTitle);
 
     logger.info('Creating property', {
       agentId: agent?.id,
@@ -455,6 +470,7 @@ export const POST = withErrorHandler(
         state: body.state,
         zipCode: body.zipCode,
         category: body.category,
+        houseType: body.houseType || null,
         
         // Common features (House & Condo)
         bedrooms: body.bedrooms || null,
