@@ -135,34 +135,34 @@ export default function PropertyActions({
   }
 
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-2 sm:gap-3 flex-shrink-0">
       <button
         onClick={toggleWishlist}
         disabled={loading}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+        className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg font-medium transition-all text-sm sm:text-base ${
           isInWishlist
             ? 'bg-red-500 text-white hover:bg-red-600'
             : 'bg-white border border-gray-300 text-gray-700 hover:bg-red-50 hover:border-red-300 hover:text-red-500'
         } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        <Heart className={`w-5 h-5 ${isInWishlist ? 'fill-current' : ''}`} />
+        <Heart className={`w-4 h-4 sm:w-5 sm:h-5 ${isInWishlist ? 'fill-current' : ''}`} />
         {showLabels && (
-          <span>{isInWishlist ? 'Saved' : 'Save'}</span>
+          <span className="hidden sm:inline">{isInWishlist ? 'Saved' : 'Save'}</span>
         )}
       </button>
       
       <button
         onClick={toggleComparison}
         disabled={loading}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
+        className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 rounded-lg font-medium transition-all text-sm sm:text-base ${
           isInComparison
             ? 'bg-blue-500 text-white hover:bg-blue-600'
             : 'bg-white border border-gray-300 text-gray-700 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-500'
         } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        <GitCompare className="w-5 h-5" />
+        <GitCompare className="w-4 h-4 sm:w-5 sm:h-5" />
         {showLabels && (
-          <span>{isInComparison ? 'In Comparison' : 'Compare'}</span>
+          <span className="hidden sm:inline">{isInComparison ? 'In Comparison' : 'Compare'}</span>
         )}
       </button>
     </div>

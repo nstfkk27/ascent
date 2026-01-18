@@ -20,7 +20,7 @@ export default async function LocaleLayout({
       <main className="flex-grow">{children}</main>
       <Footer />
       <ComparisonBar />
-      <WhatsAppButton phoneNumber="66123456789" />
+      <WhatsAppButton phoneNumber="66646799050" />
     </NextIntlClientProvider>
   );
 }

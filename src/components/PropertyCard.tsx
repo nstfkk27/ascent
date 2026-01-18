@@ -1,3 +1,6 @@
+'use client';
+
+import { useState, useRef, TouchEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { PROPERTY_SUBTYPES, PROPERTY_CATEGORIES } from '@/lib/constants';
@@ -47,6 +50,43 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property, showScores = true }: PropertyCardProps) {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const touchStartX = useRef<number>(0);
+  const touchEndX = useRef<number>(0);
+
+  const images = property.images.length > 0 
+    ? property.images 
+    : ['https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'];
+
+  const handleTouchStart = (e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchMove = (e: TouchEvent) => {
+    touchEndX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const diff = touchStartX.current - touchEndX.current;
+    const threshold = 50;
+
+    if (Math.abs(diff) > threshold) {
+      if (diff > 0 && currentImageIndex < images.length - 1) {
+        setCurrentImageIndex(prev => prev + 1);
+      } else if (diff < 0 && currentImageIndex > 0) {
+        setCurrentImageIndex(prev => prev - 1);
+      }
+    }
+  };
+
+  const goToImage = (index: number, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(index);
+  };
+
   // Check if property is new (created within last 7 days)
   const isJustListed = () => {
     if (!property.createdAt) return false;
@@ -101,14 +141,47 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
   return (
     <Link href={propertyUrl} className="block group h-full">
       <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] h-full flex flex-col">
-        <div className="relative h-56 sm:h-64 overflow-hidden flex-shrink-0">
-          <Image
-            src={property.images[0] || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=800&q=80'}
-            alt={property.title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+        <div 
+          className="relative h-56 sm:h-64 overflow-hidden flex-shrink-0"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          {/* Image Carousel */}
+          <div 
+            className="flex transition-transform duration-300 ease-out h-full"
+            style={{ transform: `translateX(-${currentImageIndex * 100}%)` }}
+          >
+            {images.slice(0, 5).map((img, index) => (
+              <div key={index} className="relative w-full h-full flex-shrink-0">
+                <Image
+                  src={img}
+                  alt={`${property.title} - ${index + 1}`}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+            ))}
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+          
+          {/* Dot Indicators */}
+          {images.length > 1 && (
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
+              {images.slice(0, 5).map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => goToImage(index, e)}
+                  className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                    currentImageIndex === index 
+                      ? 'bg-white w-4' 
+                      : 'bg-white/60 hover:bg-white/80'
+                  }`}
+                  aria-label={`Go to image ${index + 1}`}
+                />
+              ))}
+            </div>
+          )}
           
           <div className="absolute top-4 right-4 flex flex-col gap-1 items-end">
             <span className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-premium backdrop-blur-sm ${getCategoryColor(property.category)}`}>

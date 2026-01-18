@@ -139,7 +139,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden w-full max-w-[100vw]">
       {/* Back Button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <Link 
@@ -153,12 +153,12 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
         </Link>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
-        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 w-full min-w-0">
           {/* Left Column - Images & Details */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 min-w-0">
             {/* Image Gallery */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+            <div className="bg-white rounded-xl shadow-lg overflow-hidden w-full">
               {/* Header: Location & ID */}
               <div className="flex items-center justify-between px-4 pt-3 pb-2 border-b border-gray-100">
                 <div className="flex items-center gap-2 text-xs text-gray-600">
@@ -182,7 +182,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               </div>
 
               {/* Main Image */}
-              <div className="relative h-[500px] bg-gray-200">
+              <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] bg-gray-200">
                 <Image
                   src={property.images[selectedImage]}
                   alt={property.title}
@@ -197,13 +197,13 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               </div>
 
               {/* Thumbnail Grid */}
-              <div className="p-4 grid grid-cols-4 gap-2">
+              <div className="p-2 sm:p-4 grid grid-cols-4 gap-1 sm:gap-2 overflow-hidden">
                 {property.images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImage(index)}
-                    className={`relative h-24 rounded-lg overflow-hidden ${
-                      selectedImage === index ? 'ring-4 ring-[#496f5d]' : 'opacity-70 hover:opacity-100'
+                    className={`relative h-16 sm:h-24 rounded-lg overflow-hidden ${
+                      selectedImage === index ? 'ring-2 sm:ring-4 ring-[#496f5d]' : 'opacity-70 hover:opacity-100'
                     } transition-all`}
                   >
                     <Image
@@ -218,19 +218,19 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
             </div>
 
             {/* Property Details */}
-            <div className="bg-white rounded-xl shadow-lg p-8">
+            <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:p-8">
               <div className="flex items-start justify-between mb-6">
                 <div>
-                  <h1 className="text-4xl font-bold text-[#49516f]">{property.title}</h1>
+                  <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold text-[#49516f] break-words">{property.title}</h1>
                 </div>
               </div>
 
-              <div className="mb-8 flex items-center justify-between">
+              <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   {/* Sale Price */}
                   {(property.listingType === 'SALE' || property.listingType === 'BOTH') && property.price && (
-                    <div className="flex items-baseline gap-3 mb-3">
-                      <span className="text-5xl font-bold text-[#496f5d]">
+                    <div className="flex flex-wrap items-baseline gap-1 sm:gap-3 mb-3">
+                      <span className="text-2xl sm:text-3xl lg:text-5xl font-bold text-[#496f5d]">
                         ฿{Number(property.price).toLocaleString()}
                       </span>
                       {property.listingType === 'BOTH' && (
@@ -241,11 +241,11 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                   
                   {/* Rent Price */}
                   {(property.listingType === 'RENT' || property.listingType === 'BOTH') && (property as any).rentPrice && (
-                    <div className="flex items-baseline gap-3">
-                      <span className={`font-bold text-[#496f5d] ${property.listingType === 'BOTH' ? 'text-3xl' : 'text-5xl'}`}>
+                    <div className="flex flex-wrap items-baseline gap-1 sm:gap-3">
+                      <span className={`font-bold text-[#496f5d] ${property.listingType === 'BOTH' ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl lg:text-5xl'}`}>
                         ฿{Number((property as any).rentPrice).toLocaleString()}
                       </span>
-                      <span className="text-xl text-gray-600">/ month</span>
+                      <span className="text-base sm:text-xl text-gray-600">/ month</span>
                     </div>
                   )}
                   
@@ -609,7 +609,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
           </div>
 
           {/* Right Column - Compact Enquiry */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-6 min-w-0">
             <div className="bg-white rounded-xl shadow-lg p-6">
               <h3 className="text-xl font-bold text-[#49516f] mb-4">Enquire Now</h3>
               
