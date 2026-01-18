@@ -25,6 +25,7 @@ interface PropertyCardProps {
     investmentType?: string | null;
     listingType: string;
     projectName?: string | null;
+    createdAt?: string;
     updatedAt?: string;
     lastVerifiedAt?: string;
     // Scoring fields
@@ -38,11 +39,30 @@ interface PropertyCardProps {
     // Commission fields
     agentCommissionRate?: number | null;
     commissionAmount?: number | null;
+    // Engagement
+    viewCount?: number | null;
+    enquiryCount?: number | null;
   };
   showScores?: boolean;
 }
 
 export default function PropertyCard({ property, showScores = true }: PropertyCardProps) {
+  // Check if property is new (created within last 7 days)
+  const isJustListed = () => {
+    if (!property.createdAt) return false;
+    const created = new Date(property.createdAt);
+    if (isNaN(created.getTime())) return false;
+    const daysSinceCreated = Math.floor((Date.now() - created.getTime()) / (1000 * 60 * 60 * 24));
+    return daysSinceCreated <= 7;
+  };
+
+  // Check if property is "hot" (high engagement)
+  const isHot = () => {
+    const views = property.viewCount || 0;
+    const enquiries = property.enquiryCount || 0;
+    return views >= 50 || enquiries >= 5;
+  };
+
   const getUpdatedLabel = () => {
     const ts = property.updatedAt || property.lastVerifiedAt;
     if (!ts) return null;
@@ -113,10 +133,20 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
               </span>
             ) : null}
           </div>
-          <div className="absolute top-4 left-4">
+          <div className="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
             <span className="glass px-3 py-1.5 rounded-full text-xs font-bold text-gray-700 shadow-soft">
               {property.listingType === 'BOTH' ? 'Sale & Rent' : (property.listingType === 'SALE' ? 'For Sale' : 'For Rent')}
             </span>
+            {isJustListed() && (
+              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-md animate-pulse">
+                ✨ Just Listed
+              </span>
+            )}
+            {isHot() && !isJustListed() && (
+              <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-md">
+                🔥 Hot
+              </span>
+            )}
           </div>
           
           {/* Wishlist & Compare Actions */}

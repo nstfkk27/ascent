@@ -6,14 +6,9 @@ import PropertyCard from '@/components/PropertyCard';
 import SearchFilters, { SearchFilters as SearchFiltersType } from '@/components/SearchFilters';
 import Link from 'next/link';
 
-export default function PropertiesPage() {
-  const searchParams = useSearchParams();
-  const [displayCount, setDisplayCount] = useState(20); // 4 cards × 5 rows
-  const [isLoading, setIsLoading] = useState(false);
-  const [allProperties, setAllProperties] = useState<any[]>([]);
-  const [loadingData, setLoadingData] = useState(true);
-  const observerTarget = useRef(null);
-  const [filters, setFilters] = useState<SearchFiltersType>({
+// Helper to build initial filters from URL params
+function getInitialFilters(searchParams: URLSearchParams): SearchFiltersType {
+  const filters: SearchFiltersType = {
     query: '',
     category: '',
     subtype: '',
@@ -37,63 +32,57 @@ export default function PropertiesPage() {
     staffRange: '',
     equipmentIncluded: '',
     landZoneColor: '',
-  });
+  };
 
+  const urlCategory = searchParams.get('category');
+  const urlSubtype = searchParams.get('subtype');
+  const urlListingType = searchParams.get('listingType');
+  const urlCity = searchParams.get('city');
+  const urlArea = searchParams.get('area');
+  const urlQuery = searchParams.get('query');
+  const urlTag = searchParams.get('tag');
+  const urlNewProject = searchParams.get('newProject');
+
+  if (urlCategory) filters.category = urlCategory;
+  if (urlNewProject === 'true') filters.newProject = true;
+  if (urlSubtype) {
+    if (urlSubtype === 'HOUSE') filters.category = 'HOUSE';
+    else filters.subtype = urlSubtype;
+  }
+  if (urlListingType) filters.listingType = urlListingType;
+  if (urlCity) filters.city = urlCity;
+  if (urlArea) filters.area = urlArea;
+  if (urlQuery) filters.query = urlQuery;
+  if (urlTag) filters.tag = urlTag;
+
+  return filters;
+}
+
+export default function PropertiesPage() {
+  const searchParams = useSearchParams();
+  const [displayCount, setDisplayCount] = useState(20); // 4 cards × 5 rows
+  const [isLoading, setIsLoading] = useState(false);
+  const [allProperties, setAllProperties] = useState<any[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
+  const observerTarget = useRef(null);
+  const isInitialized = useRef(false);
+  
+  // Initialize filters from URL params immediately
+  const [filters, setFilters] = useState<SearchFiltersType>(() => 
+    getInitialFilters(searchParams)
+  );
+
+  // Update filters when URL changes (for client-side navigation)
   useEffect(() => {
-    // Start with fresh initial state to prevent old filters from persisting
-    const nextFilters: SearchFiltersType = {
-      query: '',
-      category: '',
-      subtype: '',
-      listingType: '',
-      minPrice: '',
-      maxPrice: '',
-      bedrooms: '',
-      city: '',
-      area: '',
-      minSize: '',
-      maxSize: '',
-      tag: '',
-      newProject: false,
-      petFriendly: false,
-      furnished: false,
-      pool: false,
-      garden: false,
-      seaView: false,
-      conferenceRoom: false,
-      openForYearsRange: '',
-      staffRange: '',
-      equipmentIncluded: '',
-      landZoneColor: '',
-    };
-
-    // Apply URL parameters to fresh state
-    const urlCategory = searchParams.get('category');
-    const urlSubtype = searchParams.get('subtype');
-    const urlListingType = searchParams.get('listingType');
-    const urlCity = searchParams.get('city');
-    const urlArea = searchParams.get('area');
-    const urlQuery = searchParams.get('query');
-    const urlTag = searchParams.get('tag');
-    const urlNewProject = searchParams.get('newProject');
-
-    if (urlCategory) nextFilters.category = urlCategory;
-    if (urlNewProject === 'true') nextFilters.newProject = true;
-    if (urlSubtype) {
-      // Navbar uses `subtype=HOUSE` for houses; the API expects `category=HOUSE`.
-      if (urlSubtype === 'HOUSE') nextFilters.category = 'HOUSE';
-      else nextFilters.subtype = urlSubtype;
+    // Skip the first run since we already initialized from URL
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      return;
     }
-    if (urlListingType) nextFilters.listingType = urlListingType;
-    if (urlCity) nextFilters.city = urlCity;
-    if (urlArea) nextFilters.area = urlArea;
-    if (urlQuery) nextFilters.query = urlQuery;
-    if (urlTag) nextFilters.tag = urlTag;
-
-    // Always update filters when URL changes
+    
+    const nextFilters = getInitialFilters(searchParams);
     setFilters(nextFilters);
     setDisplayCount(20);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
   
   // Fetch properties from API

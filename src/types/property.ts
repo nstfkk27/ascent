@@ -1,4 +1,4 @@
-export type PropertyCategory = 'HOUSE' | 'CONDO' | 'INVESTMENT';
+export type PropertyCategory = 'HOUSE' | 'CONDO' | 'INVESTMENT' | 'LAND';
 
 export type HouseType = 'SINGLE_HOUSE' | 'POOL_VILLA' | 'TOWNHOUSE' | 'SHOPHOUSE';
 
