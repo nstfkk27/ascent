@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Search, Map, LayoutGrid } from 'lucide-react';
 
 const TYPING_PHRASES = [
-  'Pool villa in Jomtien',
-  'Beachfront condo near Walking Street',
-  'Land for investment in East Pattaya',
-  '2 bedroom condo under 3M',
-  'Hotel for sale in Central Pattaya',
-  'House with garden in Na Jomtien',
+  'Riviera Jomtien',
+  'Copacabana',
+  'Supalai Parkville',
+  'Baan Balina 3',
 ];
 
 export default function HeroSearch() {

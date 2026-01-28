@@ -255,18 +255,22 @@ model PropertySubmission {
 
 model Post {
   id         String       @id @default(uuid())
+  slug       String       @unique
   title      String
   excerpt    String?
   content    String
   category   PostCategory
   coverImage String?
   published  Boolean      @default(false)
+  authorId   String?      // AgentProfile ID of author
   authorName String?
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
 
+  @@index([slug])
   @@index([category])
   @@index([published])
+  @@index([createdAt])
 }
 
 model AgentProfile {
@@ -532,10 +536,9 @@ enum UserRole {
 }
 
 enum PostCategory {
-  MARKET_TREND
-  INVESTMENT
+  LOCAL_NEWS
   LEGAL
-  NEWS
+  VISA
 }
 
 enum DealQuality {

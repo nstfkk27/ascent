@@ -4,7 +4,7 @@ import { Link } from '@/navigation';
 import { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/utils/supabase/client';
-import { Search, Menu, X, LayoutDashboard, Users, Home, LogOut, Calculator, Building, PlusCircle, Rocket, Upload, Inbox, FileText, MessageSquare, List, Settings, Heart, GitCompare } from 'lucide-react';
+import { Search, Menu, X, LayoutDashboard, Users, Home, LogOut, Calculator, Building, PlusCircle, Rocket, Upload, Inbox, FileText, MessageSquare, List, Settings, Heart, GitCompare, BookOpen } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -258,6 +258,15 @@ export default function Navbar() {
           
           {/* Right Side Buttons */}
           <div className="flex items-center gap-3">
+            {/* Knowledge Link */}
+            <Link
+              href="/knowledge"
+              className="flex items-center gap-1.5 p-2 text-gray-600 hover:text-[#496f5d] transition-colors rounded-full hover:bg-gray-50"
+              title="News & Knowledge"
+            >
+              <BookOpen className="w-5 h-5" />
+            </Link>
+            
             {!user && (
               <Link
                 href="/listing"
@@ -564,6 +573,20 @@ export default function Navbar() {
                   <Link href="/properties?category=INVESTMENT&subtype=RESTAURANT" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Restaurant</Link>
                   <Link href="/properties?category=INVESTMENT&subtype=WELLNESS" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Wellness</Link>
                 </div>
+              </div>
+            </div>
+
+            {/* News & Knowledge */}
+            <div className="space-y-2">
+              <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2 flex items-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                News & Knowledge
+              </div>
+              <div className="pl-4 space-y-1">
+                <Link href="/knowledge" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">All Articles</Link>
+                <Link href="/knowledge?category=LOCAL_NEWS" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Local News</Link>
+                <Link href="/knowledge?category=LEGAL" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Legal</Link>
+                <Link href="/knowledge?category=VISA" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Visa</Link>
               </div>
             </div>
 

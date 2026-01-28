@@ -1,9 +1,12 @@
 import Image from 'next/image';
 import { prisma } from '@/lib/prisma';
-import { MapPin, ArrowRight, User, Calendar, Newspaper, Play, ExternalLink, Home, Users, Star, Quote } from 'lucide-react';
+import { MapPin, ArrowRight, User, Home, Users, Star, Quote } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/navigation';
 import HeroSearch from '@/components/HeroSearch';
+import VideoSection from '@/components/VideoSection';
+import NewsKnowledgeSection from '@/components/NewsKnowledgeSection';
+import PropertyCategoriesSection from '@/components/PropertyCategoriesSection';
 
 interface Agent {
   name: string;
@@ -26,6 +29,7 @@ async function LandingPageContent() {
     { name: "Michael Chen", role: "Real Estate Consultant", color: "bg-blue-100" }
   ];
 
+  // Fetch agents
   try {
     const dbAgents = await prisma.agentProfile.findMany({
       where: { isActive: true },
@@ -44,6 +48,176 @@ async function LandingPageContent() {
     }
   } catch (e) {
     console.warn("Could not fetch agents from DB");
+  }
+
+  // Fetch posts for News & Knowledge section
+  let posts: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    excerpt: string | null;
+    category: 'LOCAL_NEWS' | 'LEGAL' | 'VISA';
+    coverImage: string | null;
+    createdAt: string;
+    authorName: string | null;
+  }> = [];
+
+  try {
+    const dbPosts = await prisma.post.findMany({
+      where: { published: true },
+      orderBy: { createdAt: 'desc' },
+      take: 9, // 3 per category
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        excerpt: true,
+        category: true,
+        coverImage: true,
+        createdAt: true,
+        authorName: true,
+      },
+    });
+    posts = dbPosts.map(p => ({
+      ...p,
+      category: p.category as 'LOCAL_NEWS' | 'LEGAL' | 'VISA',
+      createdAt: p.createdAt.toISOString(),
+    }));
+  } catch (e) {
+    console.warn("Could not fetch posts from DB");
+  }
+
+  // Fetch projects for In Construction section
+  let projects: Array<{
+    id: string;
+    name: string;
+    type: string;
+    city: string;
+    imageUrl: string | null;
+    completionYear: number | null;
+    developer: string | null;
+  }> = [];
+
+  try {
+    const dbProjects = await prisma.project.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        city: true,
+        imageUrl: true,
+        completionYear: true,
+        developer: true,
+      },
+    });
+    projects = dbProjects.map(p => ({
+      ...p,
+      type: p.type as string,
+    }));
+  } catch (e) {
+    console.warn("Could not fetch projects from DB");
+  }
+
+  // Fetch resale properties (not new projects)
+  let resaleProperties: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    price: number;
+    address: string;
+    city: string;
+    size: number;
+    images: string[];
+    category: string;
+    listingType: string;
+    bedrooms: number | null;
+    bathrooms: number | null;
+  }> = [];
+
+  try {
+    const dbResale = await prisma.property.findMany({
+      where: {
+        status: 'AVAILABLE',
+        category: { in: ['CONDO', 'HOUSE'] },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        price: true,
+        address: true,
+        city: true,
+        size: true,
+        images: true,
+        category: true,
+        listingType: true,
+        bedrooms: true,
+        bathrooms: true,
+      },
+    });
+    resaleProperties = dbResale.map(p => ({
+      ...p,
+      price: Number(p.price) || 0,
+      size: Number(p.size) || 0,
+      category: p.category as string,
+      listingType: p.listingType as string,
+    }));
+  } catch (e) {
+    console.warn("Could not fetch resale properties from DB");
+  }
+
+  // Fetch land properties
+  let landProperties: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    price: number;
+    address: string;
+    city: string;
+    size: number;
+    images: string[];
+    category: string;
+    listingType: string;
+    bedrooms: number | null;
+    bathrooms: number | null;
+  }> = [];
+
+  try {
+    const dbLand = await prisma.property.findMany({
+      where: {
+        status: 'AVAILABLE',
+        category: 'LAND',
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        price: true,
+        address: true,
+        city: true,
+        size: true,
+        images: true,
+        category: true,
+        listingType: true,
+        bedrooms: true,
+        bathrooms: true,
+      },
+    });
+    landProperties = dbLand.map(p => ({
+      ...p,
+      price: Number(p.price) || 0,
+      size: Number(p.size) || 0,
+      category: p.category as string,
+      listingType: p.listingType as string,
+    }));
+  } catch (e) {
+    console.warn("Could not fetch land properties from DB");
   }
 
   return (
@@ -109,70 +283,12 @@ async function LandingPageContent() {
         </div>
       </section>
 
-      {/* 2. Search Feature Section */}
-      <section className="py-24 bg-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-          <div className="flex flex-col lg:flex-row items-center gap-16">
-            <div className="lg:w-1/2">
-              <h2 className="text-3xl font-bold text-[#496f5d] mb-2 uppercase tracking-wide text-sm">{t('featureTitle')}</h2>
-              <h3 className="text-4xl md:text-5xl font-bold text-[#49516f] mb-6">
-                {t('featureSubtitle')} <span className="underline decoration-[#496f5d] decoration-4 underline-offset-4">{t('featureSubtitleHighlight')}</span>
-              </h3>
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                {t('featureDescription')}
-              </p>
-              
-              <ul className="space-y-4 mb-10">
-                {[
-                  t('feature1'),
-                  t('feature2'),
-                  t('feature3')
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center text-gray-700 font-medium">
-                    <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center mr-3">
-                      <svg className="w-4 h-4 text-[#496f5d]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-
-              <Link
-                href="/search"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-semibold rounded-lg text-white bg-[#49516f] hover:bg-[#384059] transition-all"
-              >
-                {t('ctaMap')}
-              </Link>
-            </div>
-
-            <div className="lg:w-1/2 w-full">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white bg-gray-100 aspect-[4/3] group">
-                {/* Simulated Map Interface */}
-                <div className="absolute inset-0 bg-slate-200 flex items-center justify-center">
-                    <div className="text-center">
-                        <MapPin className="w-16 h-16 text-[#496f5d] mx-auto mb-4 animate-bounce" />
-                        <span className="text-gray-500 font-medium">Interactive Map Preview</span>
-                    </div>
-                </div>
-                {/* Overlay Elements imitating UI */}
-                <div className="absolute top-4 left-4 right-4 flex gap-2">
-                    <div className="h-10 bg-white/90 backdrop-blur rounded-lg flex-1 shadow-sm"></div>
-                    <div className="h-10 w-10 bg-[#496f5d] rounded-lg shadow-sm"></div>
-                </div>
-                <div className="absolute bottom-4 left-4 right-4 h-32 bg-white/90 backdrop-blur rounded-xl shadow-lg p-4">
-                    <div className="w-1/2 h-4 bg-gray-200 rounded mb-2"></div>
-                    <div className="w-3/4 h-3 bg-gray-100 rounded"></div>
-                </div>
-                
-                {/* Hover Effect */}
-                <div className="absolute inset-0 bg-[#496f5d]/0 group-hover:bg-[#496f5d]/10 transition-colors duration-300 pointer-events-none"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* 2. Property Categories Section */}
+      <PropertyCategoriesSection 
+        projects={projects}
+        resaleProperties={resaleProperties}
+        landProperties={landProperties}
+      />
 
       {/* 3. Motto Section */}
       <section className="py-32 bg-[#49516f] relative overflow-hidden">
@@ -188,72 +304,8 @@ async function LandingPageContent() {
         </div>
       </section>
 
-      {/* 4. News and Articles */}
-      <section className="py-24 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
-          <div className="flex justify-between items-end mb-12">
-            <div>
-              <h2 className="text-3xl font-bold text-[#49516f]">{t('marketInsights')}</h2>
-              <p className="mt-2 text-gray-600">{t('marketInsightsSub')}</p>
-            </div>
-            <Link href="#" className="hidden md:flex items-center text-[#496f5d] font-semibold hover:underline">
-              {t('viewArticles')} <ArrowRight className="ml-2 w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Why Pattaya&apos;s Condo Market is Booming in 2025",
-                category: "Market Trend",
-                date: "Dec 8, 2025",
-                image: "bg-blue-100"
-              },
-              {
-                title: "Top 5 Areas for High ROI Investment",
-                category: "Investment",
-                date: "Dec 5, 2025",
-                image: "bg-green-100"
-              },
-              {
-                title: "New Foreign Ownership Laws Explained",
-                category: "Legal",
-                date: "Nov 28, 2025",
-                image: "bg-orange-100"
-              }
-            ].map((article, i) => (
-              <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer border border-gray-100">
-                <div className={`h-48 ${article.image} relative overflow-hidden`}>
-                    <div className="absolute inset-0 bg-gray-200 flex items-center justify-center text-gray-400 group-hover:scale-105 transition-transform duration-500">
-                        <Newspaper className="w-12 h-12 opacity-50" />
-                    </div>
-                </div>
-                <div className="p-6">
-                  <div className="flex items-center text-xs font-semibold text-[#496f5d] mb-3 uppercase tracking-wider">
-                    {article.category}
-                    <span className="mx-2 text-gray-300">•</span>
-                    <span className="text-gray-400 flex items-center normal-case font-normal">
-                        <Calendar className="w-3 h-3 mr-1" /> {article.date}
-                    </span>
-                  </div>
-                  <h3 className="text-xl font-bold text-[#49516f] mb-3 group-hover:text-[#496f5d] transition-colors">
-                    {article.title}
-                  </h3>
-                  <p className="text-gray-500 text-sm line-clamp-2">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="mt-8 text-center md:hidden">
-            <Link href="#" className="inline-flex items-center text-[#496f5d] font-semibold hover:underline">
-              {t('viewArticles')} <ArrowRight className="ml-2 w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* 4. News and Knowledge */}
+      <NewsKnowledgeSection posts={posts} />
 
       {/* 5. Our Agents */}
       <section className="py-24 bg-white border-t border-gray-100">
@@ -310,151 +362,91 @@ async function LandingPageContent() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* Phone UI Testimonials - Horizontal scroll on mobile, 3 in row on desktop */}
+          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
             {[
               {
-                name: "Michael Thompson",
-                role: "Property Investor, UK",
-                text: "Found my dream pool villa in Jomtien within 2 weeks. The team understood exactly what I was looking for and made the whole process seamless.",
+                name: "Arron",
+                role: "Villa Tenant",
+                text: "I rent a villa with Stefan, he verified all the documents needed for me and helped me to get a villa that I wanted.",
                 rating: 5,
-                image: null
               },
               {
-                name: "Anna Petrov",
-                role: "Condo Owner, Russia",
-                text: "Professional service from start to finish. They helped me find a great investment condo with excellent rental yield. Highly recommend!",
+                name: "Flavio",
+                role: "Condo Owner",
+                text: "I saw Nicky taking a photo of a building, he looked sharp and professional so I asked him for his WhatsApp. Later on we bought a condo with him.",
                 rating: 5,
-                image: null
               },
               {
-                name: "David Chen",
-                role: "Business Owner, Singapore",
-                text: "Bought a commercial property for my business. Their market knowledge and negotiation skills saved me significant money. True professionals.",
+                name: "Tony and Da",
+                role: "Condo Owners",
+                text: "We walked by their office and they seemed nice. I was looking for a nice seaview and they introduced me to Riviera Jomtien - it's perfect for me.",
                 rating: 5,
-                image: null
               }
             ].map((testimonial, i) => (
-              <div key={i} className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 relative">
-                <div className="absolute -top-4 left-8">
-                  <div className="w-8 h-8 bg-[#496f5d] rounded-full flex items-center justify-center">
-                    <Quote className="w-4 h-4 text-white" />
-                  </div>
-                </div>
-                
-                <div className="flex gap-1 mb-4 mt-2">
-                  {[...Array(testimonial.rating)].map((_, j) => (
-                    <Star key={j} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                
-                <p className="text-gray-600 mb-6 leading-relaxed">
-                  &quot;{testimonial.text}&quot;
-                </p>
-                
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#496f5d] to-[#49516f] rounded-full flex items-center justify-center text-white font-bold">
-                    {testimonial.name.split(' ').map(n => n[0]).join('')}
-                  </div>
-                  <div>
-                    <div className="font-semibold text-[#49516f]">{testimonial.name}</div>
-                    <div className="text-sm text-gray-500">{testimonial.role}</div>
+              <div key={i} className="flex-shrink-0 w-[280px] md:w-auto snap-center">
+                {/* Phone Frame */}
+                <div className="relative mx-auto">
+                  {/* Phone outer frame */}
+                  <div className="bg-gray-900 rounded-[2.5rem] p-2 shadow-2xl">
+                    {/* Phone inner bezel */}
+                    <div className="bg-gray-800 rounded-[2rem] p-1">
+                      {/* Phone screen */}
+                      <div className="bg-white rounded-[1.75rem] overflow-hidden">
+                        {/* Notch */}
+                        <div className="flex justify-center pt-2 pb-1 bg-white">
+                          <div className="w-20 h-6 bg-gray-900 rounded-full"></div>
+                        </div>
+                        
+                        {/* Content */}
+                        <div className="px-5 pb-6 pt-2">
+                          {/* Stars */}
+                          <div className="flex gap-1 mb-3 justify-center">
+                            {[...Array(testimonial.rating)].map((_, j) => (
+                              <Star key={j} className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                            ))}
+                          </div>
+                          
+                          {/* Quote */}
+                          <p className="text-gray-600 text-sm leading-relaxed text-center mb-4">
+                            &quot;{testimonial.text}&quot;
+                          </p>
+                          
+                          {/* Divider */}
+                          <div className="w-12 h-0.5 bg-[#496f5d]/20 mx-auto mb-4"></div>
+                          
+                          {/* Author */}
+                          <div className="text-center">
+                            <div className="w-10 h-10 bg-gradient-to-br from-[#496f5d] to-[#49516f] rounded-full flex items-center justify-center text-white font-bold text-sm mx-auto mb-2">
+                              {testimonial.name.split(' ').map(n => n[0]).join('')}
+                            </div>
+                            <div className="font-semibold text-[#49516f] text-sm">{testimonial.name}</div>
+                            <div className="text-xs text-gray-500">{testimonial.role}</div>
+                          </div>
+                        </div>
+                        
+                        {/* Home indicator */}
+                        <div className="flex justify-center pb-2">
+                          <div className="w-24 h-1 bg-gray-300 rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             ))}
           </div>
+          
+          {/* Scroll indicator for mobile */}
+          <div className="flex justify-center gap-2 mt-4 md:hidden">
+            <span className="text-xs text-gray-400">Swipe to see more</span>
+            <ArrowRight className="w-4 h-4 text-gray-400" />
+          </div>
         </div>
       </section>
 
       {/* 7. Video Reels / Social Content */}
-      <section className="py-24 bg-gradient-to-br from-gray-900 via-[#49516f] to-gray-900 relative overflow-hidden">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-              <Play className="w-4 h-4 text-white" />
-              <span className="text-white/90 text-sm font-medium">Watch & Learn</span>
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              Pattaya Property Insights
-            </h2>
-            <p className="text-gray-300 max-w-2xl mx-auto">
-              Quick tours, market tips, and local insights from our team
-            </p>
-          </div>
-
-          {/* Video Reels Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {[
-              { title: "Jomtien Beach Walk", views: "12K", duration: "0:45", gradient: "from-blue-500 to-cyan-400" },
-              { title: "Pool Villa Tour", views: "8.5K", duration: "1:20", gradient: "from-emerald-500 to-teal-400" },
-              { title: "Condo Market 2025", views: "15K", duration: "0:58", gradient: "from-purple-500 to-pink-400" },
-              { title: "Investment Tips", views: "22K", duration: "1:05", gradient: "from-orange-500 to-red-400" },
-            ].map((video, i) => (
-              <a 
-                key={i} 
-                href="#" 
-                className="group relative aspect-[9/16] rounded-2xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-[1.02]"
-              >
-                {/* Gradient Background */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${video.gradient} opacity-80`}></div>
-                
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300">
-                    <Play className="w-6 h-6 text-white fill-white ml-1" />
-                  </div>
-                </div>
-
-                {/* Duration Badge */}
-                <div className="absolute top-3 right-3 bg-black/50 backdrop-blur-sm rounded-md px-2 py-1">
-                  <span className="text-white text-xs font-medium">{video.duration}</span>
-                </div>
-
-                {/* Bottom Info */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
-                  <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2">{video.title}</h3>
-                  <p className="text-white/70 text-xs">{video.views} views</p>
-                </div>
-              </a>
-            ))}
-          </div>
-
-          {/* Social Links */}
-          <div className="mt-12 flex flex-wrap justify-center gap-4">
-            <a 
-              href="#" 
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-6 py-3 rounded-full transition-all duration-300 border border-white/20"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005 20.1a6.34 6.34 0 0010.86-4.43v-7a8.16 8.16 0 004.77 1.52v-3.4a4.85 4.85 0 01-1-.1z"/>
-              </svg>
-              <span className="font-medium">TikTok</span>
-              <ExternalLink className="w-4 h-4 opacity-50" />
-            </a>
-            <a 
-              href="#" 
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-6 py-3 rounded-full transition-all duration-300 border border-white/20"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
-              </svg>
-              <span className="font-medium">Instagram</span>
-              <ExternalLink className="w-4 h-4 opacity-50" />
-            </a>
-            <a 
-              href="#" 
-              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white px-6 py-3 rounded-full transition-all duration-300 border border-white/20"
-            >
-              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-              </svg>
-              <span className="font-medium">YouTube</span>
-              <ExternalLink className="w-4 h-4 opacity-50" />
-            </a>
-          </div>
-        </div>
-      </section>
+      <VideoSection />
 
     </main>
   );
