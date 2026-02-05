@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight, Building2, Home, MapPin, Calendar } from 'lucide-react';
 import { createCompoundSlug } from '@/utils/propertyHelpers';
+import PropertyCard from '@/components/PropertyCard';
 
 interface Project {
   id: string;
@@ -18,25 +19,38 @@ interface Property {
   slug: string;
   title: string;
   price: number;
+  rentPrice?: number | undefined;
   address: string;
   city: string;
+  state?: string;
   size: number;
   images: string[];
   category: string;
   listingType: string;
   bedrooms?: number | null;
   bathrooms?: number | null;
+  createdAt?: string;
+  updatedAt?: string;
+  lastVerifiedAt?: string;
+  featured?: boolean;
+  dealQuality?: string | null;
+  overallScore?: number | null;
+  estimatedRentalYield?: number | null;
+  agentCommissionRate?: number | null;
+  commissionAmount?: number | null;
+  viewCount?: number | null;
+  enquiryCount?: number | null;
 }
 
 interface PropertyCategoriesSectionProps {
   projects: Project[];
-  resaleProperties: Property[];
+  rentalProperties: Property[];
   landProperties: Property[];
 }
 
 export default function PropertyCategoriesSection({ 
   projects, 
-  resaleProperties, 
+  rentalProperties, 
   landProperties 
 }: PropertyCategoriesSectionProps) {
   return (
@@ -49,7 +63,7 @@ export default function PropertyCategoriesSection({
             Find Your Perfect Property
           </h3>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            From new developments to resale properties and land opportunities
+            From new developments to rental properties and land opportunities
           </p>
         </div>
 
@@ -88,26 +102,28 @@ export default function PropertyCategoriesSection({
           </Link>
         </div>
 
-        {/* Resale Property Section */}
+        {/* Property for rent Section */}
         <div className="mb-16">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
                 <Home className="w-5 h-5 text-blue-600" />
               </div>
-              <h4 className="text-2xl font-bold text-[#49516f]">Resale Property</h4>
+              <h4 className="text-2xl font-bold text-[#49516f]">Property for rent</h4>
             </div>
             <Link 
-              href="/properties?newProject=false"
+              href="/properties?listingType=RENT"
               className="hidden md:flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
             >
               View All <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
           <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
-            {resaleProperties.length > 0 ? (
-              resaleProperties.slice(0, 4).map((property) => (
-                <PropertyCardMini key={property.id} property={property} />
+            {rentalProperties.length > 0 ? (
+              rentalProperties.slice(0, 4).map((property) => (
+                <div key={property.id} className="flex-shrink-0 w-[300px] md:w-auto snap-center">
+                  <PropertyCard property={property as any} showScores={true} />
+                </div>
               ))
             ) : (
               [...Array(4)].map((_, i) => (
@@ -116,7 +132,7 @@ export default function PropertyCategoriesSection({
             )}
           </div>
           <Link 
-            href="/properties?newProject=false"
+            href="/properties?listingType=RENT"
             className="flex md:hidden items-center justify-center gap-2 text-[#496f5d] font-semibold mt-4"
           >
             View All Properties <ArrowRight className="w-4 h-4" />
@@ -142,7 +158,9 @@ export default function PropertyCategoriesSection({
           <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
             {landProperties.length > 0 ? (
               landProperties.slice(0, 4).map((property) => (
-                <PropertyCardMini key={property.id} property={property} isLand />
+                <div key={property.id} className="flex-shrink-0 w-[300px] md:w-auto snap-center">
+                  <PropertyCard property={property as any} showScores={true} />
+                </div>
               ))
             ) : (
               [...Array(4)].map((_, i) => (
@@ -277,7 +295,10 @@ function PropertyCardMini({ property, isLand = false }: { property: Property; is
           {/* Price */}
           <div className="flex items-center justify-between pt-3 border-t border-gray-100">
             <span className="text-lg font-bold text-[#496f5d]">
-              ฿{Number(property.price).toLocaleString()}
+              {property.listingType === 'RENT' 
+                ? `฿${Number(property.rentPrice || property.price).toLocaleString()}/mo`
+                : `฿${Number(property.price).toLocaleString()}`
+              }
             </span>
             <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-[#496f5d] group-hover:translate-x-1 transition-all" />
           </div>
@@ -327,10 +348,10 @@ function ProjectCardPlaceholder({ index }: { index: number }) {
 
 function PropertyCardPlaceholder({ index }: { index: number }) {
   const placeholders = [
-    { title: 'Modern Condo Jomtien', city: 'Jomtien', price: 3500000 },
-    { title: 'Sea View Apartment', city: 'Pratumnak', price: 4200000 },
-    { title: 'Pool Villa East Pattaya', city: 'East Pattaya', price: 8500000 },
-    { title: 'Beachfront Condo', city: 'Na Jomtien', price: 5900000 },
+    { title: 'Modern Condo Jomtien', city: 'Jomtien', price: 15000 },
+    { title: 'Sea View Apartment', city: 'Pratumnak', price: 22000 },
+    { title: 'Pool Villa East Pattaya', city: 'East Pattaya', price: 35000 },
+    { title: 'Beachfront Condo', city: 'Na Jomtien', price: 28000 },
   ];
   const p = placeholders[index] || placeholders[0];
   
@@ -340,7 +361,7 @@ function PropertyCardPlaceholder({ index }: { index: number }) {
         <div className="relative h-48 bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
           <Home className="w-16 h-16 text-blue-200" />
           <div className="absolute top-3 left-3">
-            <span className="px-2.5 py-1 bg-blue-400 text-white text-xs font-bold rounded-full">For Sale</span>
+            <span className="px-2.5 py-1 bg-blue-400 text-white text-xs font-bold rounded-full">For Rent</span>
           </div>
           <div className="absolute top-3 right-3">
             <span className="px-2.5 py-1 bg-white/80 text-gray-600 text-xs font-medium rounded-full">{p.city}</span>

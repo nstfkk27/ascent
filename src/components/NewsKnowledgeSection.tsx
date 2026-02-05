@@ -20,29 +20,32 @@ interface NewsKnowledgeSectionProps {
 }
 
 const TABS = [
+  { id: 'ALL', label: 'All', icon: Newspaper },
   { id: 'LOCAL_NEWS', label: 'Local News', icon: Newspaper },
   { id: 'LEGAL', label: 'Legal', icon: Scale },
   { id: 'VISA', label: 'Visa', icon: Plane },
 ] as const;
 
-type TabId = 'LOCAL_NEWS' | 'LEGAL' | 'VISA';
+type TabId = 'ALL' | 'LOCAL_NEWS' | 'LEGAL' | 'VISA';
 
 const CATEGORY_COLORS: Record<TabId, string> = {
+  ALL: 'bg-gray-100 text-gray-700',
   LOCAL_NEWS: 'bg-blue-100 text-blue-700',
   LEGAL: 'bg-orange-100 text-orange-700',
   VISA: 'bg-purple-100 text-purple-700',
 };
 
 const CATEGORY_LABELS: Record<TabId, string> = {
+  ALL: 'All',
   LOCAL_NEWS: 'Local News',
   LEGAL: 'Legal',
   VISA: 'Visa',
 };
 
 export default function NewsKnowledgeSection({ posts }: NewsKnowledgeSectionProps) {
-  const [activeTab, setActiveTab] = useState<TabId>('LOCAL_NEWS');
+  const [activeTab, setActiveTab] = useState<TabId>('ALL');
 
-  const filteredPosts = posts.filter(p => p.category === activeTab);
+  const filteredPosts = activeTab === 'ALL' ? posts : posts.filter(p => p.category === activeTab);
 
   // Get placeholder posts if no real posts exist
   const displayPosts = filteredPosts.length > 0 ? filteredPosts : getPlaceholderPosts(activeTab);
@@ -169,6 +172,7 @@ export default function NewsKnowledgeSection({ posts }: NewsKnowledgeSectionProp
 // Placeholder posts when no real posts exist
 function getPlaceholderPosts(category: TabId): Post[] {
   const placeholders: Record<TabId, Post[]> = {
+    ALL: [],
     LOCAL_NEWS: [
       {
         id: 'placeholder-1',
@@ -266,6 +270,15 @@ function getPlaceholderPosts(category: TabId): Post[] {
       },
     ],
   };
+
+  // For ALL tab, combine one from each category
+  if (category === 'ALL') {
+    return [
+      placeholders.LOCAL_NEWS[0],
+      placeholders.LEGAL[0],
+      placeholders.VISA[0],
+    ];
+  }
 
   return placeholders[category];
 }

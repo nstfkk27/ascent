@@ -16,7 +16,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const uuidFragment = extractIdFromSlug(params.id);
     const propertyId = uuidFragment || params.id;
 
-    const property = await prisma.property.findUnique({
+    let property = await prisma.property.findUnique({
       where: { id: propertyId },
       select: {
         id: true,
@@ -43,6 +43,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         petFriendly: true,
       },
     });
+
+    // If not found and looks like a UUID fragment, try startsWith search
+    if (!property && propertyId.length >= 8 && propertyId.length <= 12 && /^[a-z0-9]+$/i.test(propertyId)) {
+      const properties = await prisma.property.findMany({
+        where: {
+          id: { startsWith: propertyId },
+        },
+        take: 1,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          price: true,
+          rentPrice: true,
+          category: true,
+          listingType: true,
+          status: true,
+          bedrooms: true,
+          bathrooms: true,
+          size: true,
+          floor: true,
+          city: true,
+          area: true,
+          state: true,
+          address: true,
+          latitude: true,
+          longitude: true,
+          images: true,
+          furnished: true,
+          petFriendly: true,
+        },
+      });
+      property = properties[0] || null;
+    }
 
     if (!property) {
       return {
@@ -79,7 +114,7 @@ export default async function PropertyLayout({ params, children }: Props) {
     const uuidFragment = extractIdFromSlug(params.id);
     const propertyId = uuidFragment || params.id;
 
-    const property = await prisma.property.findUnique({
+    let property = await prisma.property.findUnique({
       where: { id: propertyId },
       select: {
         id: true,
@@ -106,6 +141,41 @@ export default async function PropertyLayout({ params, children }: Props) {
         petFriendly: true,
       },
     });
+
+    // If not found and looks like a UUID fragment, try startsWith search
+    if (!property && propertyId.length >= 8 && propertyId.length <= 12 && /^[a-z0-9]+$/i.test(propertyId)) {
+      const properties = await prisma.property.findMany({
+        where: {
+          id: { startsWith: propertyId },
+        },
+        take: 1,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          description: true,
+          price: true,
+          rentPrice: true,
+          category: true,
+          listingType: true,
+          status: true,
+          bedrooms: true,
+          bathrooms: true,
+          size: true,
+          floor: true,
+          city: true,
+          area: true,
+          state: true,
+          address: true,
+          latitude: true,
+          longitude: true,
+          images: true,
+          furnished: true,
+          petFriendly: true,
+        },
+      });
+      property = properties[0] || null;
+    }
 
     if (property) {
       // Convert Decimal to number for schema generation

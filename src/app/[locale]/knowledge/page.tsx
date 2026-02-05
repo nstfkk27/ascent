@@ -1,7 +1,8 @@
 import { prisma } from '@/lib/prisma';
-import { Newspaper, Scale, Plane, ArrowLeft, Calendar, User } from 'lucide-react';
+import { Newspaper, Scale, Plane, ArrowLeft, Calendar, User, Search } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
+import SearchBar from './SearchBar';
 
 const CATEGORY_COLORS = {
   LOCAL_NEWS: 'bg-blue-100 text-blue-700',
@@ -24,12 +25,13 @@ const CATEGORY_ICONS = {
 type PostCategory = 'LOCAL_NEWS' | 'LEGAL' | 'VISA';
 
 interface PageProps {
-  searchParams: Promise<{ category?: string }>;
+  searchParams: Promise<{ category?: string; q?: string }>;
 }
 
 export default async function KnowledgePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const categoryFilter = params.category as PostCategory | undefined;
+  const searchQuery = params.q?.trim();
 
   let posts: Array<{
     id: string;
@@ -43,9 +45,19 @@ export default async function KnowledgePage({ searchParams }: PageProps) {
   }> = [];
 
   try {
-    const whereClause: { published: boolean; category?: PostCategory } = { published: true };
+    const whereClause: any = { published: true };
+    
     if (categoryFilter && ['LOCAL_NEWS', 'LEGAL', 'VISA'].includes(categoryFilter)) {
       whereClause.category = categoryFilter;
+    }
+
+    // Add search functionality
+    if (searchQuery) {
+      whereClause.OR = [
+        { title: { contains: searchQuery, mode: 'insensitive' } },
+        { excerpt: { contains: searchQuery, mode: 'insensitive' } },
+        { content: { contains: searchQuery, mode: 'insensitive' } },
+      ];
     }
 
     posts = await prisma.post.findMany({
@@ -98,6 +110,9 @@ export default async function KnowledgePage({ searchParams }: PageProps) {
 
       {/* Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-12">
+        {/* Search Bar */}
+        <SearchBar />
+
         {/* Category Filter Tabs */}
         <div className="flex justify-center mb-12">
           <div className="inline-flex flex-wrap justify-center gap-2 bg-white rounded-2xl p-2 shadow-lg border border-gray-100">

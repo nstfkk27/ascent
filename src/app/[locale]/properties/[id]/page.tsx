@@ -5,12 +5,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Property } from '@/types/property';
 import PropertyActions from '@/components/property/PropertyActions';
+import ImageGalleryModal from '@/components/property/ImageGalleryModal';
 import { extractIdFromSlug } from '@/utils/propertyHelpers';
 import { PROPERTY_HIGHLIGHTS } from '@/lib/highlights';
 import NearbyPOIs from '@/components/property/NearbyPOIs';
 
 export default function PropertyDetailPage({ params }: { params: { id: string } }) {
   const [selectedImage, setSelectedImage] = useState(0);
+  const [showModal, setShowModal] = useState(false);
   const [property, setProperty] = useState<Property | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -182,18 +184,29 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
               </div>
 
               {/* Main Image */}
-              <div className="relative h-[300px] sm:h-[400px] lg:h-[500px] bg-gray-200">
+              <div 
+                className="relative h-[300px] sm:h-[400px] lg:h-[500px] bg-gray-200 cursor-pointer group"
+                onClick={() => setShowModal(true)}
+              >
                 <Image
                   src={property.images[selectedImage]}
                   alt={property.title}
                   fill
-                  className="object-cover"
+                  className="object-cover group-hover:opacity-90 transition-opacity"
                 />
                 {property.featured && (
                   <span className="absolute top-4 left-4 px-4 py-2 bg-red-500 text-white text-sm font-bold rounded-full shadow-lg">
                     HOT DEAL
                   </span>
                 )}
+                {/* Expand Icon */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="bg-white/90 rounded-full p-3">
+                    <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 20v4m0 0h4m-4 0l5-5m11 5v-4m0 4h-4m4 0l-5-5" />
+                    </svg>
+                  </div>
+                </div>
               </div>
 
               {/* Thumbnail Grid */}
@@ -745,6 +758,16 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
           </div>
         </div>
       </div>
+
+      {/* Image Gallery Modal */}
+      {showModal && property && (
+        <ImageGalleryModal
+          images={property.images}
+          title={property.title}
+          initialIndex={selectedImage}
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </div>
   );
 }

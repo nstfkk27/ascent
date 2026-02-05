@@ -120,26 +120,41 @@ async function LandingPageContent() {
     console.warn("Could not fetch projects from DB");
   }
 
-  // Fetch resale properties (not new projects)
-  let resaleProperties: Array<{
+  // Fetch rental properties
+  let rentalProperties: Array<{
     id: string;
     slug: string;
     title: string;
     price: number;
+    rentPrice?: number | undefined;
     address: string;
     city: string;
+    state: string;
+    area?: string | null;
     size: number;
     images: string[];
     category: string;
     listingType: string;
     bedrooms: number | null;
     bathrooms: number | null;
+    createdAt?: string;
+    updatedAt?: string;
+    lastVerifiedAt?: string;
+    featured?: boolean;
+    dealQuality?: string | null;
+    overallScore?: number | null;
+    estimatedRentalYield?: number | null;
+    agentCommissionRate?: number | null;
+    commissionAmount?: number | null;
+    viewCount?: number | null;
+    enquiryCount?: number | null;
   }> = [];
 
   try {
-    const dbResale = await prisma.property.findMany({
+    const dbRental = await prisma.property.findMany({
       where: {
         status: 'AVAILABLE',
+        listingType: 'RENT',
         category: { in: ['CONDO', 'HOUSE'] },
       },
       orderBy: { createdAt: 'desc' },
@@ -149,25 +164,45 @@ async function LandingPageContent() {
         slug: true,
         title: true,
         price: true,
+        rentPrice: true,
         address: true,
         city: true,
+        state: true,
+        area: true,
         size: true,
         images: true,
         category: true,
         listingType: true,
         bedrooms: true,
         bathrooms: true,
+        createdAt: true,
+        updatedAt: true,
+        lastVerifiedAt: true,
+        featured: true,
+        dealQuality: true,
+        overallScore: true,
+        estimatedRentalYield: true,
+        agentCommissionRate: true,
+        commissionAmount: true,
       },
     });
-    resaleProperties = dbResale.map(p => ({
+    rentalProperties = dbRental.map(p => ({
       ...p,
       price: Number(p.price) || 0,
+      rentPrice: Number(p.rentPrice) || undefined,
       size: Number(p.size) || 0,
       category: p.category as string,
       listingType: p.listingType as string,
+      createdAt: p.createdAt?.toISOString(),
+      updatedAt: p.updatedAt?.toISOString(),
+      lastVerifiedAt: p.lastVerifiedAt?.toISOString(),
+      overallScore: p.overallScore ? Number(p.overallScore) : undefined,
+      estimatedRentalYield: p.estimatedRentalYield ? Number(p.estimatedRentalYield) : undefined,
+      agentCommissionRate: p.agentCommissionRate ? Number(p.agentCommissionRate) : undefined,
+      commissionAmount: p.commissionAmount ? Number(p.commissionAmount) : undefined,
     }));
   } catch (e) {
-    console.warn("Could not fetch resale properties from DB");
+    console.warn("Could not fetch rental properties from DB");
   }
 
   // Fetch land properties
@@ -176,14 +211,26 @@ async function LandingPageContent() {
     slug: string;
     title: string;
     price: number;
+    rentPrice?: number | undefined;
     address: string;
     city: string;
+    state: string;
+    area?: string | null;
     size: number;
     images: string[];
     category: string;
     listingType: string;
     bedrooms: number | null;
     bathrooms: number | null;
+    createdAt?: string;
+    updatedAt?: string;
+    lastVerifiedAt?: string;
+    featured?: boolean;
+    dealQuality?: string | null;
+    overallScore?: number | null;
+    estimatedRentalYield?: number | null;
+    agentCommissionRate?: number | null;
+    commissionAmount?: number | null;
   }> = [];
 
   try {
@@ -199,22 +246,42 @@ async function LandingPageContent() {
         slug: true,
         title: true,
         price: true,
+        rentPrice: true,
         address: true,
         city: true,
+        state: true,
+        area: true,
         size: true,
         images: true,
         category: true,
         listingType: true,
         bedrooms: true,
         bathrooms: true,
+        createdAt: true,
+        updatedAt: true,
+        lastVerifiedAt: true,
+        featured: true,
+        dealQuality: true,
+        overallScore: true,
+        estimatedRentalYield: true,
+        agentCommissionRate: true,
+        commissionAmount: true,
       },
     });
     landProperties = dbLand.map(p => ({
       ...p,
       price: Number(p.price) || 0,
+      rentPrice: Number(p.rentPrice) || undefined,
       size: Number(p.size) || 0,
       category: p.category as string,
       listingType: p.listingType as string,
+      createdAt: p.createdAt?.toISOString(),
+      updatedAt: p.updatedAt?.toISOString(),
+      lastVerifiedAt: p.lastVerifiedAt?.toISOString(),
+      overallScore: p.overallScore ? Number(p.overallScore) : undefined,
+      estimatedRentalYield: p.estimatedRentalYield ? Number(p.estimatedRentalYield) : undefined,
+      agentCommissionRate: p.agentCommissionRate ? Number(p.agentCommissionRate) : undefined,
+      commissionAmount: p.commissionAmount ? Number(p.commissionAmount) : undefined,
     }));
   } catch (e) {
     console.warn("Could not fetch land properties from DB");
@@ -286,7 +353,7 @@ async function LandingPageContent() {
       {/* 2. Property Categories Section */}
       <PropertyCategoriesSection 
         projects={projects}
-        resaleProperties={resaleProperties}
+        rentalProperties={rentalProperties}
         landProperties={landProperties}
       />
 
