@@ -433,7 +433,7 @@ async function LandingPageContent() {
           <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
             {[
               {
-                name: "Arron",
+                name: "Paul",
                 role: "Villa Tenant",
                 text: "I rent a villa with Stefan, he verified all the documents needed for me and helped me to get a villa that I wanted.",
                 rating: 5,
