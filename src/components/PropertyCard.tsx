@@ -63,7 +63,6 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
 
   const handleTouchStart = (e: TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
-    setIsImageSwiping(false);
   };
 
   const handleTouchMove = (e: TouchEvent) => {
@@ -71,12 +70,12 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
   };
 
   const handleTouchEnd = (e: TouchEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
     const diff = touchStartX.current - touchEndX.current;
     const threshold = 50;
 
     if (Math.abs(diff) > threshold) {
+      e.preventDefault();
+      e.stopPropagation();
       setIsImageSwiping(true);
       if (diff > 0 && currentImageIndex < images.length - 1) {
         setCurrentImageIndex(prev => prev + 1);
@@ -90,7 +89,8 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
     if (isImageSwiping) {
       e.preventDefault();
       e.stopPropagation();
-      setIsImageSwiping(false);
+      setTimeout(() => setIsImageSwiping(false), 0);
+      return false;
     }
   };
 
