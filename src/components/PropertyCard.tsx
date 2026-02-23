@@ -3,6 +3,7 @@
 import { useState, useRef, TouchEvent } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Bed, Bath, Ruler, MapPin } from 'lucide-react';
 import { PROPERTY_SUBTYPES, PROPERTY_CATEGORIES } from '@/lib/constants';
 import PropertyActions from '@/components/property/PropertyActions';
 import { createCompoundSlug } from '@/utils/propertyHelpers';
@@ -140,8 +141,8 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
     : `/properties/${property.id}`;
   
   return (
-    <Link href={propertyUrl} className="block group h-full">
-      <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] h-full flex flex-col">
+    <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] h-full flex flex-col group">
+      <Link href={propertyUrl} className="block h-full flex flex-col">
         <div 
           className="relative h-56 sm:h-64 overflow-hidden flex-shrink-0"
           onTouchStart={handleTouchStart}
@@ -188,24 +189,6 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
             <span className={`px-3 py-1.5 rounded-full text-xs font-bold shadow-premium backdrop-blur-sm ${getCategoryColor(property.category)}`}>
               {property.category}
             </span>
-            {showScores && property.dealQuality && property.dealQuality !== 'FAIR' && (
-              <span className={`px-2 py-1 rounded-full text-xs font-bold shadow-sm ${
-                property.dealQuality === 'SUPER_DEAL' ? 'bg-green-500 text-white' :
-                property.dealQuality === 'GOOD_VALUE' ? 'bg-emerald-400 text-white' :
-                property.dealQuality === 'HIGH_YIELD' ? 'bg-amber-500 text-white' :
-                'bg-red-400 text-white'
-              }`}>
-                {property.dealQuality === 'SUPER_DEAL' ? '🔥 Super Deal' :
-                 property.dealQuality === 'GOOD_VALUE' ? '✓ Good Value' :
-                 property.dealQuality === 'HIGH_YIELD' ? '📈 High Yield' :
-                 '⚠️ Overpriced'}
-              </span>
-            )}
-            {(property.agentCommissionRate && property.agentCommissionRate > 0) || (property.commissionAmount && property.commissionAmount > 0) ? (
-              <span className="px-2 py-1 rounded-full text-xs font-bold shadow-sm bg-blue-500 text-white backdrop-blur-sm">
-                💰 Commission
-              </span>
-            ) : null}
           </div>
           <div className="absolute top-4 left-4 flex flex-col gap-1.5 items-start">
             <span className="glass px-3 py-1.5 rounded-full text-xs font-bold text-gray-700 shadow-soft">
@@ -225,75 +208,39 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
           
         </div>
         <div className="p-3 sm:p-4 flex-1 flex flex-col justify-between">
-          {/* Location - Top */}
-          <p className="text-xs text-gray-500 flex items-center gap-1 line-clamp-1 mb-2">
-            <svg className="w-3 h-3 text-primary-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            <span className="truncate">{property.area || property.city}</span>
-          </p>
-
           {/* Title Section */}
           <div>
-            <h3 className="text-base font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors duration-300 mb-2">
+            <h3 className="text-lg font-bold text-gray-900 line-clamp-2 group-hover:text-primary-600 transition-colors duration-300 mb-2">
               {property.title}
             </h3>
           </div>
 
           {/* Features Grid */}
-          <div className="grid grid-cols-3 gap-2 mb-3 text-xs text-gray-600">
+          <div className="grid grid-cols-3 gap-3 mb-3 text-sm text-gray-600">
             {property.bedrooms && (
-              <div className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-[#8ea4d2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
+              <div className="flex items-center gap-2">
+                <Bed className="w-8 h-8 text-[#8ea4d2]" />
                 <span>{property.bedrooms}B</span>
               </div>
             )}
             {property.bathrooms && (
-              <div className="flex items-center gap-1">
-                <svg className="w-3.5 h-3.5 text-[#8ea4d2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                </svg>
+              <div className="flex items-center gap-2">
+                <Bath className="w-8 h-8 text-[#8ea4d2]" />
                 <span>{property.bathrooms}Ba</span>
               </div>
             )}
-            <div className="flex items-center gap-1">
-              <svg className="w-3.5 h-3.5 text-[#8ea4d2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-              </svg>
+            <div className="flex items-center gap-2">
+              <Ruler className="w-8 h-8 text-[#8ea4d2]" />
               <span>{property.size?.toLocaleString() || 0}m²</span>
             </div>
           </div>
 
-          {/* Score & Price Section */}
+          {/* Price & Action Section */}
           <div className="border-t border-gray-100 pt-2">
-            {/* Score badges */}
-            {showScores && (property.overallScore || property.estimatedRentalYield) && (
-              <div className="flex items-center gap-2 mb-2 text-xs">
-                {property.overallScore && property.overallScore > 0 && (
-                  <div className="flex items-center gap-1" title={`Overall Score: ${property.overallScore}/100`}>
-                    <div className={`w-1.5 h-1.5 rounded-full ${
-                      property.overallScore >= 75 ? 'bg-green-500' :
-                      property.overallScore >= 50 ? 'bg-yellow-500' :
-                      'bg-red-500'
-                    }`}></div>
-                    <span className="text-gray-500">{property.overallScore}</span>
-                  </div>
-                )}
-                {property.estimatedRentalYield && property.estimatedRentalYield > 0 && (
-                  <span className="text-gray-500" title="Estimated Rental Yield">
-                    {property.estimatedRentalYield.toFixed(1)}% yield
-                  </span>
-                )}
-              </div>
-            )}
-            
-            {/* Price */}
+            {/* Price - Larger */}
             {property.listingType === 'BOTH' ? (
               <div className="flex items-baseline gap-1 mb-3">
-                <span className="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
+                <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">
                   ฿{Number(property.price).toLocaleString()}
                 </span>
                 {property.rentPrice && (
@@ -303,50 +250,60 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
                 )}
               </div>
             ) : property.listingType === 'RENT' ? (
-              <div className="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent mb-3">
+              <div className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent mb-3">
                 ฿{Number(property.rentPrice || property.price).toLocaleString()}<span className="text-xs font-normal text-gray-500">/mo</span>
               </div>
             ) : (
-              <div className="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent mb-3">
+              <div className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent mb-3">
                 ฿{Number(property.price).toLocaleString()}
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-end gap-3 text-xs pt-2">
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  // Trigger wishlist action
-                  const wishlistBtn = document.querySelector(`[data-wishlist-${property.id}]`) as HTMLButtonElement;
-                  wishlistBtn?.click();
-                }}
-                className="text-gray-600 hover:text-red-500 font-medium transition-colors"
-              >
-                Wish
-              </button>
-              <span className="text-gray-300">|</span>
-              <button
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  // Trigger comparison action
-                  const compareBtn = document.querySelector(`[data-compare-${property.id}]`) as HTMLButtonElement;
-                  compareBtn?.click();
-                }}
-                className="text-gray-600 hover:text-blue-500 font-medium transition-colors"
-              >
-                Compare
-              </button>
-              <span className="text-gray-300">|</span>
-              <Link href={propertyUrl} className="text-gray-600 hover:text-primary-600 font-medium transition-colors">
-                Detail
-              </Link>
+            {/* Bottom Row: Area Left, Action Buttons Right */}
+            <div className="flex items-center justify-between">
+              {/* Location - Bottom Left */}
+              <p className="text-xs text-gray-500 flex items-center gap-1 line-clamp-1">
+                <svg className="w-3 h-3 text-primary-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="truncate">{property.area || property.city}</span>
+              </p>
+
+              {/* Action Buttons - Right */}
+              <div className="flex items-center gap-3 text-xs">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const wishlistBtn = document.querySelector(`[data-wishlist-${property.id}]`) as HTMLButtonElement;
+                    wishlistBtn?.click();
+                  }}
+                  className="text-gray-600 hover:text-red-500 font-medium transition-colors"
+                >
+                  Wish
+                </button>
+                <span className="text-gray-300">|</span>
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const compareBtn = document.querySelector(`[data-compare-${property.id}]`) as HTMLButtonElement;
+                    compareBtn?.click();
+                  }}
+                  className="text-gray-600 hover:text-blue-500 font-medium transition-colors"
+                >
+                  Compare
+                </button>
+                <span className="text-gray-300">|</span>
+                <Link href={propertyUrl} className="text-gray-600 hover:text-primary-600 font-medium transition-colors">
+                  Detail
+                </Link>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 }
