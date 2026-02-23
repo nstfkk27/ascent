@@ -53,8 +53,9 @@ interface PropertyCardProps {
 
 export default function PropertyCard({ property, showScores = true }: PropertyCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const touchStartX = useRef<number>(0);
-  const touchEndX = useRef<number>(0);
+  const [isImageSwiping, setIsImageSwiping] = useState(false);
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
 
   const images = property.images.length > 0 
     ? property.images 
@@ -62,6 +63,7 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
 
   const handleTouchStart = (e: TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
+    setIsImageSwiping(false);
   };
 
   const handleTouchMove = (e: TouchEvent) => {
@@ -75,11 +77,20 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
     const threshold = 50;
 
     if (Math.abs(diff) > threshold) {
+      setIsImageSwiping(true);
       if (diff > 0 && currentImageIndex < images.length - 1) {
         setCurrentImageIndex(prev => prev + 1);
       } else if (diff < 0 && currentImageIndex > 0) {
         setCurrentImageIndex(prev => prev - 1);
       }
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    if (isImageSwiping) {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsImageSwiping(false);
     }
   };
 
@@ -142,7 +153,7 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
   
   return (
     <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] h-full flex flex-col group">
-      <Link href={propertyUrl} className="block h-full flex flex-col">
+      <Link href={propertyUrl} className="block h-full flex flex-col" onClick={handleCardClick}>
         <div 
           className="relative h-56 sm:h-64 overflow-hidden flex-shrink-0"
           onTouchStart={handleTouchStart}

@@ -33,8 +33,8 @@ export default function Footer() {
           </div>
           <div>
             <h3 className="text-xl font-bold mb-4">Contact Info</h3>
-            <p className="text-[#8ea4d2]">Email: info@estateascent.com</p>
-            <p className="text-[#8ea4d2]">Phone: (555) 123-4567</p>
+            <p className="text-[#8ea4d2]">Email: Nicky.estateascent@gmail.com</p>
+            <p className="text-[#8ea4d2]">Phone: +66 646799050</p>
           </div>
         </div>
         <div className="border-t border-[#8ea4d2] mt-8 pt-8 text-center text-[#8ea4d2]">

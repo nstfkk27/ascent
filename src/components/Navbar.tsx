@@ -141,9 +141,9 @@ export default function Navbar() {
         </div>
 
         {/* Desktop Header */}
-        <div className="hidden md:flex items-center justify-between h-14">
+        <div className="hidden md:flex items-center justify-center h-14 relative">
           {/* Left: Logo + Find */}
-          <div className="flex items-center gap-8">
+          <div className="flex items-center gap-8 absolute left-0">
             <Link href="/" className="text-2xl font-bold text-[#49516f] hover:text-[#8ea4d2] transition-colors">
               Ascent
             </Link>
@@ -257,11 +257,11 @@ export default function Navbar() {
           </div>
           
           {/* Right Side Buttons */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 absolute right-0">
             {/* Knowledge Link */}
             <Link
               href="/knowledge"
-              className="flex items-center gap-1.5 p-2 text-gray-600 hover:text-[#496f5d] transition-colors rounded-full hover:bg-gray-50"
+              className="flex items-center gap-1.5 p-1.5 text-gray-600 hover:text-[#496f5d] transition-colors rounded-full hover:bg-gray-50"
               title="News & Knowledge"
             >
               <BookOpen className="w-5 h-5" />
@@ -270,7 +270,7 @@ export default function Navbar() {
             {!user && (
               <Link
                 href="/listing"
-                className="flex items-center gap-1.5 px-4 py-2 bg-[#496f5d] text-white text-sm font-medium rounded-full hover:bg-[#3d5c4d] transition-all shadow-sm hover:shadow-md"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#496f5d] text-white text-sm font-medium rounded-full hover:bg-[#3d5c4d] transition-all shadow-sm hover:shadow-md whitespace-nowrap"
               >
                 <span>Own Property?</span>
               </Link>

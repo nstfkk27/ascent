@@ -38,19 +38,19 @@ export default function ContactPage() {
           <div className="space-y-4">
             <div>
               <h3 className="font-semibold text-gray-800">Address</h3>
-              <p className="text-gray-600">123 Real Estate Blvd<br />Suite 100<br />San Francisco, CA 94102</p>
+              <p className="text-gray-600">Estate Ascent Co.,Ltd.<br />Thepprasit Rd.<br />Pattaya, Chonburi.</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">Phone</h3>
-              <p className="text-gray-600">(555) 123-4567</p>
+              <p className="text-gray-600">+66 82 6709153<br />+66 64 6799050</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">Email</h3>
-              <p className="text-gray-600">info@estateascent.com</p>
+              <p className="text-gray-600">Nicky.estateascent@gmail.com<br />Stefan.estateascent@gmail.com</p>
             </div>
             <div>
               <h3 className="font-semibold text-gray-800">Hours</h3>
-              <p className="text-gray-600">Monday - Friday: 9am - 6pm<br />Saturday: 10am - 4pm<br />Sunday: Closed</p>
+              <p className="text-gray-600">Monday - Saturday: 8am - 7pm<br />Sunday: Closed</p>
             </div>
           </div>
         </div>
