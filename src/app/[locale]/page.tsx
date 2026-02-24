@@ -300,10 +300,8 @@ async function LandingPageContent() {
             muted
             playsInline
             className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src="https://ascentweb.vercel.app/hero-video.mp4" type="video/mp4" />
-            <source src="/hero-video.mp4" type="video/mp4" />
-          </video>
+            src="https://res.cloudinary.com/dt4xacdwt/video/upload/v1771907631/hero-video_wbgysg.mp4"
+          />
           {/* Dark overlay for text readability */}
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
