@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ComparisonBar from "@/components/ComparisonBar";
 import WhatsAppButton from "@/components/WhatsAppButton";
+import CookieConsent from "@/components/CookieConsent";
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages } from 'next-intl/server';
 
@@ -21,6 +22,7 @@ export default async function LocaleLayout({
       <Footer />
       <ComparisonBar />
       <WhatsAppButton phoneNumber="66646799050" />
+      <CookieConsent />
     </NextIntlClientProvider>
   );
 }
