@@ -187,50 +187,48 @@ function ProjectCard({ project }: { project: Project }) {
   
   return (
     <Link href={`/project/${projectSlug}`} className="flex-shrink-0 w-[300px] md:w-auto snap-center group">
-      <div>
+      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 h-full flex flex-col">
         {/* Image Card */}
-        <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100">
-          <div className="relative h-48 overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50">
-            {project.imageUrl ? (
-              <Image
-                src={project.imageUrl}
-                alt={project.name}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Building2 className="w-16 h-16 text-amber-300" />
-              </div>
-            )}
-            
-            {/* Type - Top Left */}
-            <div className="absolute top-3 left-3">
-              <span className="px-2.5 py-1 bg-amber-500 text-white text-xs font-bold rounded-full">
-                {project.type === 'CONDO' ? 'Condo' : project.type === 'HOUSE' ? 'Pool Villa' : project.type}
-              </span>
+        <div className="relative h-48 overflow-hidden bg-gradient-to-br from-amber-50 to-orange-50 flex-shrink-0">
+          {project.imageUrl ? (
+            <Image
+              src={project.imageUrl}
+              alt={project.name}
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Building2 className="w-16 h-16 text-amber-300" />
             </div>
-            
-            {/* Area - Top Right */}
-            <div className="absolute top-3 right-3">
-              <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium rounded-full">
-                {project.city}
-              </span>
-            </div>
+          )}
+          
+          {/* Type - Top Left */}
+          <div className="absolute top-3 left-3">
+            <span className="px-2.5 py-1 bg-amber-500 text-white text-xs font-bold rounded-full">
+              {project.type === 'CONDO' ? 'Condo' : project.type === 'HOUSE' ? 'Pool Villa' : project.type}
+            </span>
+          </div>
+          
+          {/* Area - Top Right */}
+          <div className="absolute top-3 right-3">
+            <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm text-gray-700 text-xs font-medium rounded-full">
+              {project.city}
+            </span>
           </div>
         </div>
 
-        {/* Content - Outside card */}
-        <div className="pt-3 flex items-start justify-between gap-2">
+        {/* Content - Inside card */}
+        <div className="p-4 flex flex-col flex-1 justify-between">
           <div>
-            <h4 className="text-base font-bold text-[#49516f] group-hover:text-[#496f5d] transition-colors line-clamp-1">
+            <h4 className="text-base font-bold text-[#49516f] group-hover:text-[#496f5d] transition-colors line-clamp-1 mb-1">
               {project.name}
             </h4>
             {project.developer && (
-              <p className="text-sm text-gray-500">{project.developer}</p>
+              <p className="text-sm text-gray-500 mb-2">{project.developer}</p>
             )}
           </div>
-          <span className="text-sm text-gray-600 whitespace-nowrap">
+          <span className="text-xs font-medium text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full inline-block w-fit">
             {project.completionYear ? `Completion: ${project.completionYear}` : 'Under Construction'}
           </span>
         </div>
