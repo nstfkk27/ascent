@@ -336,7 +336,7 @@ async function LandingPageContent() {
         <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-serif italic text-[#49516f]">
-              "Where Local Expertise Meets Regional Reach."
+              &ldquo;Where Local Expertise Meets Regional Reach.&rdquo;
             </h2>
             <div className="w-24 h-1 bg-[#496f5d] mx-auto mt-6 mb-6"></div>
             <p className="text-lg text-gray-600 leading-relaxed">
