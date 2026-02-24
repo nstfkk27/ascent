@@ -354,21 +354,7 @@ async function LandingPageContent() {
         landProperties={landProperties}
       />
 
-      {/* 3. Motto Section */}
-      <section className="py-32 bg-[#49516f] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div className="max-w-4xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-3xl md:text-5xl font-serif italic text-white mb-8 leading-tight">
-            &quot;{t('motto')}&quot;
-          </h2>
-          <div className="w-24 h-1 bg-[#496f5d] mx-auto mb-8"></div>
-          <p className="text-xl text-gray-300 font-light">
-            {t('mottoSub')}
-          </p>
-        </div>
-      </section>
-
-      {/* 4. News and Knowledge */}
+      {/* 3. News and Knowledge */}
       <NewsKnowledgeSection posts={posts} />
 
       {/* 5. Our Agents */}

@@ -55,23 +55,15 @@ export default function PropertyCategoriesSection({
 }: PropertyCategoriesSectionProps) {
   return (
     <section className="py-16 relative overflow-hidden">
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 space-y-20">
-        
-        {/* New Project Section */}
-        <div>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-amber-600" />
-              </div>
-              <h4 className="text-2xl font-bold text-[#49516f]">New Project</h4>
+      {/* New Project Section - Full Width White Background */}
+      <div className="bg-white pb-20 pt-8">
+        <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12">
+          <div>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-amber-600" />
             </div>
-            <Link 
-              href="/properties?newProject=true"
-              className="hidden md:flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
+            <h4 className="text-2xl font-bold text-[#49516f]">New Project</h4>
           </div>
           <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-3 md:grid-rows-2 md:gap-4 md:overflow-visible md:pb-0 md:h-[600px] -mx-4 px-4 md:mx-0 md:px-0">
             {projects.length > 0 ? (
@@ -84,29 +76,54 @@ export default function PropertyCategoriesSection({
               ))
             )}
           </div>
-          <Link 
-            href="/properties?newProject=true"
-            className="flex md:hidden items-center justify-center gap-2 text-[#496f5d] font-semibold mt-4"
-          >
-            View All Projects <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex justify-end mt-4">
+            <Link 
+              href="/properties?newProject=true"
+              className="flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
+            >
+              View All <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Type Filter Icons - Standalone Section */}
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 space-y-20 pt-20">
+        <div className="flex items-center justify-center gap-8 md:gap-16">
+          <button className="flex flex-col items-center gap-3 group">
+            <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
+              <Home className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
+            </div>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">Pool Villa</span>
+          </button>
+          <button className="flex flex-col items-center gap-3 group">
+            <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
+              <Building2 className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
+            </div>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">Condo</span>
+          </button>
+          <button className="flex flex-col items-center gap-3 group">
+            <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
+              <Building2 className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
+            </div>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">Hotel</span>
+          </button>
+          <button className="flex flex-col items-center gap-3 group">
+            <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
+              <MapPin className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
+            </div>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">Land</span>
+          </button>
         </div>
 
         {/* Property for rent Section */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <Home className="w-5 h-5 text-blue-600" />
-              </div>
-              <h4 className="text-2xl font-bold text-[#49516f]">Property for rent</h4>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+              <Home className="w-5 h-5 text-blue-600" />
             </div>
-            <Link 
-              href="/properties?listingType=RENT"
-              className="hidden md:flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
+            <h4 className="text-2xl font-bold text-[#49516f]">Property for rent</h4>
           </div>
           <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
             {rentalProperties.length > 0 ? (
@@ -121,29 +138,23 @@ export default function PropertyCategoriesSection({
               ))
             )}
           </div>
-          <Link 
-            href="/properties?listingType=RENT"
-            className="flex md:hidden items-center justify-center gap-2 text-[#496f5d] font-semibold mt-4"
-          >
-            View All Properties <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex justify-end mt-4">
+            <Link 
+              href="/properties?listingType=RENT"
+              className="flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
+            >
+              View All <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
 
         {/* Land Section */}
         <div>
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-                <MapPin className="w-5 h-5 text-emerald-600" />
-              </div>
-              <h4 className="text-2xl font-bold text-[#49516f]">Land</h4>
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+              <MapPin className="w-5 h-5 text-emerald-600" />
             </div>
-            <Link 
-              href="/properties?category=LAND"
-              className="hidden md:flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
+            <h4 className="text-2xl font-bold text-[#49516f]">Land</h4>
           </div>
           <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
             {landProperties.length > 0 ? (
@@ -158,12 +169,14 @@ export default function PropertyCategoriesSection({
               ))
             )}
           </div>
-          <Link 
-            href="/properties?category=LAND"
-            className="flex md:hidden items-center justify-center gap-2 text-[#496f5d] font-semibold mt-4"
-          >
-            View All Land <ArrowRight className="w-4 h-4" />
-          </Link>
+          <div className="flex justify-end mt-4">
+            <Link 
+              href="/properties?category=LAND"
+              className="flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
+            >
+              View All <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
       </div>
     </section>
