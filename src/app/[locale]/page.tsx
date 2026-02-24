@@ -291,30 +291,38 @@ async function LandingPageContent() {
     <main className="min-h-screen font-sans text-gray-900">
       
       {/* 1. Hero Section */}
-      <section className="relative pt-24 pb-20 lg:pt-36 lg:pb-32 overflow-hidden bg-gradient-to-br from-primary-50 via-white to-accent-50">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center [mask-image:linear-gradient(180deg,white,rgba(255,255,255,0))]"></div>
+      <section className="relative pt-24 pb-20 lg:pt-36 lg:pb-32 overflow-hidden">
+        {/* Video Background */}
+        <div className="absolute inset-0 w-full h-full overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+          >
+            <source src="https://ascentweb.vercel.app/hero-video.mp4" type="video/mp4" />
+            <source src="/hero-video.mp4" type="video/mp4" />
+          </video>
+          {/* Dark overlay for text readability */}
+          <div className="absolute inset-0 bg-black/40"></div>
+        </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
           <div className="text-center max-w-4xl mx-auto animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
-              <span className="text-gray-600">{t('heroTitle')}</span> <br />
-              <span className="text-[#496f5d] font-bold">
+              <span className="text-white drop-shadow-lg">{t('heroTitle')}</span> <br />
+              <span className="text-[#ffd700] font-bold drop-shadow-lg">
                 {t('heroHighlight')}
               </span>
             </h1>
-            <p className="mt-4 text-xl text-gray-600 mb-10 max-w-2xl mx-auto leading-relaxed">
+            <p className="mt-4 text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
               {t('heroDescription')}
             </p>
             
             {/* Hero Search */}
             <HeroSearch />
           </div>
-        </div>
-        
-        {/* Background blobs */}
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full overflow-hidden -z-10 opacity-30 pointer-events-none">
-            <div className="absolute top-[20%] left-[10%] w-[500px] h-[500px] bg-primary-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-            <div className="absolute top-[20%] right-[10%] w-[500px] h-[500px] bg-accent-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-            <div className="absolute bottom-[20%] left-[50%] w-[400px] h-[400px] bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-4000"></div>
         </div>
       </section>
 
