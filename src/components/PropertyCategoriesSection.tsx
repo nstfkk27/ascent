@@ -1,6 +1,9 @@
+'use client';
+
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Building2, Home, MapPin, Calendar } from 'lucide-react';
+import { ArrowRight, Building2, Home, MapPin, Calendar, Building, Store, Hotel, Wine, Sparkles, UtensilsCrossed, Flower2, TrendingUp, DollarSign, PawPrint } from 'lucide-react';
 import { createCompoundSlug } from '@/utils/propertyHelpers';
 import PropertyCard from '@/components/PropertyCard';
 
@@ -44,14 +47,16 @@ interface Property {
 
 interface PropertyCategoriesSectionProps {
   projects: Project[];
-  rentalProperties: Property[];
-  landProperties: Property[];
+  newProperties: Property[];
+  valueProperties: Property[];
+  petFriendlyProperties: Property[];
 }
 
 export default function PropertyCategoriesSection({ 
   projects, 
-  rentalProperties, 
-  landProperties 
+  newProperties, 
+  valueProperties, 
+  petFriendlyProperties 
 }: PropertyCategoriesSectionProps) {
   return (
     <section className="py-16 relative overflow-hidden">
@@ -89,97 +94,154 @@ export default function PropertyCategoriesSection({
       </div>
 
       {/* Type Filter Icons - Standalone Section */}
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 space-y-20 pt-20">
-        <div className="flex items-center justify-center gap-8 md:gap-16">
-          <button className="flex flex-col items-center gap-3 group">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 space-y-20 pt-20 pb-8">
+        <div className="flex items-center justify-center gap-8 md:gap-12 overflow-x-auto pb-4">
+          <Link href="/properties?category=HOUSE&houseType=SINGLE_HOUSE" className="flex flex-col items-center gap-3 group flex-shrink-0">
             <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
               <Home className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
             </div>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">Pool Villa</span>
-          </button>
-          <button className="flex flex-col items-center gap-3 group">
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors whitespace-nowrap">Single House</span>
+          </Link>
+          <Link href="/properties?category=HOUSE&houseType=POOL_VILLA" className="flex flex-col items-center gap-3 group flex-shrink-0">
+            <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
+              <Home className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
+            </div>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors whitespace-nowrap">Pool Villa</span>
+          </Link>
+          <Link href="/properties?category=CONDO" className="flex flex-col items-center gap-3 group flex-shrink-0">
             <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
               <Building2 className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
             </div>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">Condo</span>
-          </button>
-          <button className="flex flex-col items-center gap-3 group">
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors whitespace-nowrap">Condo</span>
+          </Link>
+          <Link href="/properties?category=INVESTMENT&investmentType=HOTEL" className="flex flex-col items-center gap-3 group flex-shrink-0">
             <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
-              <Building2 className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
+              <Hotel className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
             </div>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">Hotel</span>
-          </button>
-          <button className="flex flex-col items-center gap-3 group">
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors whitespace-nowrap">Hotel</span>
+          </Link>
+          <Link href="/properties?category=INVESTMENT&investmentType=CLUB_BAR" className="flex flex-col items-center gap-3 group flex-shrink-0">
+            <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
+              <Wine className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
+            </div>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors whitespace-nowrap">Club/Bar</span>
+          </Link>
+          <Link href="/properties?category=INVESTMENT&investmentType=RESTAURANT" className="flex flex-col items-center gap-3 group flex-shrink-0">
+            <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
+              <UtensilsCrossed className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
+            </div>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors whitespace-nowrap">Restaurant</span>
+          </Link>
+          <Link href="/properties?category=LAND" className="flex flex-col items-center gap-3 group flex-shrink-0">
             <div className="w-20 h-20 bg-gray-50 rounded-full hover:bg-amber-50 transition-all flex items-center justify-center">
               <MapPin className="w-10 h-10 text-gray-600 group-hover:text-amber-600 transition-colors" />
             </div>
-            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors">Land</span>
-          </button>
+            <span className="text-sm font-medium text-gray-700 group-hover:text-amber-600 transition-colors whitespace-nowrap">Land</span>
+          </Link>
         </div>
 
-        {/* Property for rent Section */}
-        <div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Home className="w-5 h-5 text-blue-600" />
-            </div>
-            <h4 className="text-2xl font-bold text-[#49516f]">Property for rent</h4>
-          </div>
-          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
-            {rentalProperties.length > 0 ? (
-              rentalProperties.slice(0, 4).map((property) => (
-                <div key={property.id} className="flex-shrink-0 w-[300px] md:w-auto snap-center">
-                  <PropertyCard property={property as any} showScores={true} />
-                </div>
-              ))
-            ) : (
-              [...Array(4)].map((_, i) => (
-                <PropertyCardPlaceholder key={i} index={i} />
-              ))
-            )}
-          </div>
-          <div className="flex justify-end mt-4">
-            <Link 
-              href="/properties?listingType=RENT"
-              className="flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-
-        {/* Land Section */}
-        <div>
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-emerald-600" />
-            </div>
-            <h4 className="text-2xl font-bold text-[#49516f]">Land</h4>
-          </div>
-          <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
-            {landProperties.length > 0 ? (
-              landProperties.slice(0, 4).map((property) => (
-                <div key={property.id} className="flex-shrink-0 w-[300px] md:w-auto snap-center">
-                  <PropertyCard property={property as any} showScores={true} />
-                </div>
-              ))
-            ) : (
-              [...Array(4)].map((_, i) => (
-                <LandCardPlaceholder key={i} index={i} />
-              ))
-            )}
-          </div>
-          <div className="flex justify-end mt-4">
-            <Link 
-              href="/properties?category=LAND"
-              className="flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
-            >
-              View All <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
+        {/* Trending Section with Tabs */}
+        <TrendingSection 
+          newProperties={newProperties}
+          valueProperties={valueProperties}
+          petFriendlyProperties={petFriendlyProperties}
+        />
       </div>
     </section>
+  );
+}
+
+// Trending Section Component with Tabs
+function TrendingSection({ newProperties, valueProperties, petFriendlyProperties }: { newProperties: Property[], valueProperties: Property[], petFriendlyProperties: Property[] }) {
+  const [activeTab, setActiveTab] = useState<'new' | 'value' | 'pet'>('new');
+
+  const getPropertiesForTab = () => {
+    switch (activeTab) {
+      case 'new':
+        return newProperties.slice(0, 4);
+      case 'value':
+        return valueProperties.slice(0, 4);
+      case 'pet':
+        return petFriendlyProperties.slice(0, 4);
+      default:
+        return newProperties.slice(0, 4);
+    }
+  };
+
+  const properties = getPropertiesForTab();
+
+  return (
+    <div>
+      {/* Header with Icon and Title */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
+          <TrendingUp className="w-5 h-5 text-purple-600" />
+        </div>
+        <h4 className="text-2xl font-bold text-[#49516f]">Trending</h4>
+      </div>
+
+      {/* Tabs */}
+      <div className="flex items-center gap-2 mb-6 overflow-x-auto pb-2">
+        <button
+          onClick={() => setActiveTab('new')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+            activeTab === 'new'
+              ? 'bg-[#496f5d] text-white shadow-md'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <TrendingUp className="w-4 h-4" />
+          New
+        </button>
+        <button
+          onClick={() => setActiveTab('value')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+            activeTab === 'value'
+              ? 'bg-[#496f5d] text-white shadow-md'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <DollarSign className="w-4 h-4" />
+          Value
+        </button>
+        <button
+          onClick={() => setActiveTab('pet')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+            activeTab === 'pet'
+              ? 'bg-[#496f5d] text-white shadow-md'
+              : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+          }`}
+        >
+          <PawPrint className="w-4 h-4" />
+          Pet Friendly
+        </button>
+      </div>
+
+      {/* Properties Grid */}
+      <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory md:grid md:grid-cols-4 md:overflow-visible md:pb-0 -mx-4 px-4 md:mx-0 md:px-0">
+        {properties.length > 0 ? (
+          properties.map((property) => (
+            <div key={property.id} className="flex-shrink-0 w-[300px] md:w-auto snap-center">
+              <PropertyCard property={property as any} showScores={true} />
+            </div>
+          ))
+        ) : (
+          [...Array(4)].map((_, i) => (
+            <PropertyCardPlaceholder key={i} index={i} />
+          ))
+        )}
+      </div>
+
+      {/* View All Link */}
+      <div className="flex justify-end mt-4">
+        <Link 
+          href={`/properties?trending=${activeTab}`}
+          className="flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
+        >
+          View All <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+    </div>
   );
 }
 

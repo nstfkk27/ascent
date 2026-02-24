@@ -212,8 +212,8 @@ async function LandingPageContent() {
     console.warn("Could not fetch rental properties from DB");
   }
 
-  // Fetch land properties
-  let landProperties: Array<{
+  // Fetch new properties (recently added)
+  let newProperties: Array<{
     id: string;
     slug: string;
     title: string;
@@ -241,10 +241,9 @@ async function LandingPageContent() {
   }> = [];
 
   try {
-    const dbLand = await prisma.property.findMany({
+    const dbNew = await prisma.property.findMany({
       where: {
         status: 'AVAILABLE',
-        category: 'LAND',
       },
       orderBy: { createdAt: 'desc' },
       take: 6,
@@ -275,10 +274,11 @@ async function LandingPageContent() {
         commissionAmount: true,
       },
     });
-    landProperties = dbLand.map(p => ({
+    newProperties = dbNew.map(p => ({
       ...p,
+      images: p.images as string[],
       price: Number(p.price) || 0,
-      rentPrice: Number(p.rentPrice) || undefined,
+      rentPrice: p.rentPrice ? Number(p.rentPrice) : undefined,
       size: Number(p.size) || 0,
       category: p.category as string,
       listingType: p.listingType as string,
@@ -291,7 +291,174 @@ async function LandingPageContent() {
       commissionAmount: p.commissionAmount ? Number(p.commissionAmount) : undefined,
     }));
   } catch (e) {
-    console.warn("Could not fetch land properties from DB");
+    console.warn("Could not fetch new properties from DB");
+  }
+
+  // Fetch value properties (good overall score)
+  let valueProperties: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    price: number;
+    rentPrice?: number | undefined;
+    address: string;
+    city: string;
+    state: string;
+    area?: string | null;
+    size: number;
+    images: string[];
+    category: string;
+    listingType: string;
+    bedrooms: number | null;
+    bathrooms: number | null;
+    createdAt?: string;
+    updatedAt?: string;
+    lastVerifiedAt?: string;
+    featured?: boolean;
+    dealQuality?: string | null;
+    overallScore?: number | null;
+    estimatedRentalYield?: number | null;
+    agentCommissionRate?: number | null;
+    commissionAmount?: number | null;
+  }> = [];
+
+  try {
+    const dbValue = await prisma.property.findMany({
+      where: {
+        status: 'AVAILABLE',
+        overallScore: { gte: 70 }, // Properties with score >= 70
+      },
+      orderBy: { overallScore: 'desc' },
+      take: 6,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        price: true,
+        rentPrice: true,
+        address: true,
+        city: true,
+        state: true,
+        area: true,
+        size: true,
+        images: true,
+        category: true,
+        listingType: true,
+        bedrooms: true,
+        bathrooms: true,
+        createdAt: true,
+        updatedAt: true,
+        lastVerifiedAt: true,
+        featured: true,
+        dealQuality: true,
+        overallScore: true,
+        estimatedRentalYield: true,
+        agentCommissionRate: true,
+        commissionAmount: true,
+      },
+    });
+    valueProperties = dbValue.map(p => ({
+      ...p,
+      images: p.images as string[],
+      price: Number(p.price) || 0,
+      rentPrice: p.rentPrice ? Number(p.rentPrice) : undefined,
+      size: Number(p.size) || 0,
+      category: p.category as string,
+      listingType: p.listingType as string,
+      createdAt: p.createdAt?.toISOString(),
+      updatedAt: p.updatedAt?.toISOString(),
+      lastVerifiedAt: p.lastVerifiedAt?.toISOString(),
+      overallScore: p.overallScore ? Number(p.overallScore) : undefined,
+      estimatedRentalYield: p.estimatedRentalYield ? Number(p.estimatedRentalYield) : undefined,
+      agentCommissionRate: p.agentCommissionRate ? Number(p.agentCommissionRate) : undefined,
+      commissionAmount: p.commissionAmount ? Number(p.commissionAmount) : undefined,
+    }));
+  } catch (e) {
+    console.warn("Could not fetch value properties from DB");
+  }
+
+  // Fetch pet-friendly properties
+  let petFriendlyProperties: Array<{
+    id: string;
+    slug: string;
+    title: string;
+    price: number;
+    rentPrice?: number | undefined;
+    address: string;
+    city: string;
+    state: string;
+    area?: string | null;
+    size: number;
+    images: string[];
+    category: string;
+    listingType: string;
+    bedrooms: number | null;
+    bathrooms: number | null;
+    createdAt?: string;
+    updatedAt?: string;
+    lastVerifiedAt?: string;
+    featured?: boolean;
+    dealQuality?: string | null;
+    overallScore?: number | null;
+    estimatedRentalYield?: number | null;
+    agentCommissionRate?: number | null;
+    commissionAmount?: number | null;
+  }> = [];
+
+  try {
+    const dbPet = await prisma.property.findMany({
+      where: {
+        status: 'AVAILABLE',
+        petFriendly: true,
+        category: { in: ['HOUSE', 'CONDO'] },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 6,
+      select: {
+        id: true,
+        slug: true,
+        title: true,
+        price: true,
+        rentPrice: true,
+        address: true,
+        city: true,
+        state: true,
+        area: true,
+        size: true,
+        images: true,
+        category: true,
+        listingType: true,
+        bedrooms: true,
+        bathrooms: true,
+        createdAt: true,
+        updatedAt: true,
+        lastVerifiedAt: true,
+        featured: true,
+        dealQuality: true,
+        overallScore: true,
+        estimatedRentalYield: true,
+        agentCommissionRate: true,
+        commissionAmount: true,
+      },
+    });
+    petFriendlyProperties = dbPet.map(p => ({
+      ...p,
+      images: p.images as string[],
+      price: Number(p.price) || 0,
+      rentPrice: p.rentPrice ? Number(p.rentPrice) : undefined,
+      size: Number(p.size) || 0,
+      category: p.category as string,
+      listingType: p.listingType as string,
+      createdAt: p.createdAt?.toISOString(),
+      updatedAt: p.updatedAt?.toISOString(),
+      lastVerifiedAt: p.lastVerifiedAt?.toISOString(),
+      overallScore: p.overallScore ? Number(p.overallScore) : undefined,
+      estimatedRentalYield: p.estimatedRentalYield ? Number(p.estimatedRentalYield) : undefined,
+      agentCommissionRate: p.agentCommissionRate ? Number(p.agentCommissionRate) : undefined,
+      commissionAmount: p.commissionAmount ? Number(p.commissionAmount) : undefined,
+    }));
+  } catch (e) {
+    console.warn("Could not fetch pet-friendly properties from DB");
   }
 
   return (
@@ -336,7 +503,7 @@ async function LandingPageContent() {
         <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12">
           <div className="text-center max-w-3xl mx-auto">
             <h2 className="text-3xl md:text-4xl font-serif italic text-[#49516f]">
-              &ldquo;Where Local Expertise Meets Regional Reach.&rdquo;
+              &ldquo;Local Expertise&rdquo;
             </h2>
             <div className="w-24 h-1 bg-[#496f5d] mx-auto mt-6 mb-6"></div>
             <p className="text-lg text-gray-600 leading-relaxed">
@@ -350,8 +517,9 @@ async function LandingPageContent() {
       {/* 2. Property Categories Section */}
       <PropertyCategoriesSection 
         projects={projects}
-        rentalProperties={rentalProperties}
-        landProperties={landProperties}
+        newProperties={newProperties}
+        valueProperties={valueProperties}
+        petFriendlyProperties={petFriendlyProperties}
       />
 
       {/* 3. News and Knowledge */}

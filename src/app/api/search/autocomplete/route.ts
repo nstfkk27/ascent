@@ -89,56 +89,45 @@ export async function GET(request: NextRequest) {
       })
     ]);
 
-    // Format suggestions
-    const suggestions: Array<{
-      type: string;
-      id?: string;
-      slug?: string | null;
+    // Format results
+    const results: Array<{
+      type: 'project' | 'property' | 'city';
+      id: string;
       name: string;
-      nameTh?: string | null;
-      subtitle: string;
-      category?: string;
-      icon: string;
+      city?: string;
     }> = [];
 
     // Add projects
     projects.forEach(project => {
-      suggestions.push({
+      results.push({
         type: 'project',
         id: project.id,
         name: project.name,
-        nameTh: project.nameTh,
-        subtitle: `${project.city} • ${project._count.units} available units`,
-        category: project.type,
-        icon: 'building'
+        city: project.city
       });
     });
 
     // Add cities
     cities.forEach(city => {
-      suggestions.push({
+      results.push({
         type: 'city',
-        name: city.city,
-        subtitle: `${city._count.id} properties`,
-        icon: 'map-pin'
+        id: city.city,
+        name: city.city
       });
     });
 
-    // Add reference IDs
+    // Add reference IDs as properties
     referenceIdMatches.forEach(property => {
-      suggestions.push({
-        type: 'reference',
+      results.push({
+        type: 'property',
         id: property.id,
-        slug: property.slug,
-        name: property.referenceId || '',
-        subtitle: property.projectName || property.title,
-        category: property.category,
-        icon: 'hash'
+        name: property.title,
+        city: property.projectName || undefined
       });
     });
 
     return NextResponse.json({ 
-      suggestions,
+      results,
       query 
     });
 
