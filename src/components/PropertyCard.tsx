@@ -152,7 +152,7 @@ export default function PropertyCard({ property, showScores = true }: PropertyCa
     : `/properties/${property.id}`;
   
   return (
-    <div className="bg-white rounded-2xl shadow-soft border border-gray-100 overflow-hidden hover:shadow-premium transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] h-full flex flex-col group">
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 hover:scale-[1.02] h-full flex flex-col group">
       <Link href={propertyUrl} className="block h-full flex flex-col" onClick={handleCardClick}>
         <div 
           className="relative h-56 sm:h-64 overflow-hidden flex-shrink-0"

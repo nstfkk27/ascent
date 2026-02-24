@@ -88,7 +88,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="glass border-b border-gray-100 sticky top-0 z-50 transition-all duration-300 shadow-soft">
+    <nav className="bg-gray-100 border-b border-gray-200 sticky top-0 z-50 transition-all duration-300 shadow-soft">
       <div className="max-w-[1600px] mx-auto px-4 md:px-6 lg:px-12">
         {/* Mobile Header: Hamburger | Find | LOGO | Profile */}
         <div className="flex md:hidden items-center h-14">

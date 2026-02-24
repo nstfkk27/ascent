@@ -105,7 +105,7 @@ export default function HeroSearch() {
 
       {/* View Toggle */}
       <div className="flex items-center justify-center mt-4 gap-3">
-        <span className="text-gray-500 text-sm">Search by</span>
+        <span className="text-white text-sm drop-shadow-md">Search by</span>
         <div className="flex items-center bg-white rounded-full shadow-md border border-gray-100 p-1">
           <button
             onClick={() => handleSearch('map')}

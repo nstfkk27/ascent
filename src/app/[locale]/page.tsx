@@ -99,7 +99,14 @@ async function LandingPageContent() {
   }> = [];
 
   try {
+    const currentYear = new Date().getFullYear();
     const dbProjects = await prisma.project.findMany({
+      where: {
+        OR: [
+          { completionYear: { gte: currentYear } }, // Completion year is current year or future
+          { completionYear: null } // Or no completion year set (still in construction)
+        ]
+      },
       orderBy: { createdAt: 'desc' },
       take: 6,
       select: {
@@ -288,7 +295,7 @@ async function LandingPageContent() {
   }
 
   return (
-    <main className="min-h-screen font-sans text-gray-900">
+    <main className="min-h-screen font-sans text-gray-900 bg-gray-100">
       
       {/* 1. Hero Section */}
       <section className="relative pt-24 pb-20 lg:pt-36 lg:pb-32 overflow-hidden">
@@ -306,15 +313,15 @@ async function LandingPageContent() {
           <div className="absolute inset-0 bg-black/40"></div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 relative z-10">
+        <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
           <div className="text-center max-w-4xl mx-auto animate-fade-in">
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
               <span className="text-white drop-shadow-lg">{t('heroTitle')}</span> <br />
-              <span className="text-[#ffd700] font-bold drop-shadow-lg">
+              <span className="text-white font-bold drop-shadow-lg">
                 {t('heroHighlight')}
               </span>
             </h1>
-            <p className="mt-4 text-xl text-white mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md">
+            <p className="mt-4 text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed drop-shadow-md font-light">
               {t('heroDescription')}
             </p>
             
@@ -324,34 +331,18 @@ async function LandingPageContent() {
         </div>
       </section>
 
-      {/* Stats Counter Bar */}
-      <section className="py-10 bg-[#49516f] relative overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
-        <div className="max-w-4xl mx-auto px-4 relative z-10">
-          <div className="grid grid-cols-3 gap-8 md:gap-16">
-            <div className="text-center group">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                <Home className="w-7 h-7 text-white" />
-              </div>
-              <div className="text-3xl md:text-5xl font-bold text-white mb-1">50+</div>
-              <div className="text-sm text-white/80 font-medium">Active Listings</div>
-            </div>
-            <div className="text-center group">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="text-3xl md:text-5xl font-bold text-white mb-1">100+</div>
-              <div className="text-sm text-white/80 font-medium">Deals Closed</div>
-            </div>
-            <div className="text-center group">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-white/20 backdrop-blur-sm rounded-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
-                <MapPin className="w-7 h-7 text-white" />
-              </div>
-              <div className="text-3xl md:text-5xl font-bold text-white mb-1">5+</div>
-              <div className="text-sm text-white/80 font-medium">Years in Pattaya</div>
-            </div>
+      {/* Tagline Section */}
+      <section className="py-16">
+        <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="text-center max-w-3xl mx-auto">
+            <h2 className="text-3xl md:text-4xl font-serif italic text-[#49516f]">
+              "Where Local Expertise Meets Regional Reach."
+            </h2>
+            <div className="w-24 h-1 bg-[#496f5d] mx-auto mt-6 mb-6"></div>
+            <p className="text-lg text-gray-600 leading-relaxed">
+              As locals in Pattaya, we understand the unique charm and opportunities this vibrant coastal city offers. 
+              Our team is dedicated to serving you with heart.
+            </p>
           </div>
         </div>
       </section>

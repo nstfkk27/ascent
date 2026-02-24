@@ -54,27 +54,17 @@ export default function PropertyCategoriesSection({
   landProperties 
 }: PropertyCategoriesSectionProps) {
   return (
-    <section className="py-24 bg-white relative overflow-hidden">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16">
-          <h2 className="text-sm font-bold text-[#496f5d] mb-2 uppercase tracking-wide">Explore Properties</h2>
-          <h3 className="text-3xl md:text-4xl font-bold text-[#49516f] mb-4">
-            Find Your Perfect Property
-          </h3>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            From new developments to rental properties and land opportunities
-          </p>
-        </div>
-
-        {/* In Construction Section */}
-        <div className="mb-16">
+    <section className="py-16 relative overflow-hidden">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-12 space-y-20">
+        
+        {/* New Project Section */}
+        <div>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
                 <Building2 className="w-5 h-5 text-amber-600" />
               </div>
-              <h4 className="text-2xl font-bold text-[#49516f]">In Construction</h4>
+              <h4 className="text-2xl font-bold text-[#49516f]">New Project</h4>
             </div>
             <Link 
               href="/properties?newProject=true"
@@ -103,7 +93,7 @@ export default function PropertyCategoriesSection({
         </div>
 
         {/* Property for rent Section */}
-        <div className="mb-16">
+        <div>
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -199,7 +189,7 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
   
   return (
     <Link href={`/project/${projectSlug}`} className={`flex-shrink-0 w-[300px] md:w-auto snap-center group ${getGridClass(index)}`}>
-      <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 h-full relative">
+      <div className="bg-white rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100 h-full relative">
         {/* Full Image Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50">
           {project.imageUrl ? (
