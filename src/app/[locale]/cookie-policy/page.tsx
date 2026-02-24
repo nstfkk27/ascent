@@ -173,7 +173,7 @@ export default function CookiePolicyPage() {
           <section>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Updates to This Policy</h2>
             <p className="text-gray-700 leading-relaxed mb-4">
-              We may update this Cookie Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of any significant changes by posting the updated policy on this page with a new "Last Updated" date.
+              We may update this Cookie Policy from time to time to reflect changes in our practices or legal requirements. We will notify you of any significant changes by posting the updated policy on this page with a new &ldquo;Last Updated&rdquo; date.
             </p>
             <p className="text-gray-700 leading-relaxed">
               If you have any questions about our use of cookies, please contact us at{' '}
