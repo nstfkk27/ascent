@@ -83,7 +83,7 @@ export default function PropertyCategoriesSection({
           </div>
           <div className="flex justify-end mt-4">
             <Link 
-              href="/properties?newProject=true"
+              href="/projects"
               className="flex items-center gap-2 text-[#496f5d] font-semibold hover:gap-3 transition-all"
             >
               View All <ArrowRight className="w-4 h-4" />

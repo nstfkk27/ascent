@@ -790,3 +790,32 @@ model SearchLog {
   @@index([createdAt])
   @@index([userId])
 }
+
+enum ProcessStatus {
+  ON_SENT_LISTING
+  WAITING_FOR_SCHEDULE
+  VIEWING
+  CONTRACT
+  DONE
+  NO_FEEDBACK
+}
+
+model Lead {
+  id           String        @id @default(uuid())
+  number       Int           @default(autoincrement())
+  firstContact DateTime      @default(now())
+  name         String
+  nationality  String
+  purpose      String
+  budget       String
+  source       String
+  agent        String
+  process      ProcessStatus @default(ON_SENT_LISTING)
+  remark       String        @db.Text
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([createdAt])
+  @@index([agent])
+  @@index([process])
+}

@@ -522,9 +522,6 @@ async function LandingPageContent() {
         petFriendlyProperties={petFriendlyProperties}
       />
 
-      {/* 3. News and Knowledge */}
-      <NewsKnowledgeSection posts={posts} />
-
       {/* 5. Our Agents */}
       <section className="py-24 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
@@ -533,7 +530,7 @@ async function LandingPageContent() {
             {t('meetExpertsSub')}
           </p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 max-w-3xl mx-auto">
+          <div className="grid grid-cols-2 gap-6 sm:gap-10 max-w-3xl mx-auto">
             {displayAgents.map((agent: Agent, i: number) => (
               <div key={i} className="group relative">
                 <div className="aspect-square rounded-full mx-auto w-40 h-40 mb-6 relative overflow-hidden ring-4 ring-gray-50 group-hover:ring-[#496f5d]/20 transition-all">
@@ -665,6 +662,9 @@ async function LandingPageContent() {
 
       {/* 7. Video Reels / Social Content */}
       <VideoSection />
+
+      {/* 3. News and Knowledge */}
+      <NewsKnowledgeSection posts={posts} />
 
     </main>
   );

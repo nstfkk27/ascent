@@ -124,9 +124,24 @@ export const GET = withErrorHandler(
     const minPrice = searchParams.get('minPrice');
     const maxPrice = searchParams.get('maxPrice');
     if (minPrice || maxPrice) {
-      where.price = {};
-      if (minPrice) where.price.gte = parseFloat(minPrice);
-      if (maxPrice) where.price.lte = parseFloat(maxPrice);
+      const priceCondition: any = {};
+      if (minPrice) priceCondition.gte = parseFloat(minPrice);
+      if (maxPrice) priceCondition.lte = parseFloat(maxPrice);
+
+      // Check both price (sale) and rentPrice (rental) fields
+      // If listingType is specified, filter accordingly
+      if (listingType === 'RENT') {
+        where.rentPrice = priceCondition;
+      } else if (listingType === 'SALE') {
+        where.price = priceCondition;
+      } else {
+        // If no listing type specified, match either sale price OR rent price
+        where.OR = where.OR || [];
+        where.OR.push(
+          { price: priceCondition },
+          { rentPrice: priceCondition }
+        );
+      }
     }
     
     const bedrooms = searchParams.get('bedrooms');
