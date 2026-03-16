@@ -16,6 +16,7 @@ interface Lead {
   source: string;
   agent: string;
   process: ProcessStatus;
+  targetDate: string | null;
   remark: string;
   createdAt: string;
 }
@@ -35,6 +36,7 @@ export default function CRMPage() {
     source: '',
     agent: '',
     process: 'ON_SENT_LISTING' as ProcessStatus,
+    targetDate: '',
     remark: ''
   });
 
@@ -83,6 +85,7 @@ export default function CRMPage() {
           source: '',
           agent: '',
           process: 'ON_SENT_LISTING',
+          targetDate: '',
           remark: ''
         });
         fetchLeads();
@@ -157,6 +160,7 @@ export default function CRMPage() {
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Source</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Agent</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Process</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Target Date</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Remark</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Actions</th>
               </tr>
@@ -164,7 +168,7 @@ export default function CRMPage() {
             <tbody className="bg-white divide-y divide-gray-200">
               {leads.length === 0 ? (
                 <tr>
-                  <td colSpan={11} className="px-4 py-12 text-center text-gray-400">
+                  <td colSpan={12} className="px-4 py-12 text-center text-gray-400">
                     <p className="text-sm">No leads yet</p>
                     <button 
                       onClick={() => setShowNewLeadModal(true)}
@@ -199,6 +203,9 @@ export default function CRMPage() {
                           </option>
                         ))}
                       </select>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-900">
+                      {lead.targetDate ? new Date(lead.targetDate).toLocaleDateString() : '-'}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-900 max-w-xs truncate" title={lead.remark}>
                       {lead.remark}
@@ -324,6 +331,17 @@ export default function CRMPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Target Date</label>
+                <input 
+                  type="date" 
+                  className="w-full p-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#496f5d]"
+                  value={newLead.targetDate}
+                  onChange={e => setNewLead({...newLead, targetDate: e.target.value})}
+                />
+                <p className="text-xs text-gray-500 mt-1">When does the client want to move in or close the deal?</p>
               </div>
 
               <div>

@@ -7,7 +7,7 @@ export async function PATCH(
 ) {
   try {
     const body = await request.json();
-    const { process, name, nationality, purpose, budget, source, agent, remark } = body;
+    const { process, name, nationality, purpose, budget, source, agent, targetDate, remark } = body;
 
     const updateData: any = {};
     if (process !== undefined) updateData.process = process;
@@ -17,6 +17,7 @@ export async function PATCH(
     if (budget !== undefined) updateData.budget = budget;
     if (source !== undefined) updateData.source = source;
     if (agent !== undefined) updateData.agent = agent;
+    if (targetDate !== undefined) updateData.targetDate = targetDate ? new Date(targetDate) : null;
     if (remark !== undefined) updateData.remark = remark;
 
     const lead = await prisma.lead.update({

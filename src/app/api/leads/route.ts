@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, nationality, purpose, budget, source, agent, process, remark } = body;
+    const { name, nationality, purpose, budget, source, agent, process, targetDate, remark } = body;
 
     if (!name) {
       return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 });
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
         source: source || '',
         agent: agent || '',
         process: process || 'ON_SENT_LISTING',
+        targetDate: targetDate ? new Date(targetDate) : null,
         remark: remark || '',
         firstContact: new Date()
       }
