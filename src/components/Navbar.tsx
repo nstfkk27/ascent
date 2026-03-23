@@ -237,6 +237,9 @@ export default function Navbar() {
                 </svg>
               </button>
               <div className={`absolute top-full left-0 mt-1 w-56 before:absolute before:-top-4 before:left-0 before:w-full before:h-4 before:content-[''] bg-white rounded-xl shadow-xl border border-gray-100 py-2 transition-all duration-200 transform origin-top-left ${openDropdown === 'investment' ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}`}>
+                <Link href="/investment" className="block px-5 py-3 text-sm font-semibold text-[#496f5d] hover:bg-gray-50 transition-colors border-b border-gray-100">
+                  View All Businesses
+                </Link>
                 <Link href="/properties?category=INVESTMENT&subtype=HOTEL" className="block px-5 py-3 text-sm text-gray-600 hover:bg-gray-50 hover:text-[#496f5d] transition-colors">
                   Hotel
                 </Link>
@@ -567,6 +570,7 @@ export default function Navbar() {
               <div className="space-y-2">
                 <div className="font-bold text-[#49516f] text-lg border-b border-gray-100 pb-2">Investment</div>
                 <div className="pl-4 space-y-1">
+                  <Link href="/investment" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 font-semibold text-[#496f5d]">View All Businesses</Link>
                   <Link href="/properties?category=INVESTMENT&subtype=HOTEL" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Hotel</Link>
                   <Link href="/properties?category=INVESTMENT&subtype=CLUB_BAR" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Club and Bar</Link>
                   <Link href="/properties?category=INVESTMENT&subtype=MASSAGE" onClick={() => setIsMobileMenuOpen(false)} className="block py-2 text-gray-600">Massage</Link>
