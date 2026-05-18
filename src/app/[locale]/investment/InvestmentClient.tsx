@@ -151,13 +151,13 @@ export default function InvestmentClient({ properties, typeCounts }: InvestmentC
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-sm font-medium mb-6 border border-amber-500/30 backdrop-blur-sm">
               <Sparkles className="w-4 h-4" />
-              Premium Investment Opportunities
+              Profitable Businesses for Sale
             </div>
             <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white leading-tight">
-              Business Takeovers in <span className="text-amber-400">Pattaya</span>
+              Business for Sale in <span className="text-amber-400">Pattaya</span>
             </h1>
             <p className="text-xl md:text-2xl mb-8 text-gray-200 font-light leading-relaxed">
-              Step into established success. Discover turn-key hotels, restaurants, and venues with proven revenue streams.
+              Find profitable hotels, restaurants, bars, and commercial properties for sale. Turnkey businesses with proven revenue from ฿2M.
             </p>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
@@ -226,7 +226,7 @@ export default function InvestmentClient({ properties, typeCounts }: InvestmentC
                         <Icon className="w-8 h-8" />
                       </div>
                       <h2 className="text-3xl font-bold text-gray-900 mb-3">
-                        {type.label} for Takeover
+                        {type.label} for Sale in Pattaya
                       </h2>
                       <p className="text-lg text-gray-600">
                         {type.description}
@@ -314,16 +314,16 @@ export default function InvestmentClient({ properties, typeCounts }: InvestmentC
           <div className="max-w-3xl mx-auto">
             <div className="prose prose-lg prose-gray">
               <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Business Takeover Opportunities in Pattaya
+                Business for Sale Opportunities in Pattaya
               </h2>
               
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100 mb-10">
                 <h3 className="text-2xl font-bold text-gray-900 mt-0 mb-4 flex items-center gap-3">
                   <div className="w-1.5 h-6 bg-amber-400 rounded-full" />
-                  What is a Business Takeover?
+                  Buying a Business in Pattaya
                 </h3>
                 <p className="text-gray-600 leading-relaxed">
-                  A business takeover involves purchasing an existing, operational business rather than starting from scratch. In Pattaya&apos;s vibrant market, this means acquiring hotels, restaurants, bars, massage spas, or wellness centers that already have customers, staff, equipment, and proven revenue streams.
+                  Buying a business for sale in Pattaya means acquiring an existing, operational business rather than starting from scratch. In Pattaya&apos;s vibrant market, this includes hotels, restaurants, bars, massage spas, wellness centers, and commercial buildings that already have customers, staff, equipment, and proven revenue streams. Perfect for investors seeking immediate income.
                 </p>
               </div>
 
@@ -362,6 +362,276 @@ export default function InvestmentClient({ properties, typeCounts }: InvestmentC
                     <li className="flex items-center gap-2">• Post-sale support</li>
                   </ul>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Business Comparison Table */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-gray-900 mb-3">Compare Business Types for Sale</h2>
+              <p className="text-gray-600">Find the right business investment for your budget and goals</p>
+            </div>
+            
+            <div className="overflow-x-auto">
+              <table className="w-full bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-100">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Business Type</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Price Range</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Monthly Revenue</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">ROI</th>
+                    <th className="px-6 py-4 text-left text-sm font-bold text-gray-900">Best For</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  <tr className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">Beach Bar</td>
+                    <td className="px-6 py-4 text-gray-600">฿3-8M</td>
+                    <td className="px-6 py-4 text-gray-600">฿150-400K</td>
+                    <td className="px-6 py-4 text-emerald-600 font-semibold">12-18%</td>
+                    <td className="px-6 py-4 text-gray-600 text-sm">High foot traffic areas</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">Restaurant</td>
+                    <td className="px-6 py-4 text-gray-600">฿4-12M</td>
+                    <td className="px-6 py-4 text-gray-600">฿200-600K</td>
+                    <td className="px-6 py-4 text-emerald-600 font-semibold">10-15%</td>
+                    <td className="px-6 py-4 text-gray-600 text-sm">Food enthusiasts</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">Massage Spa</td>
+                    <td className="px-6 py-4 text-gray-600">฿2-6M</td>
+                    <td className="px-6 py-4 text-gray-600">฿100-300K</td>
+                    <td className="px-6 py-4 text-emerald-600 font-semibold">15-20%</td>
+                    <td className="px-6 py-4 text-gray-600 text-sm">Wellness market</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">Boutique Hotel</td>
+                    <td className="px-6 py-4 text-gray-600">฿15-40M</td>
+                    <td className="px-6 py-4 text-gray-600">฿500K-1.5M</td>
+                    <td className="px-6 py-4 text-emerald-600 font-semibold">8-12%</td>
+                    <td className="px-6 py-4 text-gray-600 text-sm">Long-term investment</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-gray-900">Nightclub</td>
+                    <td className="px-6 py-4 text-gray-600">฿8-20M</td>
+                    <td className="px-6 py-4 text-gray-600">฿400K-1M</td>
+                    <td className="px-6 py-4 text-emerald-600 font-semibold">10-16%</td>
+                    <td className="px-6 py-4 text-gray-600 text-sm">Entertainment district</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <p className="text-sm text-gray-500 mt-4 text-center">*ROI estimates based on average market performance. Actual returns may vary.</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Businesses by Location */}
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Businesses for Sale by Pattaya Area</h2>
+              <p className="text-lg text-gray-600">Each area offers unique opportunities for different business types</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Jomtien Beach */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+                    <span className="text-2xl">🏖️</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Jomtien Beach</h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Quieter beach area perfect for family-friendly restaurants, beachfront bars, guesthouses, and wellness centers. Popular with long-term expats and families.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Beach Bars</span>
+                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Restaurants</span>
+                  <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium">Guesthouses</span>
+                </div>
+                <p className="text-sm text-gray-500">Avg. Price: ฿3-10M</p>
+              </div>
+
+              {/* Walking Street */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center">
+                    <span className="text-2xl">🎉</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Walking Street</h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Pattaya&apos;s famous entertainment hub. High-traffic nightclubs, bars, and entertainment venues with premium pricing. Best for nightlife businesses.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Nightclubs</span>
+                  <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Bars</span>
+                  <span className="px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-xs font-medium">Entertainment</span>
+                </div>
+                <p className="text-sm text-gray-500">Avg. Price: ฿8-25M</p>
+              </div>
+
+              {/* Naklua/Wongamat */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+                    <span className="text-2xl">🏨</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Naklua/Wongamat</h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Upscale area with luxury hotels, fine dining restaurants, and wellness centers. Attracts high-end tourists and expats seeking premium services.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">Hotels</span>
+                  <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">Fine Dining</span>
+                  <span className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-xs font-medium">Wellness</span>
+                </div>
+                <p className="text-sm text-gray-500">Avg. Price: ฿10-40M</p>
+              </div>
+
+              {/* Central Pattaya */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-orange-50 flex items-center justify-center">
+                    <span className="text-2xl">🏢</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Central Pattaya</h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Commercial hub with retail shops, restaurants, commercial buildings, and mixed-use properties. High foot traffic and diverse customer base.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">Retail</span>
+                  <span className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">Commercial</span>
+                  <span className="px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-xs font-medium">Restaurants</span>
+                </div>
+                <p className="text-sm text-gray-500">Avg. Price: ฿5-20M</p>
+              </div>
+
+              {/* Pratumnak Hill */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-pink-50 flex items-center justify-center">
+                    <span className="text-2xl">⛰️</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Pratumnak Hill</h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Scenic hillside location ideal for boutique hotels, rooftop restaurants, wellness retreats, and romantic dining venues with sea views.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-xs font-medium">Boutique Hotels</span>
+                  <span className="px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-xs font-medium">Rooftop Bars</span>
+                  <span className="px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-xs font-medium">Wellness</span>
+                </div>
+                <p className="text-sm text-gray-500">Avg. Price: ฿6-18M</p>
+              </div>
+
+              {/* Soi Buakhao */}
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg transition-all duration-300">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
+                    <span className="text-2xl">🍺</span>
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Soi Buakhao</h3>
+                </div>
+                <p className="text-gray-600 mb-4 text-sm leading-relaxed">
+                  Popular expat area with affordable bars, restaurants, massage shops, and small hotels. Great for budget-conscious investors seeking steady income.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-4">
+                  <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">Bars</span>
+                  <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">Massage</span>
+                  <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">Small Hotels</span>
+                </div>
+                <p className="text-sm text-gray-500">Avg. Price: ฿2-8M</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 bg-white border-t border-gray-100">
+        <div className="container mx-auto px-4">
+          <div className="max-w-3xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Frequently Asked Questions</h2>
+              <p className="text-lg text-gray-600">Everything you need to know about buying a business in Pattaya</p>
+            </div>
+
+            <div className="space-y-6">
+              {/* FAQ 1 */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">How much does it cost to buy a business in Pattaya?</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Business prices in Pattaya range from ฿2M for small massage shops or bars to ฿40M+ for established hotels. Most restaurants and bars fall in the ฿4-12M range. The price depends on location, size, revenue history, and included assets like equipment and licenses.
+                </p>
+              </div>
+
+              {/* FAQ 2 */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Can foreigners buy a business in Pattaya?</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Yes, foreigners can buy businesses in Pattaya. However, certain business types require Thai majority ownership (51%). Common structures include setting up a Thai Limited Company or partnering with Thai nationals. We provide full legal support to ensure compliant ownership structures.
+                </p>
+              </div>
+
+              {/* FAQ 3 */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">What are the best businesses to buy in Pattaya?</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  The most profitable businesses in Pattaya are beach bars (12-18% ROI), massage spas (15-20% ROI), and restaurants in high-traffic areas (10-15% ROI). Hotels offer stable long-term returns (8-12% ROI). The best choice depends on your budget, experience, and involvement level.
+                </p>
+              </div>
+
+              {/* FAQ 4 */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">How profitable are bars in Pattaya?</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Well-located bars in Pattaya typically generate ฿150-400K monthly revenue with 12-18% annual ROI. Walking Street and beach locations command premium prices but offer higher returns. Success depends on location, management, and maintaining good relationships with staff and customers.
+                </p>
+              </div>
+
+              {/* FAQ 5 */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">What documents do I need to buy a business in Thailand?</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Required documents include: passport and visa, proof of funds, business registration documents, tax clearance certificates, lease agreements, staff contracts, licenses (liquor, food, massage), and financial records. We assist with due diligence and document verification throughout the process.
+                </p>
+              </div>
+
+              {/* FAQ 6 */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">Are there financing options for buying a business in Pattaya?</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Financing options include seller financing (common for established businesses), Thai bank loans (requires Thai company structure), international lenders, or private investors. Many sellers offer payment plans with 30-50% down payment. We can connect you with financing partners.
+                </p>
+              </div>
+
+              {/* FAQ 7 */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">How long does it take to buy a business in Pattaya?</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  The typical timeline is 4-8 weeks from offer to completion. This includes due diligence (1-2 weeks), legal documentation (2-3 weeks), license transfers (1-2 weeks), and staff transition (1 week). Turnkey businesses with clear documentation can close faster.
+                </p>
+              </div>
+
+              {/* FAQ 8 */}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <h3 className="text-lg font-bold text-gray-900 mb-3">What is included when buying a turnkey business?</h3>
+                <p className="text-gray-600 leading-relaxed">
+                  Turnkey businesses include all equipment, furniture, inventory, existing staff, customer database, operating licenses, supplier contracts, and training from the current owner. You can start operating immediately with minimal setup. All our listings clearly specify what&apos;s included.
+                </p>
               </div>
             </div>
           </div>
